@@ -17,8 +17,8 @@ class OpenPoseGrabber():
     }
     depth_diffs = {"COCO": [11,90,80,40,20,80,40,20,100,70,44,100,70,44,25,25,15,15]}
     def __init__(self,net_size=(320,240),res_size=(640,480),model_op = 'COCO',
-                 model_op_path=os.path.join(os.environ['OPENPOSE_ROOT'], 'models' + os.sep)):
-
+                 model_op_path=None):
+        assert model_op_path is not None
         self.model_op = model_op
         self.op = OP.OpenPose(net_size, (240, 240), res_size, model_op, model_op_path, 0, True)
         self.keypoints = None
