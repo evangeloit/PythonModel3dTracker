@@ -5,7 +5,7 @@ import PythonModel3dTracker
 
 package_path = os.path.abspath(PythonModel3dTracker.__path__[0])
 data = os.path.join(package_path, "Data")
-models = os.environ['m3d']
+models = MD.models
 media = os.path.join(data, 'media/')
 datasets = os.path.join(data, 'ds/')
 results = os.path.join(data, 'rs/')
