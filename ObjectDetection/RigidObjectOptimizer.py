@@ -1,6 +1,6 @@
-import PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
 import PyModel3dTracker as pm3d
-import BlenderMBVLib.RenderingUtils as ru
+import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 import numpy as np
 
 

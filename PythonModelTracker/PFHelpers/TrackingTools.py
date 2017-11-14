@@ -1,8 +1,8 @@
 import PyMBVRendering as ren
 import os
 
-import BlenderMBVLib.BlenderMBVConversions as blconv
-import BlenderMBVLib.RenderingUtils as ru
+import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
+import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 import PyMBVCore as core
 import PyMBVLibraries as lib
 import PyMBVOpenMesh as mbvom

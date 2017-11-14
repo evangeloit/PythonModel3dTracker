@@ -3,16 +3,17 @@ import numpy as np
 import os
 import pickle
 
-import BlenderMBVLib.AngleTransformations as at
-import BlenderMBVLib.RenderingUtils as ru
+import BlenderMBV.BlenderMBVLib.AngleTransformations as at
+import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 import cv2
 
-import PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModelTracker.DatasetInfo as dsi
-import PythonModelTracker.Features2DUtils as f2d
-import PythonModelTracker.ModelTrackingResults as mtr
-import PythonModelTracker.PyMBVAll as mbv
-from ObjectDetection.RigidObjectDetectorORB import ObjectAppearance
+import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.Features2DUtils as f2d
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+from PythonModel3dTracker.ObjectDetection.RigidObjectDetectorORB import ObjectAppearance
+import PythonModel3dTracker.Paths as Paths
 
 # Returns R,T for Y=TmatX --- X = TinvY
 # def RigidInv(Tin):

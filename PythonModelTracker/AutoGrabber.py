@@ -1,6 +1,6 @@
 import os
-import PathsPM3DT as Paths
-import PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.Paths as Paths
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
 
 valid_input_formats = ['SFSerializedAcq', 'SFOni', 'SFImage','ser','oni','image', None]
 default_openni_xml = os.path.join(Paths.media, 'openni.xml')

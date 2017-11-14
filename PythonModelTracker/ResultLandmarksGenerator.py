@@ -2,8 +2,8 @@ import PyMBVCore as core
 import PyMBVOpenMesh as mbvom
 import PyMBVParticleFilter as mpf
 
-import PythonModelTracker.LandmarksGrabber as ldm
-import PythonModelTracker.PFHelpers.TrackingTools as tt
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.PFHelpers.TrackingTools as tt
 
 
 def GenerateLandmarks(results,landmark_names=None, landmarks=None):

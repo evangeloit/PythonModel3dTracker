@@ -1,14 +1,14 @@
 import PyMBVRendering as ren
 import numpy as np
 
-import BlenderMBVLib.AngleTransformations as at
-import BlenderMBVLib.RenderingUtils as ru
+import BlenderMBV.BlenderMBVLib.AngleTransformations as at
+import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 import PyMBVCore as core
 import PyMBVLibraries as lib
 import PyMBVParticleFilter as mpf
 import cv2
 
-import PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
 
 model3d_xml = Paths.model3d_dict['mh_body_male_custom']['path']
 

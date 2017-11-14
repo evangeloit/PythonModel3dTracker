@@ -1,17 +1,17 @@
 import PyMBVRendering as ren
 import os
 
-import BlenderMBVLib.BlenderMBVConversions as blconv
-import BlenderMBVLib.RenderingUtils as ru
+import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
+import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 import PyMBVCore as core
 import PyMBVOpenMesh as mbvom
 import PyMBVParticleFilter as mpf
-import PythonModelTracker.PFSettings as pfs
+import PythonModel3dTracker.PythonModelTracker.PFSettings as pfs
 import cv2
 
-import PythonModelTracker.LandmarksGrabber as ldm
-import PythonModelTracker.ModelTrackingGui as mtg
-import PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
 
 os.chdir(os.environ['bmbv']+"/Scripts/")
 

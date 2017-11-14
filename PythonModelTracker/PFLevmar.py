@@ -5,8 +5,8 @@ import PyMBVRendering
 import PyMBVAcquisition
 import PyMBVParticleFilter as mpf
 import PyCeresIK as IK
-from PythonModelTracker.OpenPoseGrabber import OpenPoseGrabber
-import PythonModelTracker.PFHelpers.PFInitialization as pfi
+from PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber import OpenPoseGrabber
+import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
 import copy
 
 

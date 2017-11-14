@@ -1,6 +1,6 @@
 import os
 import json
-import Models3dDict
+import Models3D.Models3dDict as MD
 
 
 data = os.path.join(os.environ['pm3dt'], "Data")
@@ -33,6 +33,6 @@ def save_datasets_dict(my_dict,save_path=None):
     fp.close()
 
 
-model3d_dict = Models3dDict.model3d_dict
+model3d_dict = MD.model3d_dict
 datasets_dict = load_datasets_dict()
 for d in datasets_dict: datasets_dict[d] = os.path.join(datasets,datasets_dict[d])

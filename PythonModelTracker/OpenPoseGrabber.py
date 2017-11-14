@@ -3,7 +3,7 @@ import PyOpenPose as OP
 import os
 import PyMBVCore as core
 
-import LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
 import PyCeresIK as IK
 import copy
 import cv2

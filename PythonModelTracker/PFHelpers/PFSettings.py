@@ -1,7 +1,7 @@
 import json
 import numpy as np
 import os
-import PathsPM3DT as Paths
+import PythonModel3dTracker.Paths as Paths
 
 np.set_printoptions(precision=2)
 np.set_printoptions(suppress=False)

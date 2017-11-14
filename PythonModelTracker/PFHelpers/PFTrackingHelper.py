@@ -3,8 +3,8 @@ import PyMBVRendering as ren
 import numpy as np
 import os
 
-import BlenderMBVLib.BlenderMBVConversions as blconv
-import BlenderMBVLib.RenderingUtils as ru
+import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
+import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 import PyMBVCore as core
 import PyMBVAcquisition as acq
 import PyMBVLibraries as lib
@@ -14,16 +14,16 @@ import PyMBVPhysics as phys
 import PyModel3dTracker as htpf
 import cv2
 
-import PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModelTracker.DatasetInfo as dsi
-import PythonModelTracker.DepthMapUtils as dmu
-import PythonModelTracker.LandmarksGrabber as ldm
-import PythonModelTracker.ModelTrackingGui as mtg
-import PythonModelTracker.ModelTrackingResults as mtr
-import PythonModelTracker.OpenPoseGrabber as opg
-import PythonModelTracker.PFHelpers.PFInitialization as pfi
-import PythonModelTracker.PFLevmar as pfl
-import PathsPM3DT as Paths
+import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as dmu
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber as opg
+import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
+import PythonModel3dTracker.PythonModelTracker.PFLevmar as pfl
+import PythonModel3dTracker.Paths as Paths
 
 
 class PFTracking:

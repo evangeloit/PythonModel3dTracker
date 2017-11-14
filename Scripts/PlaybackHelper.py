@@ -1,20 +1,20 @@
 import PyMBVRendering as ren
 import os
 
-import BlenderMBVLib.BlenderMBVConversions as blconv
-import BlenderMBVLib.RenderingUtils as ru
+import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
+import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 import PyMBVCore as core
 import PyMBVOpenMesh as mbvom
 import PyMBVParticleFilter as mpf
 import PyModel3dTracker as htpf
 import cv2
 
-import PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModelTracker.DatasetInfo as dsi
-import PythonModelTracker.LandmarksGrabber as ldm
-import PythonModelTracker.ModelTrackingGui as mtg
-import PythonModelTracker.ModelTrackingResults as mtr
-from ObjectDetection.RigidObjectOptimizer import RigidObjectOptimizer
+import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+from PythonModel3dTracker.ObjectDetection.RigidObjectOptimizer import RigidObjectOptimizer
 
 
 class PlaybackHelper:

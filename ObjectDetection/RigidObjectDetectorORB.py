@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-import PythonModelTracker.PyMBVAll as mbv
-import BlenderMBVLib.AngleTransformations as at
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import BlenderMBV.BlenderMBVLib.AngleTransformations as at
 import PyModel3dTracker as pm3d
 import copy
 

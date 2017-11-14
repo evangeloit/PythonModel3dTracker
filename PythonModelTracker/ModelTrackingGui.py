@@ -2,8 +2,8 @@ import PyMBVCore as core
 import numpy as np
 import cv2
 import zmq
-import BlenderMBVLib.BlenderMBVConnection as bmc
-import BlenderMBVLib.BlenderMBVConversions as bmcnv
+import BlenderMBV.BlenderMBVLib.BlenderMBVConnection as bmc
+import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as bmcnv
 import abc
 import json
 

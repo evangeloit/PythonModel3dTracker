@@ -1,7 +1,7 @@
 import json
 import os
 import re
-import PathsPM3DT as Paths
+import PythonModel3dTracker.Paths as Paths
 
 class DatasetInfo:
 
