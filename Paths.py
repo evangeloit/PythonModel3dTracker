@@ -1,9 +1,10 @@
 import os
 import json
 import Models3D.Models3dDict as MD
+import PythonModel3dTracker
 
-
-data = os.path.join(os.environ['pm3dt'], "Data")
+package_path = os.path.abspath(PythonModel3dTracker.__path__[0])
+data = os.path.join(package_path, "Data")
 models = os.environ['m3d']
 media = os.path.join(data, 'media/')
 datasets = os.path.join(data, 'ds/')
