@@ -1,21 +1,21 @@
-import PyMBVRendering as ren
+import cv2
 import os
+
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import PyModel3dTracker as m3dt
 
 import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
 import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
-import PyMBVCore as core
-import PyMBVLibraries as lib
-import PyMBVOpenMesh as mbvom
-import PyMBVParticleFilter as mpf
-import PyMBVPhysics as phys
-import PyModel3dTracker as htpf
-import cv2
 
-import PythonModelTracker.DatasetInfo as dsi
-import PythonModelTracker.LandmarksGrabber as ldm
-import PythonModelTracker.ModelTrackingGui as mtg
-import PythonModelTracker.ModelTrackingResults as mtr
-import PythonModelTracker.PFHelpers.PFInitialization as pfi
+import PythonModel3dTracker.Paths as Paths
+import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
+import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
+
+
 
 
 class ModelTools:
@@ -26,8 +26,8 @@ class ModelTools:
         model3d_xml = os.path.join(Paths.models,
                                    Paths.model3d_dict[model_name]['path'])
 
-        model3d = mpf.Model3dMeta.create(str(model3d_xml))
-        if model3d.model_type == mpf.Model3dType.Skinned: model3d.parts.genBonesMap()
+        model3d = mbv.PF.Model3dMeta.create(str(model3d_xml))
+        if model3d.model_type == mbv.PF.Model3dType.Skinned: model3d.parts.genBonesMap()
         return model3d, model_class
 
 class DatasetTools:
@@ -39,7 +39,7 @@ class DatasetTools:
         else:
             ds_init_state = []
         if len(ds_init_state) == len(model3d.default_state):
-            init_state = core.DoubleVector(ds_init_state)
+            init_state = mbv.Core.DoubleVector(ds_init_state)
         else:
             init_state = model3d.default_state
             print('Invalid dataset init state: ', ds_init_state)
@@ -74,11 +74,10 @@ class DatasetTools:
     @staticmethod
     def GenGrabber(params_ds):
         print('Opening dataset:', params_ds.stream_filename)
-        grabber_auto = htpf.AutoGrabber.create(str(params_ds.format),
-                                               core.StringVector([str(s) for s in params_ds.stream_filename]),
+        grabber = AutoGrabber.create(str(params_ds.format),
+                                               mbv.Core.StringVector([str(s) for s in params_ds.stream_filename]),
                                                str(params_ds.calib_filename))
 
-        grabber = htpf.FlipInputGrabber(grabber_auto, params_ds.flip_images)
         return grabber
 
 class ParticleFilterTools:
@@ -91,7 +90,7 @@ class ParticleFilterTools:
     @staticmethod
     def GenPF(pf_params, model3d, rng=None):
         if rng is None:
-            rng = mpf.RandomNumberGeneratorOpencv()
+            rng = mbv.PF.RandomNumberGeneratorOpencv()
         pf = pfi.CreatePF(rng, model3d, pf_params['pf'])
         pf.state = ParticleFilterTools.MultMeta(model3d.dim_types,
                                                 pf_params['init_state'],
@@ -99,12 +98,12 @@ class ParticleFilterTools:
 
 
         if pf_params['pf_listener_flag']:
-            pf.listener = htpf.ParticleFilterVisualizer()
+            pf.listener = m3dt.ParticleFilterVisualizer()
         return pf,rng
 
     @staticmethod
     def MultMeta(dim_types, state, mult_value):
-        meta = [i == mpf.DimType.Scale for i in dim_types]
+        meta = [i == mbv.PF.DimType.Scale for i in dim_types]
         for i, (s, m) in enumerate(zip(state, meta)):
             if m:
                 state[i] = s * mult_value
@@ -114,20 +113,20 @@ class ParticleFilterTools:
 class ObjectiveTools:
     @staticmethod
     def GenModel3dObjectiveframework(mmanager, model3d, depth_cutoff, bgfg_type):
-        model3dobj = htpf.Model3dObjectiveFrameworkRendering(mmanager)
-        model3dobj.decoder = model3d.createDecoder()  # htpf.Model3dObjectiveFrameworkDecoding.generateDefaultDecoder(model3d.model_collada)
+        model3dobj = m3dt.Model3dObjectiveFrameworkRendering(mmanager)
+        model3dobj.decoder = model3d.createDecoder()  # m3dt.Model3dObjectiveFrameworkDecoding.generateDefaultDecoder(model3d.model_collada)
         model3dobj.renderer = \
-            htpf.Model3dObjectiveFrameworkRendering. \
+            m3dt.Model3dObjectiveFrameworkRendering. \
                 generateDefaultRenderer(2048, 2048, "opengl",
                                         model3d.n_bones,
-                                        ren.RendererOGLBase.Culling.CullFront)
+                                        mbv.Ren.RendererOGLBase.Culling.CullFront)
         model3dobj.tile_size = (128, 128)
         if bgfg_type == 'skin':
-            model3dobj.bgfg = htpf.Model3dObjectiveFrameworkRendering.generateDefaultBGFG("media/hands_faceP.dat", 40,
+            model3dobj.bgfg = m3dt.Model3dObjectiveFrameworkRendering.generateDefaultBGFG("media/hands_faceP.dat", 40,
                                                                                           50)
         else:
-            model3dobj.bgfg = htpf.Model3dObjectiveFrameworkRendering.generate3DBoxBGFG(depth_cutoff)
-        if model3d.model_type == mpf.Model3dType.Primitives:
+            model3dobj.bgfg = m3dt.Model3dObjectiveFrameworkRendering.generate3DBoxBGFG(depth_cutoff)
+        if model3d.model_type == mbv.PF.Model3dType.Primitives:
             model3d.parts.genPrimitivesMap(model3dobj.decoder)
         else:
             model3d.parts.genBonesMap()
@@ -136,26 +135,26 @@ class ObjectiveTools:
     @staticmethod
     def GenRenderingObjectiveKinect(depth_cutoff):
         # RenderingObjective Initialization
-        rois = htpf.RenderingObjectives()
-        roi = htpf.RenderingObjectiveKinect()
-        roi.architecture = htpf.Architecture.cuda
+        rois = m3dt.RenderingObjectives()
+        roi = m3dt.RenderingObjectiveKinect()
+        roi.architecture = m3dt.Architecture.cuda
         roi.depth_cutoff = depth_cutoff
         rois.append(roi)
         return rois
 
     @staticmethod
     def GenRenderingObjectiveKinectWeighted(depth_cutoff,model3d,pf,part_multiplier):
-        rois = htpf.RenderingObjectives()
+        rois = m3dt.RenderingObjectives()
         for i, aux_model in enumerate(pf.aux_models_vec):
 
-            roi = htpf.RenderingObjectiveKinectWeighted()
+            roi = m3dt.RenderingObjectiveKinectWeighted()
             roi.model_parts = model3d.parts
-            part_weights = mpf.PartWeightsMap()
+            part_weights = mbv.PF.PartWeightsMap()
             for p in model3d.parts.parts_map:
                 part_weights[p.key()] = 1
             part_weights[aux_model.part_name] = part_multiplier
             roi.part_weights = part_weights
-            roi.architecture = htpf.Architecture.cuda
+            roi.architecture = m3dt.Architecture.cuda
             roi.depth_cutoff = depth_cutoff
             rois.append(roi)
         return rois
@@ -164,9 +163,9 @@ class ObjectiveTools:
     @staticmethod
     def GenModel3dObjectiveFrameworkDecoding(mmanager, model3d):
         # N = len(pf.aux_models_vec)
-        dof = htpf.Model3dObjectiveFrameworkDecoding(mmanager)
+        dof = m3dt.Model3dObjectiveFrameworkDecoding(mmanager)
         dof.decoder = model3d.createDecoder()
-        if model3d.model_type == mpf.Model3dType.Primitives:
+        if model3d.model_type == mbv.PF.Model3dType.Primitives:
             model3d.parts.genPrimitivesMap(dof.decoder)
         else:
             model3d.parts.genBonesMap()
@@ -175,18 +174,18 @@ class ObjectiveTools:
 
     @staticmethod
     def GenLandmarksDistObjective(max_dist):
-        doi = htpf.LandmarksDistObjective()
+        doi = m3dt.LandmarksDistObjective()
 
         doi.max_dist = max_dist
-        dois = htpf.DecodingObjectives()
+        dois = m3dt.DecodingObjectives()
         dois.append(doi)
         return dois
 
     @staticmethod
     def GenFilteredLandmarksDistObjective(max_dist, pf, model3d):
-        dois = htpf.DecodingObjectives()
+        dois = m3dt.DecodingObjectives()
         for i, aux_model in enumerate(pf.aux_models_vec):
-            doi = htpf.FilteredLandmarksDistObjective()
+            doi = m3dt.FilteredLandmarksDistObjective()
             doi.max_dist = max_dist
             doi.accepted_landmarks = model3d.parts.getPartPrimitives(str(aux_model.part_name))
             # roi.model_parts = model3d.parts
@@ -209,22 +208,22 @@ class ObjectiveTools:
         landmarks = ldm.GetDefaultModelLandmarks(model3d, primitive_names)
         for g in model3dobj.decoding_objectives:
             for d in g.data():
-                if (type(d) is htpf.LandmarksDistObjective) or \
-                        (type(d) is htpf.FilteredLandmarksDistObjective):
+                if (type(d) is m3dt.LandmarksDistObjective) or \
+                        (type(d) is m3dt.FilteredLandmarksDistObjective):
                     d.setObservations(landmarks, points3d_det)
                     # print("Observations/landmarks num:",len(d.observations), len(d.landmarks))
 
     @staticmethod
     def GenCollisionsObjective(mmanager):
-        col_det = lib.CollisionDetection(mmanager)
-        cyl_shape = phys.CylinderShapeZ()
-        cyl_shape.scale = core.Vector3(1, 1, 1)
+        col_det = mbv.Lib.CollisionDetection(mmanager)
+        cyl_shape = mbv.Phys.CylinderShapeZ()
+        cyl_shape.scale = mbv.Core.Vector3(1, 1, 1)
         cyl_shape.length = 2
         cyl_shape.radius = 1
-        sphere_shape = phys.SphereShape()
+        sphere_shape = mbv.Phys.SphereShape()
         sphere_shape.radius = 1
-        sphere_shape.scale = core.Vector3(1, 1, 1)
-        meshes = core.MeshTicketList()
+        sphere_shape.scale = mbv.Core.Vector3(1, 1, 1)
+        meshes = mbv.Core.MeshTicketList()
         mmanager.enumerateMeshes(meshes)
         for m in meshes:
             mesh_filename = mmanager.getMeshFilename(m)
@@ -234,20 +233,20 @@ class ObjectiveTools:
             if 'cylinder_collision' in mesh_filename:
                 print('Registering {0} from mesh {1}:{2}.'.format('cylinder', m, mesh_filename))
                 col_det.registerShape(mesh_filename, cyl_shape)
-        doi = htpf.CollisionObjective.create(col_det)
-        dois = htpf.DecodingObjectives()
+        doi = m3dt.CollisionObjective.create(col_det)
+        dois = m3dt.DecodingObjectives()
         dois.append(doi)
         return dois
 
     @staticmethod
     def GenObjective(pf,model3d,params):
-        mmanager = core.MeshManager()
-        openmesh_loader = mbvom.OpenMeshLoader()
+        mmanager = mbv.Core.MeshManager()
+        openmesh_loader = mbv.OM.OpenMeshLoader()
         mmanager.registerLoader(openmesh_loader)
         model3d.setupMeshManager(mmanager)
-        # obj_combination = htpf.ObjectiveCombination()
+        # obj_combination = m3dt.ObjectiveCombination()
         objective_weights = params['objective_weights']
-        obj_weight_vec = core.DoubleVector()
+        obj_weight_vec = mbv.Core.DoubleVector()
 
         # Model specific parameters.
         #if model_class == "Human": bgfg_type = 'depth'
@@ -283,7 +282,7 @@ class ObjectiveTools:
 
         model3dobj.objective_combination.weights = obj_weight_vec
         #objective = model3dobj.getPFObjective()
-        #parallel_objective = mpf.PFObjectiveCast.toParallel(objective)
+        #parallel_objective = mbv.PF.PFObjectiveCast.toParallel(objective)
 
         return model3dobj,mmanager
 
@@ -291,8 +290,8 @@ class ObjectiveTools:
 # def init_metaoptimizer(self, pf_params):
 #     self.mo = pfi.CreateMetaOptimizer(self.model3d, "meta", pf_params['meta_opt'])
 #     self.mf = pfi.CreateMetaFitter(self.model3d, "meta", pf_params['meta_fit'])
-#     self.mf.setFrameSetupFunctions(mpf.ObservationsSet(self.model3dobj.setObservations),
-#                                    mpf.FocusCamera(self.model3dobj.setFocus))
+#     self.mf.setFrameSetupFunctions(mbv.PF.ObservationsSet(self.model3dobj.setObservations),
+#                                    mbv.PF.FocusCamera(self.model3dobj.setFocus))
 #     self.enable_metaopt = True
 #
 # def run_metaoptimizer(self, bb):
@@ -356,7 +355,7 @@ class TrackingLoopTools:
                 if visualize['client'] == 'blender':
                     state_gui = gui.recv_state(model3d, state)
                     if state_gui is not None:
-                        state = core.DoubleVector(state_gui)
+                        state = mbv.Core.DoubleVector(state_gui)
                         pf.state = state
 
             if gui_command.name == "init":
@@ -408,7 +407,7 @@ class TrackingLoopTools:
 
         if res_filename is not None:
             results.save(res_filename)
-        core.CachedAllocatorStorage.clear()
+        mbv.Core.CachedAllocatorStorage.clear()
 
 
 
@@ -433,7 +432,7 @@ def get_model(model_name):
     assert model_name in Paths.model3d_dict
     model_class = Paths.model3d_dict[model_name]['class']
     model3d_xml = Paths.model3d_dict[model_name]['path']
-    model3d = mpf.Model3dMeta.create(str(model3d_xml))
+    model3d = mbv.PF.Model3dMeta.create(str(model3d_xml))
     return model3d, model_class
 
 

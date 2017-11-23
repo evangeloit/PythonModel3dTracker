@@ -15,6 +15,7 @@ import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
 from PythonModel3dTracker.ObjectDetection.RigidObjectOptimizer import RigidObjectOptimizer
+import PythonModel3dTracker.Paths as Paths
 
 
 class PlaybackHelper:

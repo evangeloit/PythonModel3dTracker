@@ -36,9 +36,9 @@ import PythonModel3dTracker.Paths as Paths
 
 
 
-did = 'box_eps_02'
-appearance_filename = os.path.join(Paths.objdetect, 'box_epspal_appearance.pck')
-frames = [0,2,3,4,5,7,8,9,14,15,22,25]
+did = 'box_eps_01'
+appearance_filename = os.path.join(Paths.objdetect, 'box_eps_appearance_v01.pck')
+frames = [0,1,2,3,4,5,6]
 
 
 # Initializing MBV rendering stack.

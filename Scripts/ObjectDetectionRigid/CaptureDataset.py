@@ -2,11 +2,12 @@ import os
 
 import cv2
 
-import PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModelTracker.DatasetInfo as dsi
-import PythonModelTracker.ModelTrackingGui as mtg
-import PythonModelTracker.ModelTrackingResults as mtr
-import PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.Paths as Paths
 
 visualize = {'enable':True,
              'labels':True, 'depth':True, 'rgb':True, 'wait_time':0}
