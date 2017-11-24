@@ -95,6 +95,12 @@ class DatasetTools:
         return grabber
 
 class ParticleFilterTools:
+
+    @staticmethod
+    def GenPF(pf_params, model3d, decoder=None, rng=None):
+        if pf_params['pf']['smart_pf']: return ParticleFilterTools.GenSmartPF(pf_params, model3d, decoder, rng)
+        else: return ParticleFilterTools.GenRegularPF(pf_params, model3d, rng)
+
     @staticmethod
     def GenSmartPF(pf_params, model3d, decoder, rng=None):
         if rng is None: rng = mbv.PF.RandomNumberGeneratorOpencv()
@@ -112,7 +118,7 @@ class ParticleFilterTools:
 
 
     @staticmethod
-    def GenPF(pf_params, model3d, rng=None):
+    def GenRegularPF(pf_params, model3d, rng=None):
         if rng is None:
             rng = mbv.PF.RandomNumberGeneratorOpencv()
         pf = pfi.CreatePF(rng, model3d, pf_params['pf'])
