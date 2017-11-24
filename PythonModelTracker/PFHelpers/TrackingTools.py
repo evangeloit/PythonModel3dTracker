@@ -1,6 +1,7 @@
 import cv2
 import os
 
+import PyCeresIK
 import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
 import PyModel3dTracker as m3dt
 
@@ -14,6 +15,9 @@ import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
 import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.PFLevmar as pfl
+import PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber as opg
+
 
 
 
@@ -53,16 +57,26 @@ class DatasetTools:
             background_image = cv2.imread(params_ds.background, 2 | 4)
         return background_image
 
+
     @staticmethod
-    def GenLandmarksGrabber(params_ds, model3d):
+    def GenGrabbers(params_ds,model3d, openpose_grabber = False):
+        grabber = DatasetTools.GenGrabber(params_ds)
+        grabber_ldm = DatasetTools.GenLandmarksGrabber(params_ds, model3d, openpose_grabber)
+        return grabber, grabber_ldm
+
+    @staticmethod
+    def GenLandmarksGrabber(params_ds, model3d, openpose_grabber = False):
         grabber_ldm = None
-        if params_ds.landmarks and len(params_ds.landmarks) > 0:
-            print('Landmarks filename: ', params_ds.landmarks['detections']['filename'])
-            print('Landmarks calib_filename: ', params_ds.landmarks['detections']['calib_filename'])
-            grabber_ldm = ldm.LandmarksGrabber(params_ds.landmarks['detections']['format'],
-                                                    params_ds.landmarks['detections']['filename'],
-                                                    params_ds.landmarks['detections']['calib_filename'],
-                                                    model3d.model_name)
+        if openpose_grabber:
+            grabber_ldm = opg.OpenPoseGrabber(model_op_path=Paths.models_openpose)
+        else:
+            if params_ds.landmarks and len(params_ds.landmarks) > 0:
+                print('Landmarks filename: ', params_ds.landmarks['detections']['filename'])
+                print('Landmarks calib_filename: ', params_ds.landmarks['detections']['calib_filename'])
+                grabber_ldm = ldm.LandmarksGrabber(params_ds.landmarks['detections']['format'],
+                                                   params_ds.landmarks['detections']['filename'],
+                                                   params_ds.landmarks['detections']['calib_filename'],
+                                                   model3d.model_name)
         return grabber_ldm
 
     @staticmethod
@@ -81,10 +95,20 @@ class DatasetTools:
         return grabber
 
 class ParticleFilterTools:
-    # @staticmethod
-    # def GenSmartPF():
-    #     smart_pf = pfl.SmartPF(rng, model3d, pf_params['pf'])
-    #     return smart_pf
+    @staticmethod
+    def GenSmartPF(pf_params, model3d, decoder, rng=None):
+        if rng is None: rng = mbv.PF.RandomNumberGeneratorOpencv()
+
+        primitive_names = ldm.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
+            model3d.parts.parts_map['all'],
+            model3d.model_name)
+        landmarks = ldm.GetDefaultModelLandmarks(model3d, primitive_names)
+
+
+        smart_pf = pfl.SmartPF(rng, model3d, pf_params['pf'])
+        smart_pf.ba = pfl.SmartPF.CreateBA(model3d, decoder, landmarks,
+                                           PyCeresIK.ModelAwareBundleAdjuster.MHCUSTOM_TO_COCO)
+        return smart_pf, rng
 
 
     @staticmethod
@@ -93,7 +117,7 @@ class ParticleFilterTools:
             rng = mbv.PF.RandomNumberGeneratorOpencv()
         pf = pfi.CreatePF(rng, model3d, pf_params['pf'])
         pf.state = ParticleFilterTools.MultMeta(model3d.dim_types,
-                                                pf_params['init_state'],
+                                                pf_params['pf']['init_state'],
                                                 pf_params['meta_mult'])
 
 
@@ -112,7 +136,7 @@ class ParticleFilterTools:
 
 class ObjectiveTools:
     @staticmethod
-    def GenModel3dObjectiveframework(mmanager, model3d, depth_cutoff, bgfg_type):
+    def GenModel3dObjectiveFrameworkRendering(mmanager, model3d, depth_cutoff, bgfg_type):
         model3dobj = m3dt.Model3dObjectiveFrameworkRendering(mmanager)
         model3dobj.decoder = model3d.createDecoder()  # m3dt.Model3dObjectiveFrameworkDecoding.generateDefaultDecoder(model3d.model_collada)
         model3dobj.renderer = \
@@ -192,6 +216,7 @@ class ObjectiveTools:
             dois.append(doi)
         return dois
 
+
     @staticmethod
     def SetupRenderingObjective(model3dobj,images,calibs,state):
         model3dobj.observations = images
@@ -238,12 +263,18 @@ class ObjectiveTools:
         dois.append(doi)
         return dois
 
+
     @staticmethod
-    def GenObjective(pf,model3d,params):
+    def GenMeshManager(model3d):
         mmanager = mbv.Core.MeshManager()
         openmesh_loader = mbv.OM.OpenMeshLoader()
         mmanager.registerLoader(openmesh_loader)
         model3d.setupMeshManager(mmanager)
+        return mmanager
+
+    @staticmethod
+    def GenObjective(mmanager,model3d,params):
+
         # obj_combination = m3dt.ObjectiveCombination()
         objective_weights = params['objective_weights']
         obj_weight_vec = mbv.Core.DoubleVector()
@@ -252,7 +283,7 @@ class ObjectiveTools:
         #if model_class == "Human": bgfg_type = 'depth'
 
         if objective_weights['rendering'] > 0:
-            model3dobj = ObjectiveTools.GenModel3dObjectiveframework(mmanager, model3d, params['depth_cutoff'],
+            model3dobj = ObjectiveTools.GenModel3dObjectiveFrameworkRendering(mmanager, model3d, params['depth_cutoff'],
                                                                            params['bgfg_type'])
             # if params['weighted_part_mult'] != 1:
             #     rois = ObjectiveTools.GenRenderingObjectiveKinectWeighted(params['depth_cutoff'],model3d,pf,
@@ -284,7 +315,7 @@ class ObjectiveTools:
         #objective = model3dobj.getPFObjective()
         #parallel_objective = mbv.PF.PFObjectiveCast.toParallel(objective)
 
-        return model3dobj,mmanager
+        return model3dobj
 
 
 # def init_metaoptimizer(self, pf_params):
@@ -306,18 +337,23 @@ class ObjectiveTools:
 
 class TrackingLoopTools:
     @staticmethod
-    def Grab(f,params_ds,grabber,grabber_ldm):
+    def Grab(f,params_ds,grabbers):
 
         print('frame:', f)
+        grabber = grabbers[0]
+        grabber_ldm = grabbers[1]
         grabber.seek(f)
         images, calibs = grabber.grab()
         if grabber_ldm is not None:
             grabber_ldm.seek(f)
-            points3d_det_names, points3d_det, ldm_calib = grabber_ldm.acquire(images, calibs)
+            #points3d_det_names, points3d_det, ldm_calib \
+            landmark_observations = grabber_ldm.acquire(images, calibs)
+
         else:
-            points3d_det_names = None
-            points3d_det = None
-            ldm_calib = None
+            landmark_observations = None
+            #points3d_det_names = None
+            #points3d_det = None
+            #ldm_calib = None
 
         depth = images[0]
         depth_filt = depth
@@ -325,13 +361,11 @@ class TrackingLoopTools:
         if (len(rgb.shape) == 2):
             images[1] = cv2.merge((rgb, rgb, rgb))
             rgb = cv2.merge((rgb, rgb, rgb))
-        return images,calibs, points3d_det_names, points3d_det, ldm_calib
+        return images,calibs, landmark_observations #points3d_det_names, points3d_det, ldm_calib
+
 
     @staticmethod
-    def loop(params_ds,model3d,grabber,grabber_ldm,mesh_manager,pf,pf_params,model3dobj,objective_params,
-             visualize,res_filename):
-        gui = None
-        results = mtr.ModelTrackingResults(did=params_ds.did)
+    def GenGui(visualize,params_ds):
         if visualize['enable']:
             if visualize['client'] == 'blender':
                 gui = mtg.ModelTrackingGuiZeromq()
@@ -339,8 +373,42 @@ class TrackingLoopTools:
                 gui = mtg.ModelTrackingGuiOpencv(visualize=visualize, init_frame=params_ds.limits[0])
         else:
             gui = mtg.ModelTrackingGuiNone(params_ds.limits[0])
+        return gui
 
-        grabber.seek(params_ds.limits[0])
+    @staticmethod
+    def SetupObjetive(state, observations, model3d, model3dobj, objective_params):
+        images, calibs, landmark_observations = observations  # points3d_det_names, points3d_det, ldm_calib
+
+        if (objective_params['objective_weights']['primitives'] > 0) and (landmark_observations is not None):
+            points3d_det_names = landmark_observations[0]
+            points3d_det = landmark_observations[1]
+            # ldm_calib = landmark_observations[2]
+            ObjectiveTools.SetupLandmarkDistObjective(model3dobj, points3d_det_names, points3d_det, model3d)
+        if objective_params['objective_weights']['rendering'] > 0:
+            ObjectiveTools.SetupRenderingObjective(model3dobj, images, calibs, state)
+        return model3dobj.getPFObjective()
+
+
+    @staticmethod
+    def SetupSmartPFObjective(observations, smart_pf):
+        images, calibs, landmark_observations = observations
+        points3d_det_names = landmark_observations[0]
+        points3d_det = landmark_observations[1]
+        points2d_det = landmark_observations[2]
+        ldm_calib = landmark_observations[3]
+        smart_pf.calib = ldm_calib
+        smart_pf.keypoints3d = points3d_det[0]
+        smart_pf.keypoints2d = points2d_det[0]
+        return mbv.Opt.ParallelObjective(smart_pf.Objective)
+
+    @staticmethod
+    def loop(params_ds,model3d,grabbers,mesh_manager,pf,pf_params,model3dobj,objective_params,
+             visualize,res_filename):
+
+        results = mtr.ModelTrackingResults(did=params_ds.did)
+        gui = TrackingLoopTools.GenGui(visualize, params_ds)
+
+        grabbers[0].seek(params_ds.limits[0])
         # Main loop
         print("entering loop")
         continue_loop = True
@@ -360,9 +428,9 @@ class TrackingLoopTools:
 
             if gui_command.name == "init":
                 if visualize['client'] == 'blender':
-                    gui.send_init(blconv.getFrameDataMBV(model3d, state,
-                                                         None, [params_ds.limits[0], f,
-                                                                params_ds.limits[1]], None, 0.001))
+                    gui.send_init(blconv.getFrameDataMBV(model3dmeta=model3d, state=state,
+                                                         frames=[params_ds.limits[0], f, params_ds.limits[1]],
+                                                         scale=0.001))
                 else:
                     gui_command.name = "frame"
 
@@ -371,31 +439,26 @@ class TrackingLoopTools:
                 if f_gui is not None:
                     f = f_gui
                     if (f > params_ds.limits[1]) or (f < 0): break
-                    images, calibs, points3d_det_names, points3d_det, ldm_calib = \
-                        TrackingLoopTools.Grab(f, params_ds, grabber, grabber_ldm)
+                    observations = TrackingLoopTools.Grab(f, params_ds, grabbers)
 
-                    if f > params_ds.limits[0]:
-                        # 3d point observations related stuff.
-                        if grabber_ldm is not None:
-                            ObjectiveTools.SetupLandmarkDistObjective(model3dobj, points3d_det_names, points3d_det,
-                                                                         model3d)
-                        if objective_params['objective_weights']['rendering'] > 0:
-                            ObjectiveTools.SetupRenderingObjective(model3dobj, images, calibs, state)
-                        pf.track(state, model3dobj.getPFObjective())
-                        # if enable_metaopt: run_metaoptimizer(bb)
 
-                    frame_data = None
+                    if pf_params['smart_pf']:
+                        objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf)
+                    else:
+                        objective = TrackingLoopTools.SetupObjetive(state,observations,model3d,
+                                                                    model3dobj,objective_params)
+                    pf.track(state, objective)
+
                     if visualize['enable']:
                         if visualize['client'] == 'blender':
-                            frame_data = blconv.getFrameDataMBV(model3d, state, calibs[0],
-                                                                [params_ds.limits[0], f,
-                                                                 params_ds.limits[1]],
-                                                                images,
-                                                                0.001)
+                            frame_data = blconv.getFrameDataMBV(model3dmeta=model3d, state=state,
+                                                                mbv_camera=observations[1][0],
+                                                                frames=[params_ds.limits[0], f, params_ds.limits[1]],
+                                                                images=observations[0], scale=0.001)
                         else:
 
                             viz = ru.visualize_overlay(model3dobj.renderer, mesh_manager, model3dobj.decoder, state,
-                                                       calibs[0], images[1], model3d.n_bones)
+                                                       observations[1][0], observations[0][1], model3d.n_bones)
                             frame_data = mtg.FrameDataOpencv(rgb=viz, n_frame=f)
                     else:
                         frame_data = 'None'

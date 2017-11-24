@@ -1,9 +1,5 @@
 import numpy as np
-import PyMBVCore as Core
-import PyMBVDecoding
-import PyMBVRendering
-import PyMBVAcquisition
-import PyMBVParticleFilter as mpf
+import PyMBVAll as mbv
 import PyCeresIK as IK
 from PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber import OpenPoseGrabber
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
@@ -39,7 +35,12 @@ class SmartPF:
 
 
     def __del__(self):
-        Core.CachedAllocatorStorage.clear()
+        mbv.Core.CachedAllocatorStorage.clear()
+
+
+    def track(self,state,objective):
+        self.pf.particles = mbv.PF.ParticlesMatrix(self.DynamicModel(self.pf.particles.particles))
+        self.pf.track(state, objective)
 
     @staticmethod
     def CreateBA(model3d,decoder,landmarks,model2keypoints):
@@ -60,14 +61,14 @@ class SmartPF:
 
     @staticmethod
     def CreatePF(rng,model3d,pf_params):
-        pfs = mpf.ParticleFilterStandard()
+        pfs = mbv.PF.ParticleFilterStandard()
         pfs.rng = rng
         pfs.resampling_flag = True
         pfs.like_variance = pf_params['like_variance']
         pfs.n_particles = pf_params['n_particles']
-        pfs.state_est_method = mpf.PFEstMethod.pf_est_max
+        pfs.state_est_method = mbv.PF.PFEstMethod.pf_est_max
         pfs.initFromModel3d(model3d)
-        pfs.std_dev = Core.DoubleVector(pf_params['std_dev'])
+        pfs.std_dev = mbv.Core.DoubleVector(pf_params['std_dev'])
         return pfs
 
     def DynamicModel(self, particles):
@@ -93,7 +94,7 @@ class SmartPF:
                 #print 'keypoints_cur:',keypoints_cur
                 observations = OpenPoseGrabber.ConvertIK([keypoints_cur], self.calib)
                 # do something with
-                cur_state = Core.DoubleVector(particles[:, i])
+                cur_state = mbv.Core.DoubleVector(particles[:, i])
                 #print 'cur_state:', cur_state
                 score, results = self.ba.solve(observations[0], cur_state)
                 #print 'levmar solve:', results
@@ -108,7 +109,7 @@ class SmartPF:
         n_particles = len(param_vectors)
         n_dims = len(param_vectors[0])
 
-        res = Core.DoubleVector([0]*n_particles)
+        res = mbv.Core.DoubleVector([0]*n_particles)
         # if self.model3dobj is not None:
         #     print 'SmartPF Objective running', 'n_particles:', n_particles, 'n_dims:', n_dims
         #     res = self.model3dobj.evaluate(param_vectors, 0)

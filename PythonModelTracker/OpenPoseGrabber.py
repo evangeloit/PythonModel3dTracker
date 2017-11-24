@@ -59,7 +59,7 @@ class OpenPoseGrabber():
 
             point_names = OpenPoseGrabber.landmark_names[self.model_op]
 
-        return point_names, self.keypoints, clb
+        return point_names, self.keypoints, self.keypoints2d, clb
 
 
     @staticmethod
