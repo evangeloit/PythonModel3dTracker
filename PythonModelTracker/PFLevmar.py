@@ -12,7 +12,7 @@ class SmartPF:
 
         self.model3d = model3d
         #self.std_dev = pf_params['std_dev']
-        self.pf = pfi.CreatePF(rng,model3d,pf_params)#SmartPF.CreatePF(rng,model3d,pf_params)
+        self.pf = SmartPF.CreatePF(rng,model3d,pf_params)#SmartPF.CreatePF(rng,model3d,pf_params)
         #self.pf.dynamic_model = mpf.DynamicModel(self.DynamicModel)
 
         if (decoder is not None and landmarks is not None and model2keypoints is not None):
@@ -25,10 +25,10 @@ class SmartPF:
         self.calib = None
         self.particles_prev = None
         self.model3dobj = None
-        self.levmar_particles = 10
+        self.smart_particles = 10
         self.filter_ratios = [0.1, 0.2]
-        if 'levmar_particles' in pf_params:
-            self.levmar_particles = pf_params['levmar_particles']
+        if 'smart_particles' in pf_params:
+            self.smart_particles = pf_params['smart_particles']
         if 'obs_filter_ratios' in pf_params:
             self.filter_ratios = pf_params['obs_filter_ratios']
 
@@ -68,6 +68,7 @@ class SmartPF:
         pfs.n_particles = pf_params['n_particles']
         pfs.state_est_method = mbv.PF.PFEstMethod.pf_est_max
         pfs.initFromModel3d(model3d)
+        pfs.state = mbv.Core.DoubleVector(pf_params['init_state'])
         pfs.std_dev = mbv.Core.DoubleVector(pf_params['std_dev'])
         return pfs
 
@@ -87,7 +88,7 @@ class SmartPF:
 
         if self.keypoints3d is not None:
             print 'SmartPF Dynamic: LEVMAR'
-            for i in range(min(self.levmar_particles, n_particles)):
+            for i in range(min(self.smart_particles, n_particles)):
                 keypoints_cur = OpenPoseGrabber.FilterKeypointsRandom(self.keypoints3d,
                                                                       self.keypoints2d,
                                                                       self.filter_ratios)

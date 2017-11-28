@@ -6,7 +6,6 @@ import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
 import PyModel3dTracker as m3dt
 
 import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
-import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 
 import PythonModel3dTracker.Paths as Paths
 import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
@@ -281,47 +280,51 @@ class ObjectiveTools:
     @staticmethod
     def GenObjective(mmanager,model3d,params):
 
-        # obj_combination = m3dt.ObjectiveCombination()
-        objective_weights = params['objective_weights']
-        obj_weight_vec = mbv.Core.DoubleVector()
+        renderer = None
+        decoder = None
+        model3dobj = None
 
-        # Model specific parameters.
-        #if model_class == "Human": bgfg_type = 'depth'
+        if params['enable']:
+            objective_weights = params['objective_weights']
+            obj_weight_vec = mbv.Core.DoubleVector()
+            # Model specific parameters.
+            #if model_class == "Human": bgfg_type = 'depth'
 
-        if objective_weights['rendering'] > 0:
-            model3dobj = ObjectiveTools.GenModel3dObjectiveFrameworkRendering(mmanager, model3d, params['depth_cutoff'],
-                                                                           params['bgfg_type'])
-            # if params['weighted_part_mult'] != 1:
-            #     rois = ObjectiveTools.GenRenderingObjectiveKinectWeighted(params['depth_cutoff'],model3d,pf,
-            #                                                               params['weighted_part_mult'])
-            # else:
-            rois = ObjectiveTools.GenRenderingObjectiveKinect(params['depth_cutoff'])
-            model3dobj.appendRenderingObjectivesGroup(rois)
-            # obj_combination.addObjective(model3dobj.getPFObjective(), objective_weights['rendering'])
-            obj_weight_vec.append(objective_weights['rendering'])
-        else:
-            model3dobj = ObjectiveTools.GenModel3dObjectiveFrameworkDecoding(mmanager, model3d)
+            if objective_weights['rendering'] > 0:
+                model3dobj = ObjectiveTools.GenModel3dObjectiveFrameworkRendering(mmanager, model3d, params['depth_cutoff'],
+                                                                               params['bgfg_type'])
+                renderer = model3dobj.renderer
+                # if params['weighted_part_mult'] != 1:
+                #     rois = ObjectiveTools.GenRenderingObjectiveKinectWeighted(params['depth_cutoff'],model3d,pf,
+                #                                                               params['weighted_part_mult'])
+                # else:
+                rois = ObjectiveTools.GenRenderingObjectiveKinect(params['depth_cutoff'])
+                model3dobj.appendRenderingObjectivesGroup(rois)
+                # obj_combination.addObjective(model3dobj.getPFObjective(), objective_weights['rendering'])
+                obj_weight_vec.append(objective_weights['rendering'])
+            elif (objective_weights['primitives'] > 0) or (objective_weights['collisions'] > 0):
+                model3dobj = ObjectiveTools.GenModel3dObjectiveFrameworkDecoding(mmanager, model3d)
+                decoder = model3dobj.decoder
 
-        #if objective_weights['openpose']: grabber_ldm = opg.OpenPoseGrabber()
+                if (objective_weights['primitives'] > 0):
+                    model3dobj.appendDecodingObjectivesGroup(ObjectiveTools.GenLandmarksDistObjective(params['depth_cutoff']))
+                    # model3dobj.appendDecodingObjectivesGroup(
+                    #    PFTracking.generate_filteredlandmarksdistobjectives(depth_cutoff,pf,model3d))
+                    # obj_combination.addObjective(model3dobj_dec.getPFObjective(), objective_weights['primitives'])
+                    obj_weight_vec.append(objective_weights['primitives'])
 
-        if (objective_weights['primitives'] > 0):
-            model3dobj.appendDecodingObjectivesGroup(ObjectiveTools.GenLandmarksDistObjective(params['depth_cutoff']))
-            # model3dobj.appendDecodingObjectivesGroup(
-            #    PFTracking.generate_filteredlandmarksdistobjectives(depth_cutoff,pf,model3d))
-            # obj_combination.addObjective(model3dobj_dec.getPFObjective(), objective_weights['primitives'])
-            obj_weight_vec.append(objective_weights['primitives'])
+                if objective_weights['collisions'] > 0:
+                    dois = ObjectiveTools.GenCollisionsObjective(mmanager)
+                    model3dobj.appendDecodingObjectivesGroup(dois)
+                    obj_weight_vec.append(objective_weights['collisions'])
+            else:
+                model3dobj = m3dt.Model3dObjectiveFramework()
 
-        if objective_weights['collisions'] > 0:
-            dois = ObjectiveTools.GenCollisionsObjective(mmanager)
-            model3dobj.appendDecodingObjectivesGroup(dois)
-            obj_weight_vec.append(objective_weights['collisions'])
+            model3dobj.objective_combination.weights = obj_weight_vec
+            #objective = model3dobj.getPFObjective()
+            #parallel_objective = mbv.PF.PFObjectiveCast.toParallel(objective)
 
-
-        model3dobj.objective_combination.weights = obj_weight_vec
-        #objective = model3dobj.getPFObjective()
-        #parallel_objective = mbv.PF.PFObjectiveCast.toParallel(objective)
-
-        return model3dobj
+        return model3dobj, decoder, renderer
 
 
 # def init_metaoptimizer(self, pf_params):
@@ -367,7 +370,11 @@ class TrackingLoopTools:
         if (len(rgb.shape) == 2):
             images[1] = cv2.merge((rgb, rgb, rgb))
             rgb = cv2.merge((rgb, rgb, rgb))
-        return images,calibs, landmark_observations #points3d_det_names, points3d_det, ldm_calib
+        observations = {}
+        observations['images'] = images
+        observations['calibs'] = calibs
+        observations['landmarks'] = landmark_observations
+        return observations
 
 
     @staticmethod
@@ -383,7 +390,10 @@ class TrackingLoopTools:
 
     @staticmethod
     def SetupObjetive(state, observations, model3d, model3dobj, objective_params):
-        images, calibs, landmark_observations = observations  # points3d_det_names, points3d_det, ldm_calib
+        images = observations['images']
+        calibs = observations['calibs']
+        landmark_observations = observations['landmarks']
+        #images, calibs, landmark_observations = observations  # points3d_det_names, points3d_det, ldm_calib
 
         if (objective_params['objective_weights']['primitives'] > 0) and (landmark_observations is not None):
             points3d_det_names = landmark_observations[0]
@@ -397,8 +407,10 @@ class TrackingLoopTools:
 
     @staticmethod
     def SetupSmartPFObjective(observations, smart_pf):
-        images, calibs, landmark_observations = observations
-        points3d_det_names = landmark_observations[0]
+        # images = observations['images']
+        # calibs = observations['calibs']
+        landmark_observations = observations['landmarks']
+        # points3d_det_names = landmark_observations[0]
         points3d_det = landmark_observations[1]
         points2d_det = landmark_observations[2]
         ldm_calib = landmark_observations[3]
@@ -408,11 +420,11 @@ class TrackingLoopTools:
         return mbv.Opt.ParallelObjective(smart_pf.Objective)
 
     @staticmethod
-    def loop(params_ds,model3d,grabbers,mesh_manager,pf,pf_params,model3dobj,objective_params,
-             visualize,res_filename):
+    def loop(params_ds,model3d,grabbers,pf,pf_params,model3dobj,objective_params,
+             visualizer, visualize_params,res_filename):
 
         results = mtr.ModelTrackingResults(did=params_ds.did)
-        gui = TrackingLoopTools.GenGui(visualize, params_ds)
+        gui = TrackingLoopTools.GenGui(visualize_params, params_ds)
 
         grabbers[0].seek(params_ds.limits[0])
         # Main loop
@@ -426,14 +438,14 @@ class TrackingLoopTools:
                 continue_loop = False
 
             if gui_command.name == "state":
-                if visualize['client'] == 'blender':
+                if visualize_params['client'] == 'blender':
                     state_gui = gui.recv_state(model3d, state)
                     if state_gui is not None:
                         state = mbv.Core.DoubleVector(state_gui)
                         pf.state = state
 
             if gui_command.name == "init":
-                if visualize['client'] == 'blender':
+                if visualize_params['client'] == 'blender':
                     gui.send_init(blconv.getFrameDataMBV(model3dmeta=model3d, state=state,
                                                          frames=[params_ds.limits[0], f, params_ds.limits[1]],
                                                          scale=0.001))
@@ -450,21 +462,19 @@ class TrackingLoopTools:
 
                     if pf_params['smart_pf']:
                         objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf)
-                    else:
+                    if objective_params['enable']:
                         objective = TrackingLoopTools.SetupObjetive(state,observations,model3d,
                                                                     model3dobj,objective_params)
                     pf.track(state, objective)
 
-                    if visualize['enable']:
-                        if visualize['client'] == 'blender':
+                    if visualize_params['enable']:
+                        if visualize_params['client'] == 'blender':
                             frame_data = blconv.getFrameDataMBV(model3dmeta=model3d, state=state,
-                                                                mbv_camera=observations[1][0],
+                                                                mbv_camera=observations['calibs'][0],
                                                                 frames=[params_ds.limits[0], f, params_ds.limits[1]],
                                                                 images=observations[0], scale=0.001)
                         else:
-
-                            viz = ru.visualize_overlay(model3dobj.renderer, mesh_manager, model3dobj.decoder, state,
-                                                       observations[1][0], observations[0][1], model3d.n_bones)
+                            viz = visualizer.visualize_overlay(state, observations['calibs'][0], observations['images'][1])
                             frame_data = mtg.FrameDataOpencv(rgb=viz, n_frame=f)
                     else:
                         frame_data = 'None'

@@ -125,6 +125,7 @@ def CreatePFStd(rng,model3d,pfs_params):
     pfs.n_particles = pfs_params['n_particles']
     pfs.state_est_method = pf.PFEstMethod.pf_est_max
     pfs.initFromModel3d(model3d)
+    pfs.state = core.DoubleVector(pfs_params['init_state'])
     pfs.std_dev = core.DoubleVector(pfs_params['std_dev'])
     return pfs
 
