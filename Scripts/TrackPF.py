@@ -11,26 +11,26 @@ visualize_params = {'enable':True,
              'wait_time':0}
 assert visualize_params['client'] in ['opencv','blender']
 
-# Model & Dataset
-dataset = 'mhad_s04_a04'
-model_name = 'mh_body_male_custom'
+# Model & Datasets
+dataset = 'mhad_s09_a01'
+model_name = 'mh_body_male_custom_0950'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
-enable_openpose_grabber = True
+enable_openpose_grabber = False
 
 
-res_filename = None #os.path.join(Paths.results,"Human_tracking/{0}_toinit.json".format(dataset))
+res_filename = os.path.join(Paths.results,"Human_tracking/{0}_toinit.json".format(dataset))
 
 # PF Initialization
 hmf_arch_type = "2levels"
 pf_params = pfs.Load(model_name, model_class,hmf_arch_type)
-pf_params['pf']['n_particles'] = 1
+pf_params['pf']['n_particles'] = 512
 pf_params['pf']['init_state'] = tt.DatasetTools.GenInitState(params_ds, model3d)
 pf_params['meta_mult'] = 1
 pf_params['pf_listener_flag'] = False
-pf_params['pf']['smart_pf'] = True
-pf_params['pf']['smart_particles'] = 1
-pf_params['pf']['obs_filter_ratios'] = [0.05, 0.25]
+pf_params['pf']['smart_pf'] = False
+pf_params['pf']['smart_particles'] = 10
+pf_params['pf']['obs_filter_ratios'] = [0.05, 0.3]
 
 # Objectives
 objective_params = {
@@ -49,6 +49,8 @@ decoder = visualizer.decoder
 grabbers = tt.DatasetTools.GenGrabbers(params_ds, model3d, enable_openpose_grabber)
 pf, rng = tt.ParticleFilterTools.GenPF(pf_params, model3d, decoder)
 
-tt.TrackingLoopTools.loop(params_ds,model3d, grabbers, pf,
+results = tt.TrackingLoopTools.loop(params_ds,model3d, grabbers, pf,
                           pf_params['pf'],model3dobj,objective_params,
-                          visualizer, visualize_params,res_filename)
+                          visualizer, visualize_params)
+
+if res_filename is not None: results.save(res_filename)

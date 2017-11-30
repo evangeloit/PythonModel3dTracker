@@ -16,8 +16,10 @@ class SmartPF:
         #self.pf.dynamic_model = mpf.DynamicModel(self.DynamicModel)
 
         if (decoder is not None and landmarks is not None and model2keypoints is not None):
+            self.decoder = decoder
             self.ba = SmartPF.CreateBA(model3d,decoder,landmarks,model2keypoints)
         else:
+            self.decoder = None
             self.ba = None
 
         self.keypoints2d = None
@@ -48,15 +50,27 @@ class SmartPF:
         lmv = IK.LandmarksVector()
         for l in landmarks:
             lmv.append(l)
-
         ba.decoder = decoder
+        ba.low_bounds = model3d.low_bounds
+        ba.high_bounds = model3d.high_bounds
+        # assert (type(decoder) is mbv.Dec.GenericDecoderGPU) or \
+        #        (type(decoder) is mbv.Dec.StateTransformDecoder)
+        # if type(decoder) is mbv.Dec.GenericDecoderGPU:
+        #     ba.decoder = decoder
+        #     ba.low_bounds = model3d.low_bounds
+        #     ba.high_bounds = model3d.high_bounds
+        # else:
+        #     ba.decoder = decoder.delegate
+        #     st = decoder.state_transformer
+        #     ba.low_bounds = st.process(model3d.low_bounds, mbv.Dec.StateTransformDirection.Forward)
+        #     ba.high_bounds = st.process(model3d.high_bounds, mbv.Dec.StateTransformDirection.Forward)
+        #     print 'highBounds length:', len(ba.high_bounds)
         ba.landmarks = lmv
         ba.model_to_keypoints = model2keypoints
         ba.ceres_report = False
         ba.max_iterations = 500
         # ba.soft_bounds = True
-        ba.low_bounds = model3d.low_bounds
-        ba.high_bounds = model3d.high_bounds
+
         return ba
 
     @staticmethod
@@ -96,9 +110,18 @@ class SmartPF:
                 observations = OpenPoseGrabber.ConvertIK([keypoints_cur], self.calib)
                 # do something with
                 cur_state = mbv.Core.DoubleVector(particles[:, i])
+
+                # if (self.decoder is not None) and (type(self.decoder) is mbv.Dec.StateTransformDecoder):
+                #     st = self.decoder.state_transformer
+                #     cur_state = st.process(cur_state)
+
                 #print 'cur_state:', cur_state
                 score, results = self.ba.solve(observations[0], cur_state)
                 #print 'levmar solve:', results
+                # if (self.decoder is not None) and (type(self.decoder) is mbv.Dec.StateTransformDecoder):
+                #     st = self.decoder.state_transformer
+                #     results = st.process(results, mbv.Dec.StateTransformDirection.Backward)
+
                 particles[:,i] = results
         #for f in range(n_particles):
         #    particles[0, f] += 100*f

@@ -421,7 +421,7 @@ class TrackingLoopTools:
 
     @staticmethod
     def loop(params_ds,model3d,grabbers,pf,pf_params,model3dobj,objective_params,
-             visualizer, visualize_params,res_filename):
+             visualizer, visualize_params):
 
         results = mtr.ModelTrackingResults(did=params_ds.did)
         gui = TrackingLoopTools.GenGui(visualize_params, params_ds)
@@ -484,9 +484,10 @@ class TrackingLoopTools:
 
             results.add(f, model3d.model_name, state)
 
-        if res_filename is not None:
-            results.save(res_filename)
-        mbv.Core.CachedAllocatorStorage.clear()
+        #if res_filename is not None:
+        #    results.save(res_filename)
+        return results
+        #mbv.Core.CachedAllocatorStorage.clear()
 
 
 
@@ -501,9 +502,6 @@ def background_subtraction(images, background_image, thres):
         depth_mask = ((background_image - images[0]) > thres)
         images[0] = depth_mask * images[0]
     return images
-
-
-
 
 
 @staticmethod

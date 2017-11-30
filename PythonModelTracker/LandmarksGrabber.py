@@ -38,12 +38,18 @@ primitives_dict = {
     #{'L.LLeg': 15, 'L.ULeg': 14, 'R.LLeg': 11, 'R.Foot': 12, 'R.LArm': 3, 'R.eye': 21, 'L.shoulder': 5, 'R.torso': 9,
     # 'L.LArm': 7, 'R.shoulder': 1, 'L.Wrist': 8, 'R.ULeg': 10, 'R.ear': 23, 'L.ear': 22, 'L.eye': 20, 'Nose': 19,
     # 'L.UArm': 6, 'neck': 17, 'neck.001': 18, 'root': 0, 'R.Wrist': 4, 'L.torso': 13, 'R.UArm': 2, 'L.Foot': 16}
-
-
 }
 primitives_dict["human_ext_collisions"] = primitives_dict["human_ext"]
 primitives_dict["mh_body_male_meta"] = primitives_dict["mh_body_male"]
 primitives_dict["mh_body_male_meta_grpscl"] = primitives_dict["mh_body_male"]
+primitives_dict["mh_body_male_custom_meta"] = primitives_dict["mh_body_male_custom"]
+primitives_dict["mh_body_male_custom_0850"] = primitives_dict["mh_body_male_custom"]
+primitives_dict["mh_body_male_custom_0900"] = primitives_dict["mh_body_male_custom"]
+primitives_dict["mh_body_male_custom_0950"] = primitives_dict["mh_body_male_custom"]
+primitives_dict["mh_body_male_custom_1050"] = primitives_dict["mh_body_male_custom"]
+primitives_dict["mh_body_male_custom_1100"] = primitives_dict["mh_body_male_custom"]
+primitives_dict["mh_body_male_custom_1150"] = primitives_dict["mh_body_male_custom"]
+primitives_dict["mh_body_male_custom_meta_glbscl"] = primitives_dict["mh_body_male_custom"]
 
 
 

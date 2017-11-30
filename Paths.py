@@ -1,7 +1,7 @@
 import os
 import json
 import Models3D.Models3dDict as MD
-import PythonModel3dTracker
+
 
 package_path = os.environ['pm3dt'] #os.path.abspath(PythonModel3dTracker.__path__[0])
 data = os.path.join(package_path, "Data")

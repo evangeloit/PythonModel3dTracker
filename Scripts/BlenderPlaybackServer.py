@@ -5,12 +5,12 @@ import PythonModel3dTracker.Paths as Paths
 
 # Input
 wait_time = 1
-dataset = None#os.path.join(paths.datasets, "object_tracking/co4robots/{}.oni".format("box_eps_02"))
-model_name = "box" #"hand_skinned"#"mh_body_male_meta_glbscl"
-res = 'box_eps_01'
-results_txt = os.path.join(Paths.datasets, "object_tracking/co4robots/{}_gt.json".format(res))
+dataset = 'mhad_s01_a04' #os.path.join(paths.datasets, "object_tracking/co4robots/{}.oni".format("box_eps_02"))
+model_name = "mh_body_male_custom" #"hand_skinned"#"mh_body_male_meta_glbscl"
+res = dataset
+results_txt = None #os.path.join(Paths.datasets, "object_tracking/co4robots/{}_gt.json".format(res))
 visualize = {'enable':True,
-             'client': 'blender',
+             'client': 'opencv',
              'labels':True, 'depth':True, 'rgb':True, 'wait_time':0}
 assert visualize['client'] in ['opencv','blender']
 sel_landmarks = None #"gt"   #see dataset json for available landmarks.

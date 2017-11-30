@@ -1,13 +1,11 @@
-import PyMBVRendering as ren
 import os
+import cv2
 
 import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
 import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
-import PyMBVCore as core
-import PyMBVOpenMesh as mbvom
-import PyMBVParticleFilter as mpf
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
 import PyModel3dTracker as htpf
-import cv2
+
 
 import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
 import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
@@ -51,6 +49,7 @@ class PlaybackHelper:
 
     def __del__(self):
         if self.video_writer is not None: self.video_writer.release()
+        mbv.Core.CachedAllocatorStorage.clear()
 
     def set_results(self,results_json,sel_landmarks=None):
         self.results = mtr.ModelTrackingResults()
@@ -61,7 +60,7 @@ class PlaybackHelper:
     def set_model(self,model_name):
         assert model_name in Paths.model3d_dict
         model3d_xml = Paths.model3d_dict[model_name]['path']
-        self.model3d = mpf.Model3dMeta.create(str(model3d_xml))
+        self.model3d = mbv.PF.Model3dMeta.create(str(model3d_xml))
 
 
 
@@ -82,7 +81,7 @@ class PlaybackHelper:
         assert self.params_ds is not None
         print self.params_ds.calib_filename
         self.grabber = AutoGrabber.create(str(self.params_ds.format),
-                                                    core.StringVector([str(s) for s in self.params_ds.stream_filename]),
+                                                    mbv.Core.StringVector([str(s) for s in self.params_ds.stream_filename]),
                                                     str(self.params_ds.calib_filename))
         #self.grabber = htpf.FlipInputGrabber(self.grabber_auto, self.params_ds.flip_images)
         self.grabber_ldm = None
@@ -96,8 +95,8 @@ class PlaybackHelper:
 
     def init_mbv_rendering_stack(self):
         assert self.model3d is not None
-        self.mmanager = core.MeshManager()
-        self.openmesh_loader = mbvom.OpenMeshLoader()
+        self.mmanager = mbv.Core.MeshManager()
+        self.openmesh_loader = mbv.OM.OpenMeshLoader()
         self.mmanager.registerLoader(self.openmesh_loader)
         self.model3d.setupMeshManager(self.mmanager)
         self.decoder = self.model3d.createDecoder()
@@ -105,18 +104,18 @@ class PlaybackHelper:
         self.exposed_renderer = \
             htpf.Model3dObjectiveFrameworkRendering. \
                 generateDefaultRenderer(2048, 2048, "opengl",self.model3d.n_bones,
-                                        ren.RendererOGLBase.Culling.CullNone)#ren.RendererOGLCudaExposed.get(2048, 2048)
+                                        mbv.Ren.RendererOGLBase.Culling.CullNone)#mbv.Ren.RendererOGLCudaExposed.get(2048, 2048)
         self.renderer = self.exposed_renderer.delegate
         self.renderer.bonesPerHypothesis = self.model3d.n_bones
 
         self.dof = htpf.Model3dObjectiveFrameworkDecoding(self.mmanager)
         self.dof.decoder = self.decoder
-        if self.model3d.model_type == mpf.Model3dType.Primitives:
+        if self.model3d.model_type == mbv.PF.Model3dType.Primitives:
             self.model3d.parts.genPrimitivesMap(self.dof.decoder)
         else:
             self.model3d.parts.genBonesMap()
-            # landmarks = ldm.GetDefaultModelLandmarks(model3d, core.StringVector(['f_pinky.03.R', 'f_middle.03.R', 'f_ring.03.R', 'thumb.03.R', 'f_index.03.R']))
-            #landmarks_decoder = mpf.LandmarksDecoder()
+            # landmarks = ldm.GetDefaultModelLandmarks(model3d, mbv.Core.StringVector(['f_pinky.03.R', 'f_middle.03.R', 'f_ring.03.R', 'thumb.03.R', 'f_index.03.R']))
+            #landmarks_decoder = mbv.PF.LandmarksDecoder()
             #landmarks_decoder.decoder = decoder
 
     def get_init_state(self,f):
@@ -124,11 +123,11 @@ class PlaybackHelper:
             state = []
         elif self.results is not None:
             if self.results.has_state(f, self.model3d.model_name):
-                state = core.DoubleVector(self.results.states[f][self.model3d.model_name])
+                state = mbv.Core.DoubleVector(self.results.states[f][self.model3d.model_name])
             elif self.results.has_state(f+1, self.model3d.model_name):
-                state = core.DoubleVector(self.results.states[f+1][self.model3d.model_name])
+                state = mbv.Core.DoubleVector(self.results.states[f+1][self.model3d.model_name])
         elif self.model3d.model_name in self.params_ds.initialization:
-            state = core.DoubleVector(self.params_ds.initialization[self.model3d.model_name])
+            state = mbv.Core.DoubleVector(self.params_ds.initialization[self.model3d.model_name])
         else:
             state = self.model3d.default_state
         return state
@@ -223,7 +222,7 @@ class PlaybackHelper:
                     if self.results is not None:
                         cur_results_flag = self.results.has_state(f, self.model3d.model_name)
                         if cur_results_flag:
-                            state = core.DoubleVector(self.results.states[f][self.model3d.model_name])
+                            state = mbv.Core.DoubleVector(self.results.states[f][self.model3d.model_name])
 
                     if self.grabber_ldm is not None:
                         self.grabber_ldm.seek(f)
