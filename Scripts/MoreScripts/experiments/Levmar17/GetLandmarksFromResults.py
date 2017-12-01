@@ -1,30 +1,25 @@
 import os.path
 
-import PythonModelTracker.ModelTrackingResults as mtr
-from PythonModelTracker.ResultLandmarksGenerator import GenerateLandmarks
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+from PythonModel3dTracker.PythonModelTracker.ResultLandmarksGenerator import GenerateLandmarks
+import PythonModel3dTracker.Paths as Paths
 
 os.chdir(os.environ['bmbv']+'/Scripts/')
 
 
-input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/{0}{1}")
-res = ['mhad_s02_a04_mh_body_male_custom_p1_lp1_ransac[0.0, 0.0]',
-       'mhad_s02_a04_mh_body_male_custom_p10_lp10_ransac[0.0, 0.0]',
-       'mhad_s02_a04_mh_body_male_custom_p10_lp10_ransac[0.0, 0.1]',
-       'mhad_s02_a04_mh_body_male_custom_p10_lp10_ransac[0.1, 0.2]',
-       'mhad_s02_a04_mh_body_male_custom_p20_lp20_ransac[0.1, 0.2]',
-       'mhad_s02_a04_mh_body_male_custom_p20_lp20_ransac[0.15, 0.3]',
-       'mhad_s02_a04_mh_body_male_custom_p256_lp20_ransac[0.1, 0.2]']
+input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/")
 
-wait_time = 1
-for f in res:
-    results_in = input_dir.format(f,'.json')
-    assert os.path.isfile(results_in)
 
-    results_out = input_dir.format(f,'_out.json')
-    results = mtr.ModelTrackingResults()
-    results.load(results_in)
-    results_ldm = GenerateLandmarks(results)
-    results_ldm.save(results_out)
+for i,f in enumerate(os.listdir(input_dir)):
+    results_in = os.path.join(input_dir, f)
+    f_base, f_ext = os.path.splitext(f)
+    if (f_ext == '.json') and os.path.isfile(results_in):
+        results_out = os.path.join(input_dir, f_base + '_ldm.json')
+        print i,results_in, results_out
+        # results = mtr.ModelTrackingResults()
+        # results.load(results_in)
+        # results_ldm = GenerateLandmarks(results)
+        # results_ldm.save(results_out)
 
 
 

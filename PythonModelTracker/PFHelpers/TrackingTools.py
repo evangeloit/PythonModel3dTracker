@@ -106,6 +106,7 @@ class ParticleFilterTools:
 
         primitive_names = ldm.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
             model3d.parts.parts_map['all'],
+            'coco',
             model3d.model_name)
         landmarks = ldm.GetDefaultModelLandmarks(model3d, primitive_names)
 

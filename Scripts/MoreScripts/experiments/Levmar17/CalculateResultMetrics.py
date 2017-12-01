@@ -1,41 +1,48 @@
 import numpy as np
 import os
 
-import PyModel3dTracker as mt
-
+import PythonModel3dTracker.Paths as Paths
 from PythonModelTracker.ModelTrackingResults import ModelTrackingResults
-
-input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/{0}{1}")
-res = ['mhad_s02_a04_mh_body_male_custom_p1_lp1_ransac[0.0, 0.0]',
-       'mhad_s02_a04_mh_body_male_custom_p10_lp10_ransac[0.0, 0.0]',
-       'mhad_s02_a04_mh_body_male_custom_p10_lp10_ransac[0.0, 0.1]',
-       'mhad_s02_a04_mh_body_male_custom_p10_lp10_ransac[0.1, 0.2]',
-       'mhad_s02_a04_mh_body_male_custom_p20_lp20_ransac[0.1, 0.2]',
-       'mhad_s02_a04_mh_body_male_custom_p20_lp20_ransac[0.15, 0.3]',
-       'mhad_s02_a04_mh_body_male_custom_p256_lp20_ransac[0.1, 0.2]']
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
+import PythonModel3dTracker.PythonModelTracker.DatasetInfo as DI
 
 
-# Load landmarks
-res_filename1 = input_dir.format(res[0],'.json')
-res1 = ModelTrackingResults()
-res1.load(res_filename1)
+input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/")
 
-res_filename2 = input_dir.format(res[1],'.json')
-res2 = ModelTrackingResults()
-res2.load(res_filename2)
 
-# Create LandmarkDistObjective
-metric_calculator = mt.LandmarksDistObjective()
+for i,f in enumerate(os.listdir(input_dir)):
+    results_in = os.path.join(input_dir, f)
+    f_base, f_ext = os.path.splitext(f)
+    if (f_ext == '.json') and os.path.isfile(results_in):
 
-model_name = res1.models[0]
-lnames, landmarks1 = res1.get_model_landmarks(model_name)
-lnames, landmarks2 = res2.get_model_landmarks(model_name)
-assert len(landmarks1) == len(landmarks2)
+        if i<3:
+            print i, results_in
+            res = ModelTrackingResults()
+            res.load(results_in)
+            model_name = res.models[0]
+            di = DI.DatasetInfo()
+            di.load(Paths.datasets_dict[str(res.did)])
 
-for f1,f2 in zip(landmarks1, landmarks2):
-    assert f1 == f2
-    lnp1 = np.array(landmarks1[f1])
-    lnp2 = np.array(landmarks2[f2])
-    dists = np.linalg.norm(lnp1-lnp2,axis=1)
-    avg_dist = np.average(dists)
-    print f1, avg_dist
+            lg = LG.LandmarksGrabber(di.landmarks['gt']['format'],
+                                     di.landmarks['gt']['filename'],
+                                     di.landmarks['gt']['calib_filename'])
+
+            lnames, landmarks = res.get_model_landmarks(model_name)
+
+
+            for frame in landmarks:
+                lg.seek(frame)
+                gt_names, gt_landmarks, gt_clb = lg.acquire()
+                cor_lnames = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(gt_names, 'bvh', model_name)
+                gt_indices = [i for i,g in enumerate(cor_lnames) if g != 'None']
+                cor_indices = [lnames.index(g) for g in cor_lnames if g != 'None']
+                # for g, c in zip(gt_indices, cor_indices):
+                #     print g, gt_names[g],c, lnames[c]
+
+                lnp_all = np.array(landmarks[frame])
+                lnp = np.array([landmarks[frame][l] for l in cor_indices ])
+                gnp = np.array([gt_landmarks[l].data[:,0] for l in gt_indices ])
+
+                dists = np.linalg.norm(lnp-gnp,axis=1)
+                avg_dist = np.average(dists)
+                print di.did, frame, avg_dist

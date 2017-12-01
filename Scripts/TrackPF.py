@@ -12,24 +12,24 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'mhad_s09_a01'
+dataset = 'mhad_s09_a03'
 model_name = 'mh_body_male_custom_0950'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
-enable_openpose_grabber = False
+enable_openpose_grabber = True
 
 
-res_filename = os.path.join(Paths.results,"Human_tracking/{0}_toinit.json".format(dataset))
+res_filename = None #os.path.join(Paths.results,"Human_tracking/{0}_toinit.json".format(dataset))
 
 # PF Initialization
 hmf_arch_type = "2levels"
 pf_params = pfs.Load(model_name, model_class,hmf_arch_type)
-pf_params['pf']['n_particles'] = 512
+pf_params['pf']['n_particles'] = 1
 pf_params['pf']['init_state'] = tt.DatasetTools.GenInitState(params_ds, model3d)
 pf_params['meta_mult'] = 1
 pf_params['pf_listener_flag'] = False
-pf_params['pf']['smart_pf'] = False
-pf_params['pf']['smart_particles'] = 10
+pf_params['pf']['smart_pf'] = True
+pf_params['pf']['smart_particles'] = 1
 pf_params['pf']['obs_filter_ratios'] = [0.05, 0.3]
 
 # Objectives

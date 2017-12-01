@@ -7,16 +7,16 @@ import PythonModel3dTracker.Paths as Paths
 wait_time = 1
 dataset = 'mhad_s01_a04' #os.path.join(paths.datasets, "object_tracking/co4robots/{}.oni".format("box_eps_02"))
 model_name = "mh_body_male_custom" #"hand_skinned"#"mh_body_male_meta_glbscl"
-res = dataset
-results_txt = None #os.path.join(Paths.datasets, "object_tracking/co4robots/{}_gt.json".format(res))
+res = 'mhad_s12_a04_mh_body_male_custom_p5_lp5_ransac[0.05, 0.15]_ldm'
+results_txt = os.path.join(Paths.results, "Human_tracking/Levmar/{}.json".format(res))
 visualize = {'enable':True,
              'client': 'opencv',
              'labels':True, 'depth':True, 'rgb':True, 'wait_time':0}
 assert visualize['client'] in ['opencv','blender']
-sel_landmarks = None #"gt"   #see dataset json for available landmarks.
+sel_landmarks = "gt"   #see dataset json for available landmarks.
 
 # Output options
-results_txt_out = results_txt# os.path.join(paths.datasets, "object_tracking/co4robots/{}_new.json".format(res))
+results_txt_out = None #results_txt# os.path.join(paths.datasets, "object_tracking/co4robots/{}_new.json".format(res))
 output_video = None#os.path.join(paths.datasets,"object_tracking/co4robots/{}.avi".format(res))
 output_frames = None #os.path.join(paths.results,"Human_tracking/Levmar/{0}/{1}.png".format(res,"{:05d}"))
 

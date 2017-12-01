@@ -8,48 +8,53 @@ import csv
 import numpy as np
 import os.path
 
+# Dictionary of landmark correspondences between: (landmard_detection_source, skinned_model).
 primitives_dict = {
-    "human_ext":
+    ("damien", "human_ext"):
     {"head":"head_sphere_0","neck":"neck_sphere_0","bodyCenter":"body_sphere_1",
      "hip":"body_sphere_2","leftShoulder":"arm_left_sphere_0","rightShoulder":"arm_right_sphere_0",
      "leftElbow":"arm_left_sphere_1","rightElbow":"arm_right_sphere_1","leftWrist":"arm_left_sphere_2",
      "rightWrist":"arm_right_sphere_2","leftLegRoot":"leg_left_sphere_0",
      "rightLegRoot":"leg_right_sphere_0","leftKnee":"leg_left_sphere_1","rightKnee":"leg_right_sphere_1",
      "leftAnkle":"leg_left_sphere_2","rightAnkle":"leg_right_sphere_2"},
-    "mh_body_male":
+    ("damien", "mh_body_male"):
     {"head":"head","neck":"neck","bodyCenter":"spine-1",
      "hip":"hips","leftShoulder":"deltoid.L","rightShoulder":"deltoid.R",
      "leftElbow":"forearm.L","rightElbow":"forearm.R","leftWrist":"hand.L",
      "rightWrist":"hand.R","leftLegRoot":"thigh.L",
      "rightLegRoot":"thigh.R","leftKnee":"shin.L","rightKnee":"shin.R",
      "leftAnkle":"foot.L","rightAnkle":"foot.R"},
-    "hand_skinned_rds":
+    ("roditak", "hand_skinned_rds"):
     {'f_pinky.03.R':'f_pinky.03.R',
      'f_middle.03.R':'f_middle.03.R',
      'f_ring.03.R':'f_ring.03.R',
      'thumb.03.R':'thumb.03.R',
      'f_index.03.R':'f_index.03.R'},
-    "mh_body_male_custom":
+    ("coco", "mh_body_male_custom"):
     {'L.LLeg': 'L.LLeg', 'L.ULeg': 'L.ULeg', 'R.LLeg': 'R.LLeg', 'R.Foot': 'R.Foot', 'R.LArm': 'R.LArm',
      'R.eye': 'R.eye', 'L.shoulder': 'L.shoulder', 'R.torso': 'R.torso', 'L.LArm': 'L.LArm',
      'R.shoulder': 'R.shoulder', 'L.Wrist': 'L.Wrist', 'R.ULeg': 'R.ULeg', 'R.ear': 'R.ear', 'L.ear': 'L.ear',
      'L.eye': 'L.eye', 'Nose': 'Nose', 'L.UArm': 'L.UArm', 'neck': 'neck', 'neck.001': 'neck.001', 'root': 'root',
-     'R.Wrist': 'R.Wrist', 'L.torso': 'L.torso', 'R.UArm': 'R.UArm', 'L.Foot': 'L.Foot'}
-    #{'L.LLeg': 15, 'L.ULeg': 14, 'R.LLeg': 11, 'R.Foot': 12, 'R.LArm': 3, 'R.eye': 21, 'L.shoulder': 5, 'R.torso': 9,
-    # 'L.LArm': 7, 'R.shoulder': 1, 'L.Wrist': 8, 'R.ULeg': 10, 'R.ear': 23, 'L.ear': 22, 'L.eye': 20, 'Nose': 19,
-    # 'L.UArm': 6, 'neck': 17, 'neck.001': 18, 'root': 0, 'R.Wrist': 4, 'L.torso': 13, 'R.UArm': 2, 'L.Foot': 16}
+     'R.Wrist': 'R.Wrist', 'L.torso': 'L.torso', 'R.UArm': 'R.UArm', 'L.Foot': 'L.Foot'},
+
+    ("bvh", "mh_body_male_custom"):
+    {'LeftLegRoll': 'L.LLeg', 'LeftUpLegRoll': 'L.ULeg', 'RightLegRoll': 'R.LLeg', 'RightFoot': 'R.Foot', 'RightForeArmRoll': 'R.LArm',
+     'Head': 'R.eye', 'LeftShoulder': 'L.shoulder', 'spine2': 'R.torso', 'LeftForeArmRoll': 'L.LArm',
+     'RightShoulder': 'R.shoulder', 'LeftHand': 'L.Wrist', 'RightUpLegRoll': 'R.ULeg', 'Head': 'R.ear', 'Head': 'L.ear',
+     'Head': 'L.eye', 'Head': 'Nose', 'LeftArmRoll': 'L.UArm', 'Neck': 'neck', 'Neck': 'neck.001', 'spine': 'root',
+     'RightHand': 'R.Wrist', 'spine2': 'L.torso', 'RightArmRoll': 'R.UArm', 'LeftFoot': 'L.Foot'}
 }
-primitives_dict["human_ext_collisions"] = primitives_dict["human_ext"]
-primitives_dict["mh_body_male_meta"] = primitives_dict["mh_body_male"]
-primitives_dict["mh_body_male_meta_grpscl"] = primitives_dict["mh_body_male"]
-primitives_dict["mh_body_male_custom_meta"] = primitives_dict["mh_body_male_custom"]
-primitives_dict["mh_body_male_custom_0850"] = primitives_dict["mh_body_male_custom"]
-primitives_dict["mh_body_male_custom_0900"] = primitives_dict["mh_body_male_custom"]
-primitives_dict["mh_body_male_custom_0950"] = primitives_dict["mh_body_male_custom"]
-primitives_dict["mh_body_male_custom_1050"] = primitives_dict["mh_body_male_custom"]
-primitives_dict["mh_body_male_custom_1100"] = primitives_dict["mh_body_male_custom"]
-primitives_dict["mh_body_male_custom_1150"] = primitives_dict["mh_body_male_custom"]
-primitives_dict["mh_body_male_custom_meta_glbscl"] = primitives_dict["mh_body_male_custom"]
+primitives_dict[("damien", "human_ext_collisions")] = primitives_dict[("damien", "human_ext")]
+primitives_dict[("damien", "mh_body_male_meta")] = primitives_dict[("damien", "mh_body_male")]
+primitives_dict[("damien", "mh_body_male_meta_grpscl")] = primitives_dict[("damien", "mh_body_male")]
+primitives_dict[("coco", "mh_body_male_custom_meta")] = primitives_dict[("coco", "mh_body_male_custom")]
+primitives_dict[("coco", "mh_body_male_custom_0850")] = primitives_dict[("coco", "mh_body_male_custom")]
+primitives_dict[("coco", "mh_body_male_custom_0900")] = primitives_dict[("coco", "mh_body_male_custom")]
+primitives_dict[("coco", "mh_body_male_custom_0950")] = primitives_dict[("coco", "mh_body_male_custom")]
+primitives_dict[("coco", "mh_body_male_custom_1050")] = primitives_dict[("coco", "mh_body_male_custom")]
+primitives_dict[("coco", "mh_body_male_custom_1100")] = primitives_dict[("coco", "mh_body_male_custom")]
+primitives_dict[("coco", "mh_body_male_custom_1150")] = primitives_dict[("coco", "mh_body_male_custom")]
+primitives_dict[("coco", "mh_body_male_custom_meta_glbscl")] = primitives_dict[("coco", "mh_body_male_custom")]
 
 
 
@@ -66,7 +71,7 @@ class LandmarksGrabber:
     """
     supported_formats = ['damien','bvh','roditak']
     
-    def __init__(self, file_format, landmarks_filename, clb_filename, model_name):
+    def __init__(self, file_format, landmarks_filename, clb_filename, model_name = None):
         assert file_format in LandmarksGrabber.supported_formats
         self.file_format = file_format
         self.landmarks_filename = landmarks_filename
@@ -86,10 +91,13 @@ class LandmarksGrabber:
             self.bvh_point_names, self.bvh_points, self.fps = mt.LoadBvh(str(landmarks_filename), 'x y z')
 
     @staticmethod
-    def getPrimitiveNamesfromLandmarkNames(ldm_names, model_name):
+    def getPrimitiveNamesfromLandmarkNames(ldm_names,landmark_source,model_name):
         primitives = core.StringVector()
         for p in ldm_names:
-            primitives.append(primitives_dict[model_name][p])
+            if p in primitives_dict[(str(landmark_source), str(model_name))]:
+                primitives.append(primitives_dict[(str(landmark_source), str(model_name))][p])
+            else:
+                primitives.append("None")
         return primitives
 
     def seek(self,f):
