@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 import PythonModel3dTracker.Paths as Paths
-from PythonModelTracker.ModelTrackingResults import ModelTrackingResults
+from PythonModel3dTracker.PythonModelTracker.ModelTrackingResults import ModelTrackingResults
 import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
 import PythonModel3dTracker.PythonModelTracker.DatasetInfo as DI
 
@@ -15,11 +15,11 @@ for i,f in enumerate(os.listdir(input_dir)):
     f_base, f_ext = os.path.splitext(f)
     if (f_ext == '.json') and os.path.isfile(results_in):
 
-        if i<3:
-            print i, results_in
-            res = ModelTrackingResults()
-            res.load(results_in)
-            model_name = res.models[0]
+        #print i, results_in
+        res = ModelTrackingResults()
+        res.load(results_in)
+        if res.did == 'mhad_s10_a04':
+            model_name = str(res.models[0])
             di = DI.DatasetInfo()
             di.load(Paths.datasets_dict[str(res.did)])
 
@@ -29,20 +29,16 @@ for i,f in enumerate(os.listdir(input_dir)):
 
             lnames, landmarks = res.get_model_landmarks(model_name)
 
-
+            seq_dists = []
             for frame in landmarks:
                 lg.seek(frame)
                 gt_names, gt_landmarks, gt_clb = lg.acquire()
-                cor_lnames = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(gt_names, 'bvh', model_name)
-                gt_indices = [i for i,g in enumerate(cor_lnames) if g != 'None']
-                cor_indices = [lnames.index(g) for g in cor_lnames if g != 'None']
-                # for g, c in zip(gt_indices, cor_indices):
-                #     print g, gt_names[g],c, lnames[c]
-
-                lnp_all = np.array(landmarks[frame])
-                lnp = np.array([landmarks[frame][l] for l in cor_indices ])
-                gnp = np.array([gt_landmarks[l].data[:,0] for l in gt_indices ])
-
+                l_cor, g_cor =  LG.GetCorrespondingLandmarks(model_name, lnames, landmarks[frame],
+                                                             di.landmarks['gt']['format'], gt_names,gt_landmarks)
+                lnp = np.array(l_cor)
+                gnp = np.array(g_cor)
                 dists = np.linalg.norm(lnp-gnp,axis=1)
                 avg_dist = np.average(dists)
-                print di.did, frame, avg_dist
+                seq_dists.append(avg_dist)
+            seq_dist = np.average(np.array(seq_dists))
+            print results_in, seq_dist

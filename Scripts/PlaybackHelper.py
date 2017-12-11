@@ -9,7 +9,7 @@ import PyModel3dTracker as htpf
 
 import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
 import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
 from PythonModel3dTracker.ObjectDetection.RigidObjectOptimizer import RigidObjectOptimizer
@@ -88,7 +88,7 @@ class PlaybackHelper:
 
         if self.sel_landmarks and (self.sel_landmarks in self.params_ds.landmarks):
             print('Landmarks filename: ', self.params_ds.landmarks[self.sel_landmarks]['filename'])
-            self.grabber_ldm = ldm.LandmarksGrabber(self.params_ds.landmarks[self.sel_landmarks]['format'],
+            self.grabber_ldm = LG.LandmarksGrabber(self.params_ds.landmarks[self.sel_landmarks]['format'],
                                                     self.params_ds.landmarks[self.sel_landmarks]['filename'],
                                                     self.params_ds.landmarks[self.sel_landmarks]['calib_filename'],
                                                     self.model3d.model_name)
@@ -114,9 +114,9 @@ class PlaybackHelper:
             self.model3d.parts.genPrimitivesMap(self.dof.decoder)
         else:
             self.model3d.parts.genBonesMap()
-            # landmarks = ldm.GetDefaultModelLandmarks(model3d, mbv.Core.StringVector(['f_pinky.03.R', 'f_middle.03.R', 'f_ring.03.R', 'thumb.03.R', 'f_index.03.R']))
-            #landmarks_decoder = mbv.PF.LandmarksDecoder()
-            #landmarks_decoder.decoder = decoder
+            # landmarks = LG.GetDefaultModelLandmarks(model3d, mbv.Core.StringVector(['f_pinky.03.R', 'f_middle.03.R', 'f_ring.03.R', 'thumb.03.R', 'f_index.03.R']))
+            #self.landmarks_decoder = mbv.PF.LandmarksDecoder()
+            #self.landmarks_decoder.decoder = self.decoder
 
     def get_init_state(self,f):
         if self.model3d is None:
@@ -164,9 +164,9 @@ class PlaybackHelper:
 
             if gui_command.name == "init":
                 if visualize['client'] == 'blender':
-                    gui.send_init(blconv.getFrameDataMBV(self.model3d, state,None,None, None, [self.params_ds.limits[0], f,
-                                                                                  self.params_ds.limits[1]],
-                                                      None, 0.001))
+                    gui.send_init(blconv.getFrameDataMBV(self.model3d, state, None, None, None, None,
+                                                         [self.params_ds.limits[0], f, self.params_ds.limits[1]],
+                                                        None, 0.001))
                 else:
                     gui_command.name = "frame"
                     gui.next_frame = f
@@ -181,7 +181,7 @@ class PlaybackHelper:
                     state = optimizer.optimize(images, calibs, state )
                     if visualize['client'] == 'blender':
 
-                        frame_data = blconv.getFrameDataMBV(self.model3d, state, points3d_det_names, points3d_det,
+                        frame_data = blconv.getFrameDataMBV(self.model3d, state, ['LandmarkObs'], [points3d_det_names], [points3d_det],
                                                             calibs[0],
                                                             [self.params_ds.limits[0], f, self.params_ds.limits[1]],
                                                             [depth, rgb], 0.001)
@@ -227,18 +227,36 @@ class PlaybackHelper:
                     if self.grabber_ldm is not None:
                         self.grabber_ldm.seek(f)
                         points3d_det_names, points3d_det, ldm_calib = self.grabber_ldm.acquire()
+                        print points3d_det_names
+
+
+                    # Pack landmarks
+                    lnames = []
+                    if self.model3d is not None:
+                        lnames, landmarks = self.results.get_model_landmarks(self.model3d.model_name)
+                    if len(lnames) > 0:
+                        l_names_cor, l_cor, g_names_cor, g_cor = LG.GetCorrespondingLandmarks(self.model3d.model_name, lnames, landmarks[f],
+                                                                    self.params_ds.landmarks[
+                                                                        self.sel_landmarks]['format'],
+                                                                    points3d_det_names, points3d_det)
+                        disp_landmark_sets = ['LandmarksModel', 'LandmmarksObs']
+                        disp_landmark_names = [l_names_cor, g_names_cor]
+                        disp_landmarks = [l_cor, g_cor]
+                    else:
+                        disp_landmark_sets = ['LandmarksObs']
+                        disp_landmark_names = [ points3d_det_names ]
+                        disp_landmarks = [ points3d_det ]
 
                     frame_data = None
                     if visualize['client'] == 'blender':
-                        frame_data = blconv.getFrameDataMBV(self.model3d, state, points3d_det_names, points3d_det,
-                                                            calibs[0],
-                                                         [self.params_ds.limits[0], f, self.params_ds.limits[1]],
+                        frame_data = blconv.getFrameDataMBV(self.model3d, state,
+                                                            disp_landmark_sets, disp_landmark_names, disp_landmarks,
+                                                            calibs[0], [self.params_ds.limits[0], f, self.params_ds.limits[1]],
                                                             [depth, rgb], 0.001)
                     else:
                         if self.model3d is not None:
-                            #points3d_ldm = landmarks_decoder.decode(state, landmarks)
                             viz = ru.visualize_overlay(self.renderer, self.mmanager, self.decoder, state, calibs[0], rgb,
-                                                       self.model3d.n_bones, [points3d_det])
+                                                       self.model3d.n_bones, disp_landmarks)
                         else:
                             viz = rgb
                         frame_data = mtg.FrameDataOpencv(depth, None, viz, f)

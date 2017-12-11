@@ -34,11 +34,14 @@ class ModelTrackingResults:
     def get_model_landmarks(self, model_name):
         #min_frame, max_frame = self.get_limits()
         model_landmarks = {}
-        for f in self.landmarks:
-            #print(f, model_name)
-            if self.has_landmarks(f, model_name):
-                model_landmarks[f] = self.landmarks[f][model_name]
-        return self.landmark_names[model_name],model_landmarks
+        if model_name in self.landmark_names:
+            landmark_names = self.landmark_names[model_name]
+            for f in self.landmarks:
+                #print(f, model_name)
+                if self.has_landmarks(f, model_name):
+                    model_landmarks[f] = self.landmarks[f][model_name]
+        else: landmark_names = []
+        return landmark_names,model_landmarks
 
 
     def get_limits(self):

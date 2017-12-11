@@ -38,11 +38,25 @@ primitives_dict = {
      'R.Wrist': 'R.Wrist', 'L.torso': 'L.torso', 'R.UArm': 'R.UArm', 'L.Foot': 'L.Foot'},
 
     ("bvh", "mh_body_male_custom"):
-    {'LeftLegRoll': 'L.LLeg', 'LeftUpLegRoll': 'L.ULeg', 'RightLegRoll': 'R.LLeg', 'RightFoot': 'R.Foot', 'RightForeArmRoll': 'R.LArm',
-     'Head': 'R.eye', 'LeftShoulder': 'L.shoulder', 'spine2': 'R.torso', 'LeftForeArmRoll': 'L.LArm',
-     'RightShoulder': 'R.shoulder', 'LeftHand': 'L.Wrist', 'RightUpLegRoll': 'R.ULeg', 'Head': 'R.ear', 'Head': 'L.ear',
-     'Head': 'L.eye', 'Head': 'Nose', 'LeftArmRoll': 'L.UArm', 'Neck': 'neck', 'Neck': 'neck.001', 'spine': 'root',
-     'RightHand': 'R.Wrist', 'spine2': 'L.torso', 'RightArmRoll': 'R.UArm', 'LeftFoot': 'L.Foot'}
+    {'LeftLeg': 'L.LLeg', 'LeftUpLeg': 'L.ULeg', 'RightLeg': 'R.LLeg', 'RightFoot': 'R.Foot', 'RightForeArm': 'R.LArm',
+     'LeftShoulder': 'L.shoulder', 'LeftForeArm': 'L.LArm',
+     'RightShoulder': 'R.shoulder', 'LeftHand': 'L.Wrist', 'RightUpLeg': 'R.ULeg',
+      'Head': 'neck.001', 'LeftArm': 'L.UArm', 'Neck': 'neck.001', 'spine': 'root',
+     'RightHand': 'R.Wrist', 'RightArm': 'R.UArm', 'LeftFoot': 'L.Foot'}
+    # 'Hips', 'spine', 'spine1', 'spine2',
+    # 'Neck', 'Head', 'Site', 'RightShoulder',
+    # 'RightArm', 'RightArmRoll', 'RightForeArm',
+    # 'RightForeArmRoll', 'RightHand', 'Site', 'LeftShoulder',
+    # 'LeftArm', 'LeftArmRoll', 'LeftForeArm', 'LeftForeArmRoll',
+    # 'LeftHand', 'Site', 'RightUpLeg', 'RightUpLegRoll', 'RightLeg',
+    # 'RightLegRoll', 'RightFoot', 'RightToeBase', 'Site', 'LeftUpLeg',
+    # 'LeftUpLegRoll', 'LeftLeg', 'LeftLegRoll', 'LeftFoot', 'LeftToeBase', 'Site'
+
+# {'LeftLeg': 'L.LLeg', 'LeftUpLeg': 'L.ULeg', 'RightLeg': 'R.LLeg', 'RightFoot': 'R.Foot', 'RightForeArm': 'R.LArm',
+#      'Head': 'R.eye', 'LeftShoulder': 'L.shoulder', 'spine2': 'R.torso', 'LeftForeArm': 'L.LArm',
+#      'RightShoulder': 'R.shoulder', 'LeftHand': 'L.Wrist', 'RightUpLeg': 'R.ULeg', 'Head': 'R.ear', 'Head': 'L.ear',
+#      'Head': 'L.eye', 'Head': 'Nose', 'LeftArm': 'L.UArm', 'Neck': 'neck', 'Neck': 'neck.001', 'spine': 'root',
+#      'RightHand': 'R.Wrist', 'spine2': 'L.torso', 'RightArm': 'R.UArm', 'LeftFoot': 'L.Foot'}
 }
 primitives_dict[("damien", "human_ext_collisions")] = primitives_dict[("damien", "human_ext")]
 primitives_dict[("damien", "mh_body_male_meta")] = primitives_dict[("damien", "mh_body_male")]
@@ -55,6 +69,13 @@ primitives_dict[("coco", "mh_body_male_custom_1050")] = primitives_dict[("coco",
 primitives_dict[("coco", "mh_body_male_custom_1100")] = primitives_dict[("coco", "mh_body_male_custom")]
 primitives_dict[("coco", "mh_body_male_custom_1150")] = primitives_dict[("coco", "mh_body_male_custom")]
 primitives_dict[("coco", "mh_body_male_custom_meta_glbscl")] = primitives_dict[("coco", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_custom_meta")] = primitives_dict[("bvh", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_custom_0850")] = primitives_dict[("bvh", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_custom_0900")] = primitives_dict[("bvh", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_custom_0950")] = primitives_dict[("bvh", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_custom_1050")] = primitives_dict[("bvh", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_custom_1100")] = primitives_dict[("bvh", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_custom_1150")] = primitives_dict[("bvh", "mh_body_male_custom")]
 
 
 
@@ -252,6 +273,19 @@ def GetDefaultModelLandmarks(model3d, landmark_names=None):
         landmarks_decoder.convertReferenceFrame(mpf.ReferenceFrame.RFModel, transform_node, landmarks)
 
     return landmarks
+
+
+def GetCorrespondingLandmarks(model_name, ldm_model_names, ldm_model, ldm_obs_source, ldm_obs_names, ldm_obs):
+
+    lnames_cor = LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(ldm_obs_names, ldm_obs_source, model_name)
+    idx_obs = [i for i, g in enumerate(lnames_cor) if g != 'None']
+    idx_model = [ldm_model_names.index(g) for g in lnames_cor if g != 'None']
+
+    names_model_cor = [ldm_model_names[l] for l in idx_model]
+    ldm_model_cor = [ldm_model[l] for l in idx_model]
+    names_obs_cor = [ldm_obs_names[l] for l in idx_obs]
+    ldm_obs_cor = [ [float(ldm_obs[l].data[0, 0]), float(ldm_obs[l].data[1, 0]) ,float(ldm_obs[l].data[2, 0])] for l in idx_obs]
+    return names_model_cor, ldm_model_cor, names_obs_cor, ldm_obs_cor
 
 
 
