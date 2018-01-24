@@ -1,7 +1,7 @@
 import os
 
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFSettings as pfs
-import PythonModel3dTracker.PythonModelTracker..PFHelpers.PFTrackingHelper as pfh
+import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFTrackingHelper as pfh
 
 
 #Viz Parameters

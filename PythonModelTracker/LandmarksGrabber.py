@@ -36,13 +36,28 @@ primitives_dict = {
      'R.shoulder': 'R.shoulder', 'L.Wrist': 'L.Wrist', 'R.ULeg': 'R.ULeg', 'R.ear': 'R.ear', 'L.ear': 'L.ear',
      'L.eye': 'L.eye', 'Nose': 'Nose', 'L.UArm': 'L.UArm', 'neck': 'neck', 'neck.001': 'neck.001', 'root': 'root',
      'R.Wrist': 'R.Wrist', 'L.torso': 'L.torso', 'R.UArm': 'R.UArm', 'L.Foot': 'L.Foot'},
-
     ("bvh", "mh_body_male_custom"):
-    {'LeftLeg': 'L.LLeg', 'LeftUpLeg': 'L.ULeg', 'RightLeg': 'R.LLeg', 'RightFoot': 'R.Foot', 'RightForeArm': 'R.LArm',
-     'LeftShoulder': 'L.shoulder', 'LeftForeArm': 'L.LArm',
-     'RightShoulder': 'R.shoulder', 'LeftHand': 'L.Wrist', 'RightUpLeg': 'R.ULeg',
-      'Head': 'neck.001', 'LeftArm': 'L.UArm', 'Neck': 'neck.001', 'spine': 'root',
-     'RightHand': 'R.Wrist', 'RightArm': 'R.UArm', 'LeftFoot': 'L.Foot'}
+        {'LeftUpLeg': 'L.torso', 'LeftLeg': 'L.ULeg', 'LeftFoot': 'L.LLeg',
+         'RightUpLeg': 'R.torso', 'RightLeg': 'R.ULeg', 'RightFoot': 'R.LLeg',
+         'LeftArm': 'L.shoulder', 'LeftForeArm': 'L.UArm', 'LeftHand': 'L.Wrist',
+         'RightArm': 'R.shoulder', 'RightForeArm': 'R.UArm', 'RightHand': 'R.Wrist',
+         'Neck': 'neck.001', 'spine': 'root'
+        },
+    ("csv", "mh_body_male_custom"):
+    {"head":"neck.001","neck":"neck","bodyCenter":"root",
+     "leftShoulder":"L.UArm","rightShoulder":"R.UArm",
+     "leftElbow":"L.LArm","rightElbow":"R.LArm","leftWrist":"L.Wrist",
+     "rightWrist":"R.Wrist","leftLegRoot":"L.ULeg",
+     "rightLegRoot":"R.ULeg","leftKnee":"L.LLeg","rightKnee":"R.LLeg",
+     "leftAnkle":"L.Foot","rightAnkle":"R.Foot"},
+
+
+    # {'LeftLeg': 'L.LLeg', 'LeftUpLeg': 'L.ULeg', 'RightLeg': 'R.LLeg', 'RightFoot': 'R.Foot', 'RightForeArm': 'R.LArm',
+    #  'LeftShoulder': 'L.shoulder', 'LeftForeArm': 'L.LArm',
+    #  'RightShoulder': 'R.shoulder', 'LeftHand': 'L.Wrist', 'RightUpLeg': 'R.ULeg',
+    #   'Head': 'neck.001', 'LeftArm': 'L.UArm', 'Neck': 'neck.001', 'spine': 'root',
+    #  'RightHand': 'R.Wrist', 'RightArm': 'R.UArm', 'LeftFoot': 'L.Foot'}
+
     # 'Hips', 'spine', 'spine1', 'spine2',
     # 'Neck', 'Head', 'Site', 'RightShoulder',
     # 'RightArm', 'RightArmRoll', 'RightForeArm',
@@ -76,7 +91,7 @@ primitives_dict[("bvh", "mh_body_male_custom_0950")] = primitives_dict[("bvh", "
 primitives_dict[("bvh", "mh_body_male_custom_1050")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_custom_1100")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_custom_1150")] = primitives_dict[("bvh", "mh_body_male_custom")]
-
+primitives_dict[("csv", "mh_body_male_custom_0950")] = primitives_dict[("csv", "mh_body_male_custom")]
 
 
             
@@ -90,7 +105,7 @@ class LandmarksGrabber:
         clb_filename
         clb        
     """
-    supported_formats = ['damien','bvh','roditak']
+    supported_formats = ['damien','bvh','roditak','csv']
     
     def __init__(self, file_format, landmarks_filename, clb_filename, model_name = None):
         assert file_format in LandmarksGrabber.supported_formats
@@ -102,14 +117,17 @@ class LandmarksGrabber:
         self.R, _ = cv2.Rodrigues(extr_rot)
         self.model_name = model_name
         self.f_count = 0
-        self.bvh_point_names = None
-        self.bvh_points = None
+        self.preloaded_point_names = None
+        self.preloaded_points = None
         self.fps = 30.
         self.points_vec = core.Vector3fStorage()
         self.point_names = []
         if self.file_format == 'bvh':
             assert os.path.isfile(landmarks_filename)
-            self.bvh_point_names, self.bvh_points, self.fps = mt.LoadBvh(str(landmarks_filename), 'x y z')
+            self.preloaded_point_names, self.preloaded_points, self.fps = mt.LoadBvh(str(landmarks_filename), 'x y z')
+        if self.file_format == 'csv':
+            assert os.path.isfile(landmarks_filename)
+            self.preloaded_point_names, self.preloaded_points = LandmarksGrabber.loadCsvLandmarks(str(landmarks_filename))
 
     @staticmethod
     def getPrimitiveNamesfromLandmarkNames(ldm_names,landmark_source,model_name):
@@ -140,8 +158,11 @@ class LandmarksGrabber:
             points = points.transpose()
         elif self.file_format == 'bvh':
             bvh_frame = int(round(self.f_count*self.fps/30.))
-            self.point_names = self.bvh_point_names[bvh_frame]
-            points = LandmarksGrabber.pvec2np(self.bvh_points[bvh_frame])
+            self.point_names = self.preloaded_point_names[bvh_frame]
+            points = LandmarksGrabber.pvec2np(self.preloaded_points[bvh_frame])
+        elif self.file_format == 'csv':
+            self.point_names = self.preloaded_point_names
+            points = self.preloaded_points[self.f_count]
 
         points = np.dot(self.R,points) + self.t
 
@@ -217,6 +238,25 @@ class LandmarksGrabber:
 
 
     @staticmethod
+    def loadCsvLandmarks(ldm_filename):
+        with open(ldm_filename) as csvfile:
+            reader = csv.reader(csvfile, delimiter=';')
+
+            points = []
+            for i, row in enumerate(reader):
+                N = len(row)
+                if i == 2: point_names = [row[j][:-2] for j in range(N) if (((j - 2) % 4) == 0)]
+                if i>2:
+                    points_cur = np.empty((0, 3), float)
+                    for j in range(N):
+                        if ((j - 2) % 4) == 0:
+                            points_cur = np.append(points_cur, np.array([[float(row[j]), float(row[j+1]),
+                                                                          float(row[j+2])]]), axis=0)
+                    points_cur = points_cur.transpose()
+                    points.append(points_cur)
+        return point_names, points
+
+    @staticmethod
     def loadCalibTxt(clb_filename):
         with open(clb_filename) as txtfile:
             x = txtfile.read().splitlines()
@@ -272,7 +312,7 @@ def GetDefaultModelLandmarks(model3d, landmark_names=None):
         landmarks_decoder = mpf.LandmarksDecoder()
         landmarks_decoder.convertReferenceFrame(mpf.ReferenceFrame.RFModel, transform_node, landmarks)
 
-    return landmarks
+    return landmark_names, landmarks
 
 
 def GetCorrespondingLandmarks(model_name, ldm_model_names, ldm_model, ldm_obs_source, ldm_obs_names, ldm_obs):

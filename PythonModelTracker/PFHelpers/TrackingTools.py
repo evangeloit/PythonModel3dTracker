@@ -105,10 +105,8 @@ class ParticleFilterTools:
         if rng is None: rng = mbv.PF.RandomNumberGeneratorOpencv()
 
         primitive_names = ldm.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
-            model3d.parts.parts_map['all'],
-            'coco',
-            model3d.model_name)
-        landmarks = ldm.GetDefaultModelLandmarks(model3d, primitive_names)
+            model3d.parts.parts_map['all'],'coco', model3d.model_name)
+        lnames, landmarks = ldm.GetDefaultModelLandmarks(model3d, primitive_names)
 
 
         smart_pf = pfl.SmartPF(rng, model3d, pf_params['pf'])
@@ -125,7 +123,6 @@ class ParticleFilterTools:
         pf.state = ParticleFilterTools.MultMeta(model3d.dim_types,
                                                 pf_params['pf']['init_state'],
                                                 pf_params['meta_mult'])
-
 
         if pf_params['pf_listener_flag']:
             pf.listener = m3dt.ParticleFilterVisualizer()

@@ -18,8 +18,8 @@ def create(input_format, input_stream, input_calib=None, openni_xml = default_op
     assert input_format in valid_input_formats
     if input_format in ['SFOni', 'oni']:
         assert len(input_stream) == 1
-        #grabber = mbv.Acq.OpenNIGrabber(True,True,openni_xml,str(input_stream[0]),False)
-        grabber = mbv.Acq.OpenNI2Grabber(True, True, str(input_stream[0]), False)
+        grabber = mbv.Acq.OpenNIGrabber(True,True,openni_xml,str(input_stream[0]),False)
+        #grabber = mbv.Acq.OpenNI2Grabber(True, True, str(input_stream[0]), False)
         grabber.initialize()
     elif input_format in ['SFImage', 'image']:
         assert len(input_stream) == 2

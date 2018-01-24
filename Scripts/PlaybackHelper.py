@@ -143,8 +143,7 @@ class PlaybackHelper:
         else:
             gui = mtg.ModelTrackingGuiZeromq()
 
-        points3d_det = None
-        points3d_det_names = None
+
         f = self.params_ds.limits[0]
         state = self.get_init_state(f)
         self.grabber.seek(f)
@@ -227,22 +226,33 @@ class PlaybackHelper:
                     if self.grabber_ldm is not None:
                         self.grabber_ldm.seek(f)
                         points3d_det_names, points3d_det, ldm_calib = self.grabber_ldm.acquire()
-                        print points3d_det_names
+                    else:
+                        points3d_det = []
+                        points3d_det_names = []
+                        ldm_calib = None
 
 
                     # Pack landmarks
+
+                    disp_landmark_sets = []
+                    disp_landmark_names = []
+                    disp_landmarks = []
                     lnames = []
-                    if self.model3d is not None:
+                    if (self.model3d is not None) and (self.results is not None):
                         lnames, landmarks = self.results.get_model_landmarks(self.model3d.model_name)
-                    if len(lnames) > 0:
-                        l_names_cor, l_cor, g_names_cor, g_cor = LG.GetCorrespondingLandmarks(self.model3d.model_name, lnames, landmarks[f],
-                                                                    self.params_ds.landmarks[
-                                                                        self.sel_landmarks]['format'],
-                                                                    points3d_det_names, points3d_det)
+                    if (len(lnames) > 0) and (len(points3d_det_names) > 0):
+                        l_names_cor, l_cor, g_names_cor, g_cor = \
+                            LG.GetCorrespondingLandmarks(self.model3d.model_name, lnames, landmarks[f],
+                                self.params_ds.landmarks[self.sel_landmarks]['format'], points3d_det_names, points3d_det)
                         disp_landmark_sets = ['LandmarksModel', 'LandmmarksObs']
                         disp_landmark_names = [l_names_cor, g_names_cor]
                         disp_landmarks = [l_cor, g_cor]
-                    else:
+                    elif len(lnames) > 0:
+                        disp_landmark_sets = ['LandmarksModel']
+                        disp_landmark_names = [lnames]
+                        disp_landmarks = [landmarks]
+
+                    elif len(points3d_det_names) > 0:
                         disp_landmark_sets = ['LandmarksObs']
                         disp_landmark_names = [ points3d_det_names ]
                         disp_landmarks = [ points3d_det ]

@@ -1,5 +1,6 @@
 import numpy as np
 import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as dmu
 
 
 def ApplyRigid(X,T):
@@ -23,11 +24,11 @@ def GetPointsFromKeypoints(keypoints,camera,depth):
     p2d_np = np.zeros((2, len(keypoints)), dtype=np.float)
 
     for i,kp in enumerate(keypoints):
-        p2d = kp.pt
-        dval = depth[p2d[1], p2d[0]]
-        p3d = camera.unproject(mbv.Core.Vector2(p2d[0], p2d[1]), np.float(dval))
-        p2d_np[0][i] = p2d[0]
-        p2d_np[1][i] = p2d[1]
+        p2d = mbv.Core.Vector2(kp.pt[0], kp.pt[1])
+        dval = dmu.GetMedianDepth(p2d,depth)#depth[p2d[1], p2d[0]]
+        p3d = camera.unproject(p2d, np.float(dval))
+        p2d_np[0][i] = p2d.x
+        p2d_np[1][i] = p2d.y
         p3d_np[0][i] = p3d.x
         p3d_np[1][i] = p3d.y
         p3d_np[2][i] = p3d.z

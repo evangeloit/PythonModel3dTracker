@@ -8,6 +8,9 @@ import copy
 
 class SmartPF:
 
+    default_smart_particles = 10
+    default_filter_ratios = [0.1, 0.2]
+
     def __init__(self,rng,model3d,pf_params,decoder=None,landmarks=None,model2keypoints=None):
 
         self.model3d = model3d
@@ -27,8 +30,8 @@ class SmartPF:
         self.calib = None
         self.particles_prev = None
         self.model3dobj = None
-        self.smart_particles = 10
-        self.filter_ratios = [0.1, 0.2]
+        self.smart_particles = SmartPF.default_smart_particles
+        self.filter_ratios = SmartPF.default_filter_ratios
         if 'smart_particles' in pf_params:
             self.smart_particles = pf_params['smart_particles']
         if 'obs_filter_ratios' in pf_params:

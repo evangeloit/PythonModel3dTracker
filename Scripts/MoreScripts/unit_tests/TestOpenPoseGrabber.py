@@ -14,6 +14,7 @@ if __name__ == '__main__':
     params_ds.generate(dataset)
     grabber = AutoGrabber.create_di(params_ds)
     images, calibs = grabber.grab()
-    op = opg.OpenPoseGrabber()
-    point_names, keypoints, clb = op.acquire(images, calibs)
-    op.ConvertIK(keypoints, clb)
+    print images[0].shape
+    #op = opg.OpenPoseGrabber()
+    #point_names, keypoints, clb = op.acquire(images, calibs)
+    #op.ConvertIK(keypoints, clb)
