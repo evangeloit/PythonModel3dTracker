@@ -17,6 +17,17 @@ def ApplyHomography(X,H):
     Y[1,:] /= Y[dim, :]
     return Y[:dim,:]
 
+
+def ConvertKeypointsArray(keypoints):
+    # Get numpy array from opencv keypoints.
+    p2d_np = np.zeros((2, len(keypoints)), dtype=np.float)
+    for i,kp in enumerate(keypoints):
+        p2d = mbv.Core.Vector2(kp.pt[0], kp.pt[1])
+        p2d_np[0][i] = p2d.x
+        p2d_np[1][i] = p2d.y
+    return p2d_np
+
+
 #keypoints: opencv feature detector points.
 def GetPointsFromKeypoints(keypoints,camera,depth):
     # Get 3D Points from 2D feature locations.
