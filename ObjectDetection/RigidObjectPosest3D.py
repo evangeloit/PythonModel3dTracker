@@ -24,9 +24,9 @@ def CalcRigidTransformRansac(p, q, settings=default_ransac_settings): #N=5000, d
             inliers_ratio = cur_ratio
             inliers_idx = cur_inliers_idx
             outliers_idx = cur_outliers_idx
-    print "inliers_idx", inliers_idx
+    #print "inliers_idx", inliers_idx
     Rt = CalcRigidTransformSVD(p[:, inliers_idx], q[:, inliers_idx])
-    print "Ransac Rt:\n", Rt
+    #print "Ransac Rt:\n", Rt
     return Rt, outliers_idx
 
 

@@ -88,8 +88,9 @@ def ExtractPoseMatrixMBV(state):
 
 def TransformPose(state, tf_matrix):
     pose = ExtractPoseMatrixMBV(state)
-    # print 'tf_matrix:\n', tf_matrix
-    # print 'pose:\n', pose
+    #print 'state:\n', state
+    #print 'tf_matrix:\n', tf_matrix
+    #print 'pose:\n', pose
     transformed_pose = tf_matrix * pose
     transformed_pose_np = transformed_pose.data.T
     transformed_quat = at.quaternion_from_matrix(transformed_pose_np)

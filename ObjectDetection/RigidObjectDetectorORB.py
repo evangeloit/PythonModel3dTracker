@@ -55,7 +55,7 @@ class RigidObjectDetectorORB:
     def filter_depth(self, keypoints, descriptors, camera, depth):
         p3d_np, p2d_np = f2d.GetPointsFromKeypoints(keypoints, camera, depth)
         kp_mask = np.array([p[2] > 0 for p in p3d_np.T])
-        print "kp_mask:,", kp_mask
+        #print "kp_mask:,", kp_mask
         kp_filt = [kp for kp, m in zip(keypoints, kp_mask) if m]
         des_filt = descriptors[np.array(kp_mask)]
         p3d_np = p3d_np[:, kp_mask]
@@ -105,7 +105,9 @@ class RigidObjectDetectorORB:
                     src_pts_np = src_pts_vec.data.T
                     dst_pts_np = p3d[:, dst_match_indices]
                     Rt, outliers_idx = RigidObjectPosest3D.CalcRigidTransformRansac(src_pts_np, dst_pts_np, self.settings['ransac'])
-                    state_cur = StateVectorTools.SetPositionRotationRt(oi.default_state, Rt)
+                    #print 'Rt', Rt, outliers_idx
+                    if np.isnan(Rt).any(): state_cur = None
+                    else: state_cur = StateVectorTools.SetPositionRotationRt(oi.default_state, Rt)
                 elif self.settings['method'] == '2d3d':
                     rtvec = mbv.Core.DoubleVector()
                     outliers_idx = mbv.Core.IntVector()
