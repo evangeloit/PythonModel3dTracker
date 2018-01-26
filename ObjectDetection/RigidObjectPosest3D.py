@@ -36,10 +36,10 @@ def toHom(p):
     phom = np.append(p, np.ones((1, n)), axis=0)
     return phom
 
-def toCart(phom):
-    d = np.shape(phom)[0] - 1
-    p = phom[0:d, :]
-    for i in range(d): p[0, :] /= phom[d, :]
+def toCart(ph):
+    d = np.shape(ph)[0] - 1
+    p = ph[0:d, :]
+    for i in range(d): p[0, :] /= ph[d, :]
     return p
 
 
