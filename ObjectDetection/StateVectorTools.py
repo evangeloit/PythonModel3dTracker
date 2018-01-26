@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import copy
 
-import PerceptionLib3d.PyMBVAll as mbv
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
 import BlenderMBV.BlenderMBVLib.AngleTransformations as at
 
 

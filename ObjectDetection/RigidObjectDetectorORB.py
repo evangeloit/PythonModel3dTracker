@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+np.set_printoptions(precision=1, suppress = True)
 import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
 import PythonModel3dTracker.PythonModelTracker.Features2DUtils as f2d
 import PythonModel3dTracker.ObjectDetection.RigidObjectPosest3D as RigidObjectPosest3D
@@ -73,6 +74,8 @@ class RigidObjectDetectorORB:
         kp, des = self.orb.detectAndCompute(img, mask)
         if self.settings['method'] == '3d3d':
             kp, des, p3d, p2d = self.filter_depth(kp, des, clbs[0], depth)
+            #p3d, p2d = f2d.GetPointsFromKeypoints(kp, clbs[0], depth)
+            #print "p3d:\n", p3d
         elif self.settings['method'] == '2d3d':
             p2d = f2d.ConvertKeypointsArray(kp)
         #print des.shape

@@ -67,6 +67,7 @@ for f in frames:
     depth = copy.deepcopy(imgs[0])
     rgb = copy.deepcopy(imgs[1])
     camera = clbs[0]
+    print 'Camera Intrinsics:', camera.camera.getIntrinsics(camera.size)
     img = cv2.cvtColor(rgb, cv2.COLOR_BGR2GRAY)
     gt_state = mbv.Core.DoubleVector(gt.get_model_states('box')[f])
     def_state = mbv.Core.DoubleVector([0, 0, 0, 0., 0., 0., 1., gt_state[7], gt_state[8], gt_state[9]])
