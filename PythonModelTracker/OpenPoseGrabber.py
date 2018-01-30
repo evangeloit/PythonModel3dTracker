@@ -43,7 +43,7 @@ class OpenPoseGrabber():
             self.keypoints = []
         else:
             for i,p in enumerate(persons):
-                for n, kp in zip(OpenPoseGrabber.landmark_names["COCO"], p):
+                for n, kp in zip(OpenPoseGrabber.landmark_names[self.model_op], p):
                     print 'person', i, n, kp
 
             self.keypoints = []
@@ -131,7 +131,7 @@ class OpenPoseGrabber():
         kp_depths = core.SingleVector()
         for i,(x, y) in enumerate(points2d_):
             p = core.Vector2(np.float(x),np.float(y))
-            d = OpenPoseGrabber.getAverageDepth((x,y), depth, w)
+            d = OpenPoseGrabber.getMedianDepth((x,y), depth, w)
             if d > 0: d += OpenPoseGrabber.depth_diffs["COCO"][i]
             points2d.append(p)
             kp_depths.append(d)
@@ -144,7 +144,7 @@ class OpenPoseGrabber():
         return points3d, points2d
 
     @staticmethod
-    def getAverageDepth(p,depthmap,w=4):
+    def getMedianDepth(p,depthmap,w=4):
         x = p[0]
         y = p[1]
         height = depthmap.shape[0]

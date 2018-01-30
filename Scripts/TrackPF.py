@@ -12,14 +12,14 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'mhad_ammar'
-model_name = 'mh_body_male_custom'
+dataset = 'mhad_s01_a04'
+model_name = 'mh_body_male_custom_0850'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
 enable_openpose_grabber = True
 
 
-res_filename = os.path.join(Paths.results,"Human_tracking/Levmar/{0}.json".format(dataset))
+res_filename = None #os.path.join(Paths.results,"Human_tracking/Levmar/{0}.json".format(dataset))
 
 # PF Initialization
 hmf_arch_type = "2levels"

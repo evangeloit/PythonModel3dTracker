@@ -7,7 +7,7 @@ import PythonModel3dTracker.Paths as Paths
 wait_time = 1
 dataset = "mhad_ammar"
 model_name = "mh_body_male_custom" #"hand_skinned"#"mh_body_male_meta_glbscl"
-res = 'mhad_ammar'
+res = 'mhad_ammar_mh_body_male_custom_p75_lp75_ransac[0.05, 0.2]'
 results_txt = os.path.join(Paths.results, "Human_tracking/Levmar/{}.json".format(res))
 visualize = {'enable':True,
              'client': 'opencv',

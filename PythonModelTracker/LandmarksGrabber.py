@@ -289,7 +289,6 @@ class LandmarksGrabber:
         return clb
 
 
-
 def GetDefaultModelLandmarks(model3d, landmark_names=None):
     # pf.Landmark3dInfoVec()
     if landmark_names is None:
@@ -316,7 +315,6 @@ def GetDefaultModelLandmarks(model3d, landmark_names=None):
 
 
 def GetCorrespondingLandmarks(model_name, ldm_model_names, ldm_model, ldm_obs_source, ldm_obs_names, ldm_obs):
-
     lnames_cor = LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(ldm_obs_names, ldm_obs_source, model_name)
     idx_obs = [i for i, g in enumerate(lnames_cor) if g != 'None']
     idx_model = [ldm_model_names.index(g) for g in lnames_cor if g != 'None']
@@ -324,7 +322,8 @@ def GetCorrespondingLandmarks(model_name, ldm_model_names, ldm_model, ldm_obs_so
     names_model_cor = [ldm_model_names[l] for l in idx_model]
     ldm_model_cor = [ldm_model[l] for l in idx_model]
     names_obs_cor = [ldm_obs_names[l] for l in idx_obs]
-    ldm_obs_cor = [ [float(ldm_obs[l].data[0, 0]), float(ldm_obs[l].data[1, 0]) ,float(ldm_obs[l].data[2, 0])] for l in idx_obs]
+    ldm_obs_cor = [ [float(ldm_obs[l].data[0, 0]), float(ldm_obs[l].data[1, 0]),
+                     float(ldm_obs[l].data[2, 0])] for l in idx_obs]
     return names_model_cor, ldm_model_cor, names_obs_cor, ldm_obs_cor
 
 
