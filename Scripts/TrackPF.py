@@ -30,6 +30,9 @@ pf_params['meta_mult'] = 1
 pf_params['pf_listener_flag'] = False
 pf_params['pf']['smart_pf'] = True
 pf_params['pf']['smart_particles'] = 5
+pf_params['pf']['smart_pf_model'] = "COCO"
+pf_params['pf']['smart_pf_interpolate_bones'] = ["R.UArm", "R.LArm","R.ULeg", "R.LLeg","L.UArm", "L.LArm","L.ULeg", "L.LLeg"]
+pf_params['pf']['smart_pf_interpolate_num'] = 3
 pf_params['pf']['obs_filter_ratios'] = [0.0, 0.25]
 
 # Objectives

@@ -106,9 +106,15 @@ class ParticleFilterTools:
         if rng is None: rng = mbv.PF.RandomNumberGeneratorOpencv()
 
         primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
-            model3d.parts.parts_map['all'],'coco', model3d.model_name)
+            model3d.parts.parts_map['all'],pf_params['pf']['smart_pf_model'], model3d.model_name)
         lnames, landmarks = M3DU.GetDefaultModelLandmarks(model3d, primitive_names)
 
+
+        lnames, landmarks = \
+            M3DU.GetInterpModelLandmarks(model3d=model3d,default_bones=None,
+                interpolated_bones=pf_params['pf']['smart_pf_interpolate_bones'],
+                n_interp=pf_params['pf']['smart_pf_interpolate_num'])
+        for l in landmarks: print l.bone_id, l.pos, l.linked_geometry, l.name, l.ref_frame
 
         smart_pf = pfl.SmartPF(rng, model3d, pf_params['pf'])
         smart_pf.ba = pfl.SmartPF.CreateBA(model3d, decoder, landmarks,
@@ -405,17 +411,24 @@ class TrackingLoopTools:
 
 
     @staticmethod
-    def SetupSmartPFObjective(observations, smart_pf):
+    def SetupSmartPFObjective(observations, smart_pf, pf_params):
         # images = observations['images']
         # calibs = observations['calibs']
         landmark_observations = observations['landmarks']
-        # points3d_det_names = landmark_observations[0]
-        points3d_det = landmark_observations[1]
-        points2d_det = landmark_observations[2]
+        points3d_det_names = landmark_observations[0]
+        points3d_det = landmark_observations[1][0]
+        points2d_det = landmark_observations[2][0]
         ldm_calib = landmark_observations[3]
+        smart_pf_model = pf_params['smart_pf_model']
+        interpolate_set = pf_params['smart_pf_interpolate_bones']
+        n_interp = pf_params['smart_pf_interpolate_num']
+        points3d_det_names, points3d_det, points2d_det = \
+            M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names, points3d_det, points2d_det,
+                                         interpolate_set, n_interp)
+        for p, k3, k2 in zip(points3d_det_names, points3d_det, points2d_det): print p, k3, k2
         smart_pf.calib = ldm_calib
-        smart_pf.keypoints3d = points3d_det[0]
-        smart_pf.keypoints2d = points2d_det[0]
+        smart_pf.keypoints3d = points3d_det
+        smart_pf.keypoints2d = points2d_det
         return mbv.Opt.ParallelObjective(smart_pf.Objective)
 
     @staticmethod
@@ -460,7 +473,7 @@ class TrackingLoopTools:
 
 
                     if pf_params['smart_pf']:
-                        objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf)
+                        objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf, pf_params)
                     if objective_params['enable']:
                         objective = TrackingLoopTools.SetupObjetive(state,observations,model3d,
                                                                     model3dobj,objective_params)

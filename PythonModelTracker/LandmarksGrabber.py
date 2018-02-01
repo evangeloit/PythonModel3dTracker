@@ -30,7 +30,7 @@ primitives_dict = {
      'f_ring.03.R':'f_ring.03.R',
      'thumb.03.R':'thumb.03.R',
      'f_index.03.R':'f_index.03.R'},
-    ("coco", "mh_body_male_custom"):
+    ("COCO", "mh_body_male_custom"):
     {'L.LLeg': 'L.LLeg', 'L.ULeg': 'L.ULeg', 'R.LLeg': 'R.LLeg', 'R.Foot': 'R.Foot', 'R.LArm': 'R.LArm',
      'R.eye': 'R.eye', 'L.shoulder': 'L.shoulder', 'R.torso': 'R.torso', 'L.LArm': 'L.LArm',
      'R.shoulder': 'R.shoulder', 'L.Wrist': 'L.Wrist', 'R.ULeg': 'R.ULeg', 'R.ear': 'R.ear', 'L.ear': 'L.ear',
@@ -76,14 +76,14 @@ primitives_dict = {
 primitives_dict[("damien", "human_ext_collisions")] = primitives_dict[("damien", "human_ext")]
 primitives_dict[("damien", "mh_body_male_meta")] = primitives_dict[("damien", "mh_body_male")]
 primitives_dict[("damien", "mh_body_male_meta_grpscl")] = primitives_dict[("damien", "mh_body_male")]
-primitives_dict[("coco", "mh_body_male_custom_meta")] = primitives_dict[("coco", "mh_body_male_custom")]
-primitives_dict[("coco", "mh_body_male_custom_0850")] = primitives_dict[("coco", "mh_body_male_custom")]
-primitives_dict[("coco", "mh_body_male_custom_0900")] = primitives_dict[("coco", "mh_body_male_custom")]
-primitives_dict[("coco", "mh_body_male_custom_0950")] = primitives_dict[("coco", "mh_body_male_custom")]
-primitives_dict[("coco", "mh_body_male_custom_1050")] = primitives_dict[("coco", "mh_body_male_custom")]
-primitives_dict[("coco", "mh_body_male_custom_1100")] = primitives_dict[("coco", "mh_body_male_custom")]
-primitives_dict[("coco", "mh_body_male_custom_1150")] = primitives_dict[("coco", "mh_body_male_custom")]
-primitives_dict[("coco", "mh_body_male_custom_meta_glbscl")] = primitives_dict[("coco", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_custom_meta")] = primitives_dict[("COCO", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_custom_0850")] = primitives_dict[("COCO", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_custom_0900")] = primitives_dict[("COCO", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_custom_0950")] = primitives_dict[("COCO", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_custom_1050")] = primitives_dict[("COCO", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_custom_1100")] = primitives_dict[("COCO", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_custom_1150")] = primitives_dict[("COCO", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_custom_meta_glbscl")] = primitives_dict[("COCO", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_custom_meta")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_custom_0850")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_custom_0900")] = primitives_dict[("bvh", "mh_body_male_custom")]
@@ -287,6 +287,10 @@ class LandmarksGrabber:
         cam.OpenCV_setExtrinsics(tr, rot)
         clb.camera = cam
         return clb
+
+
+
+
 
 
 

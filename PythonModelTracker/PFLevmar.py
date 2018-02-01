@@ -89,6 +89,7 @@ class SmartPF:
         pfs.std_dev = mbv.Core.DoubleVector(pf_params['std_dev'])
         return pfs
 
+
     def DynamicModel(self, particles):
         n_particles = particles.shape[1]
 
