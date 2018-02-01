@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 np.set_printoptions(precision=1, suppress = True)
-import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.PythonModelTracker.Features2DUtils as f2d
 import PythonModel3dTracker.ObjectDetection.RigidObjectPosest3D as RigidObjectPosest3D
 import PythonModel3dTracker.ObjectDetection.StateVectorTools as StateVectorTools

@@ -1,5 +1,5 @@
 import numpy as np
-import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as dmu
 
 

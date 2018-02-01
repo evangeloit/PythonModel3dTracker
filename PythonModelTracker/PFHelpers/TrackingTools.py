@@ -2,14 +2,15 @@ import cv2
 import os
 
 import PyCeresIK
-import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PyMBVAll as mbv
 import PyModel3dTracker as m3dt
 
 import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
 
 import PythonModel3dTracker.Paths as Paths
 import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
+import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
@@ -72,7 +73,7 @@ class DatasetTools:
             if params_ds.landmarks and len(params_ds.landmarks) > 0:
                 print('Landmarks filename: ', params_ds.landmarks['detections']['filename'])
                 print('Landmarks calib_filename: ', params_ds.landmarks['detections']['calib_filename'])
-                grabber_ldm = ldm.LandmarksGrabber(params_ds.landmarks['detections']['format'],
+                grabber_ldm = LG.LandmarksGrabber(params_ds.landmarks['detections']['format'],
                                                    params_ds.landmarks['detections']['filename'],
                                                    params_ds.landmarks['detections']['calib_filename'],
                                                    model3d.model_name)
@@ -104,9 +105,9 @@ class ParticleFilterTools:
     def GenSmartPF(pf_params, model3d, decoder, rng=None):
         if rng is None: rng = mbv.PF.RandomNumberGeneratorOpencv()
 
-        primitive_names = ldm.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
+        primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
             model3d.parts.parts_map['all'],'coco', model3d.model_name)
-        lnames, landmarks = ldm.GetDefaultModelLandmarks(model3d, primitive_names)
+        lnames, landmarks = M3DU.GetDefaultModelLandmarks(model3d, primitive_names)
 
 
         smart_pf = pfl.SmartPF(rng, model3d, pf_params['pf'])
@@ -231,9 +232,9 @@ class ObjectiveTools:
 
     @staticmethod
     def SetupLandmarkDistObjective(model3dobj, points3d_det_names, points3d_det, model3d):
-        primitive_names = ldm.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(points3d_det_names,
+        primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(points3d_det_names,
                                                                                   model3d.model_name)
-        landmarks = ldm.GetDefaultModelLandmarks(model3d, primitive_names)
+        landmarks = M3DU.GetDefaultModelLandmarks(model3d, primitive_names)
         for g in model3dobj.decoding_objectives:
             for d in g.data():
                 if (type(d) is m3dt.LandmarksDistObjective) or \

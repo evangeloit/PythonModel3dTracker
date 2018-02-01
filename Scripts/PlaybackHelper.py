@@ -3,7 +3,7 @@ import cv2
 
 import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
 import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
-import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PyMBVAll as mbv
 import PyModel3dTracker as htpf
 
 

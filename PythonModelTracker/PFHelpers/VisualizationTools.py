@@ -1,4 +1,4 @@
-import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PyMBVAll as mbv
 import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 
 

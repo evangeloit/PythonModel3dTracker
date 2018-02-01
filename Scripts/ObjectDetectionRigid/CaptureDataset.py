@@ -6,7 +6,7 @@ import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
 import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
-import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.Paths as Paths
 
 visualize = {'enable':True,

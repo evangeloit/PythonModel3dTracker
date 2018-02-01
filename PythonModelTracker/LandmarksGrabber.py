@@ -1,12 +1,12 @@
-import PyMBVCore as core
-import PyMBVAcquisition as acq
-import PyMBVParticleFilter as mpf
-import PyMBVDecoding as dec
+import PythonModel3dTracker.PyMBVAll as mbv
+
 import PyModel3dTracker as mt
 import cv2
 import csv
 import numpy as np
 import os.path
+
+#import PythonModel3dTracker.PythonModelTracker.Model3dUtils as m3dutils
 
 # Dictionary of landmark correspondences between: (landmard_detection_source, skinned_model).
 primitives_dict = {
@@ -120,7 +120,7 @@ class LandmarksGrabber:
         self.preloaded_point_names = None
         self.preloaded_points = None
         self.fps = 30.
-        self.points_vec = core.Vector3fStorage()
+        self.points_vec = mbv.Core.Vector3fStorage()
         self.point_names = []
         if self.file_format == 'bvh':
             assert os.path.isfile(landmarks_filename)
@@ -131,7 +131,7 @@ class LandmarksGrabber:
 
     @staticmethod
     def getPrimitiveNamesfromLandmarkNames(ldm_names,landmark_source,model_name):
-        primitives = core.StringVector()
+        primitives = mbv.Core.StringVector()
         for p in ldm_names:
             if p in primitives_dict[(str(landmark_source), str(model_name))]:
                 primitives.append(primitives_dict[(str(landmark_source), str(model_name))][p])
@@ -173,10 +173,10 @@ class LandmarksGrabber:
 
     @staticmethod
     def np2pvec(points_np):
-        points_mbv = core.Vector3fStorage()
+        points_mbv = mbv.Core.Vector3fStorage()
         points_np = points_np.transpose()
         for i, p in enumerate(points_np):
-            point_mbv = core.Vector3()
+            point_mbv = mbv.Core.Vector3()
             point_mbv.x = np.float(p[0])
             point_mbv.y = np.float(p[1])
             point_mbv.z = np.float(p[2])
@@ -203,7 +203,7 @@ class LandmarksGrabber:
         points = np.dot(R, points) + t
         points = points.transpose()
         for i, p in enumerate(points):
-            # print core.Vector3(p[0],p[1],p[2])
+            # print mbv.Core.Vector3(p[0],p[1],p[2])
             points_mbv[i].x = p[0]
             points_mbv[i].y = p[1]
             points_mbv[i].z = p[2]
@@ -278,8 +278,8 @@ class LandmarksGrabber:
                     rot = np.array([[float(x[i + 1])], [float(x[i + 2])], [float(x[i + 3])]])
                     # print rot
 
-        clb = core.CameraMeta()
-        cam = core.CameraFrustum()
+        clb = mbv.Core.CameraMeta()
+        cam = mbv.Core.CameraFrustum()
         clb.width = imwidth
         clb.height = imheight
         C = (K[0, 0], K[1, 1], K[0, 2], K[1, 2], imwidth, imheight)
@@ -289,42 +289,7 @@ class LandmarksGrabber:
         return clb
 
 
-def GetDefaultModelLandmarks(model3d, landmark_names=None):
-    # pf.Landmark3dInfoVec()
-    if landmark_names is None:
-        landmark_names = model3d.parts.parts_map['all']
-    if model3d.model_type == mpf.Model3dType.Primitives:
-        landmarks = mpf.Landmark3dInfoPrimitives.create_multiple(landmark_names,
-                                                                landmark_names,
-                                                                mpf.ReferenceFrame.RFGeomLocal,
-                                                                core.Vector3fStorage([core.Vector3(0, 0, 0)]),
-                                                                model3d.parts.primitives_map)
-    else:
-        landmarks = mpf.Landmark3dInfoSkinned.create_multiple(landmark_names,
-                                                              landmark_names,
-                                                             mpf.ReferenceFrame.RFGeomLocal,
-                                                             core.Vector3fStorage([core.Vector3(0, 0, 0)]),
-                                                             model3d.parts.bones_map)
-        #print(landmark_names)
-        transform_node = dec.TransformNode()
-        mpf.LoadTransformNode(model3d.transform_node_filename, transform_node)
-        landmarks_decoder = mpf.LandmarksDecoder()
-        landmarks_decoder.convertReferenceFrame(mpf.ReferenceFrame.RFModel, transform_node, landmarks)
 
-    return landmark_names, landmarks
-
-
-def GetCorrespondingLandmarks(model_name, ldm_model_names, ldm_model, ldm_obs_source, ldm_obs_names, ldm_obs):
-    lnames_cor = LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(ldm_obs_names, ldm_obs_source, model_name)
-    idx_obs = [i for i, g in enumerate(lnames_cor) if g != 'None']
-    idx_model = [ldm_model_names.index(g) for g in lnames_cor if g != 'None']
-
-    names_model_cor = [ldm_model_names[l] for l in idx_model]
-    ldm_model_cor = [ldm_model[l] for l in idx_model]
-    names_obs_cor = [ldm_obs_names[l] for l in idx_obs]
-    ldm_obs_cor = [ [float(ldm_obs[l].data[0, 0]), float(ldm_obs[l].data[1, 0]),
-                     float(ldm_obs[l].data[2, 0])] for l in idx_obs]
-    return names_model_cor, ldm_model_cor, names_obs_cor, ldm_obs_cor
 
 
 
