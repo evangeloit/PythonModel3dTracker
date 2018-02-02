@@ -104,21 +104,23 @@ class ParticleFilterTools:
     @staticmethod
     def GenSmartPF(pf_params, model3d, decoder, rng=None):
         if rng is None: rng = mbv.PF.RandomNumberGeneratorOpencv()
-
+        landmarks_source = pf_params['pf']['smart_pf_model']
         primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
-            model3d.parts.parts_map['all'],pf_params['pf']['smart_pf_model'], model3d.model_name)
-        lnames, landmarks = M3DU.GetDefaultModelLandmarks(model3d, primitive_names)
+            opg.OpenPoseGrabber.landmark_names[landmarks_source],landmarks_source, model3d.model_name)
 
-
-        lnames, landmarks = \
-            M3DU.GetInterpModelLandmarks(model3d=model3d,default_bones=None,
-                interpolated_bones=pf_params['pf']['smart_pf_interpolate_bones'],
-                n_interp=pf_params['pf']['smart_pf_interpolate_num'])
-        for l in landmarks: print l.bone_id, l.pos, l.linked_geometry, l.name, l.ref_frame
+        if pf_params['smart_pf_interpolate_bones'] and pf_params['smart_pf_interpolate_num'] > 1:
+            lnames, landmarks = \
+                M3DU.GetInterpModelLandmarks(model3d=model3d,default_bones=primitive_names,
+                    interpolated_bones=pf_params['pf']['smart_pf_interpolate_bones'],
+                    n_interp=pf_params['pf']['smart_pf_interpolate_num'])
+        else:
+            lnames, landmarks = M3DU.GetDefaultModelLandmarks(model3d, primitive_names)
+        for i,l in enumerate(landmarks): print i, l.name, l.linked_geometry, l.bone_id, l.pos, l.ref_frame
 
         smart_pf = pfl.SmartPF(rng, model3d, pf_params['pf'])
-        smart_pf.ba = pfl.SmartPF.CreateBA(model3d, decoder, landmarks,
-                                           PyCeresIK.ModelAwareBundleAdjuster.MHCUSTOM_TO_COCO)
+        smart_pf.lnames = lnames
+        smart_pf.landmarks = landmarks
+        smart_pf.ba = pfl.SmartPF.CreateBA(model3d, decoder, landmarks)
         return smart_pf, rng
 
 
@@ -419,16 +421,20 @@ class TrackingLoopTools:
         points3d_det = landmark_observations[1][0]
         points2d_det = landmark_observations[2][0]
         ldm_calib = landmark_observations[3]
-        smart_pf_model = pf_params['smart_pf_model']
-        interpolate_set = pf_params['smart_pf_interpolate_bones']
-        n_interp = pf_params['smart_pf_interpolate_num']
-        points3d_det_names, points3d_det, points2d_det = \
-            M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names, points3d_det, points2d_det,
-                                         interpolate_set, n_interp)
-        for p, k3, k2 in zip(points3d_det_names, points3d_det, points2d_det): print p, k3, k2
+        if pf_params['smart_pf_interpolate_bones'] and pf_params['smart_pf_interpolate_num'] >1:
+            smart_pf_model = pf_params['smart_pf_model']
+            interpolate_set = pf_params['smart_pf_interpolate_bones']
+            n_interp = pf_params['smart_pf_interpolate_num']
+            points3d_det_names, points3d_det, points2d_det = \
+                M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names, points3d_det, points2d_det,
+                                             interpolate_set, n_interp)
+        #for i,(p, k3, k2) in enumerate(zip(points3d_det_names, points3d_det, points2d_det)): print i, p, k3, k2
         smart_pf.calib = ldm_calib
         smart_pf.keypoints3d = points3d_det
         smart_pf.keypoints2d = points2d_det
+
+        observations['landmarks'] = (points3d_det_names, [points3d_det], [points2d_det])
+
         return mbv.Opt.ParallelObjective(smart_pf.Objective)
 
     @staticmethod
@@ -474,10 +480,16 @@ class TrackingLoopTools:
 
                     if pf_params['smart_pf']:
                         objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf, pf_params)
+                        landmarks = pf.landmarks
+                    else: landmarks = []
                     if objective_params['enable']:
                         objective = TrackingLoopTools.SetupObjetive(state,observations,model3d,
                                                                     model3dobj,objective_params)
                     pf.track(state, objective)
+
+
+                    disp_landmark_sets, disp_landmark_names, disp_landmarks = \
+                        TrackingLoopTools.PackLandmarks(state, model3dobj.decoder, landmarks, observations)
 
                     if visualize_params['enable']:
                         if visualize_params['client'] == 'blender':
@@ -486,7 +498,8 @@ class TrackingLoopTools:
                                                                 frames=[params_ds.limits[0], f, params_ds.limits[1]],
                                                                 images=observations[0], scale=0.001)
                         else:
-                            viz = visualizer.visualize_overlay(state, observations['calibs'][0], observations['images'][1])
+                            viz = visualizer.visualize_overlay(state, observations['calibs'][0],
+                                                               observations['images'][1], disp_landmarks)
                             frame_data = mtg.FrameDataOpencv(rgb=viz, n_frame=f)
                     else:
                         frame_data = 'None'
@@ -500,6 +513,37 @@ class TrackingLoopTools:
         #    results.save(res_filename)
         return results
         #mbv.Core.CachedAllocatorStorage.clear()
+
+    @staticmethod
+    def PackLandmarks(state, decoder, landmarks, observations):
+        landmark_observations = observations['landmarks']
+        detnames = landmark_observations[0]
+        detpoints = landmark_observations[1][0]
+        # Pack landmarks
+        disp_landmark_sets = []
+        disp_landmark_names = []
+        disp_landmarks = []
+
+        lnames = [l.name for l in landmarks]
+        landmarks_decoder = mbv.PF.LandmarksDecoder()
+        landmarks_decoder.decoder = decoder
+        landmark_points = landmarks_decoder.decode(state, landmarks)
+        
+        if (len(lnames) > 0) and (len(detnames) > 0):
+            disp_landmark_sets = ['LandmarksModel', 'LandmmarksObs']
+            disp_landmark_names = [lnames, detnames]
+            disp_landmarks = [landmark_points, detpoints]
+        elif len(lnames) > 0:
+            disp_landmark_sets = ['LandmarksModel']
+            disp_landmark_names = [lnames]
+            disp_landmarks = [landmark_points]
+
+        elif len(detnames) > 0:
+            disp_landmark_sets = ['LandmarksObs']
+            disp_landmark_names = [detnames]
+            disp_landmarks = [detpoints]
+
+        return disp_landmark_sets, disp_landmark_names, disp_landmarks
 
 
 

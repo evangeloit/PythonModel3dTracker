@@ -25,6 +25,8 @@ class SmartPF:
             self.decoder = None
             self.ba = None
 
+        self.lnames = None
+        self.landmarks = None
         self.keypoints2d = None
         self.keypoints3d = None
         self.calib = None
@@ -33,7 +35,7 @@ class SmartPF:
         self.smart_particles = SmartPF.default_smart_particles
         self.filter_ratios = SmartPF.default_filter_ratios
         if 'smart_particles' in pf_params:
-            self.smart_particles = pf_params['smart_particles']
+            self.smart_particles = min(pf_params['smart_particles'], pf_params['n_particles'])
         if 'obs_filter_ratios' in pf_params:
             self.filter_ratios = pf_params['obs_filter_ratios']
 
@@ -48,7 +50,7 @@ class SmartPF:
         self.pf.track(state, objective)
 
     @staticmethod
-    def CreateBA(model3d,decoder,landmarks,model2keypoints):
+    def CreateBA(model3d,decoder,landmarks):
         ba = IK.ModelAwareBundleAdjuster()
         lmv = IK.LandmarksVector()
         for l in landmarks:
@@ -69,7 +71,6 @@ class SmartPF:
         #     ba.high_bounds = st.process(model3d.high_bounds, mbv.Dec.StateTransformDirection.Forward)
         #     print 'highBounds length:', len(ba.high_bounds)
         ba.landmarks = lmv
-        ba.model_to_keypoints = model2keypoints
         ba.ceres_report = False
         ba.max_iterations = 500
         # ba.soft_bounds = True
@@ -106,7 +107,7 @@ class SmartPF:
 
         if self.keypoints3d is not None:
             print 'SmartPF Dynamic: LEVMAR'
-            for i in range(min(self.smart_particles, n_particles)):
+            for i in range(self.smart_particles):
                 keypoints_cur = OpenPoseGrabber.FilterKeypointsRandom(self.keypoints3d,
                                                                       self.keypoints2d,
                                                                       self.filter_ratios)
@@ -115,16 +116,8 @@ class SmartPF:
                 # do something with
                 cur_state = mbv.Core.DoubleVector(particles[:, i])
 
-                # if (self.decoder is not None) and (type(self.decoder) is mbv.Dec.StateTransformDecoder):
-                #     st = self.decoder.state_transformer
-                #     cur_state = st.process(cur_state)
-
                 #print 'cur_state:', cur_state
                 score, results = self.ba.solve(observations[0], cur_state)
-                #print 'levmar solve:', results
-                # if (self.decoder is not None) and (type(self.decoder) is mbv.Dec.StateTransformDecoder):
-                #     st = self.decoder.state_transformer
-                #     results = st.process(results, mbv.Dec.StateTransformDirection.Backward)
 
                 particles[:,i] = results
         #for f in range(n_particles):

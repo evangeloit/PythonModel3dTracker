@@ -13,32 +13,32 @@ dry_run = False
 input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/")
 
 # AMMAR Synthetic MHAD Correspondences.
-landmark_names = [
- "L.UArm", "L.LArm", "L.Wrist",
- "R.UArm", "R.LArm", "R.Wrist",
- "L.ULeg", "L.LLeg", "L.Foot",
- "R.ULeg", "R.LLeg", "R.Foot",
- "neck.001", "neck", "root"
-]
-
-landmark_positions = [ [0,0,0], [0,0,0], [0,0,0],
-                       [0,0,0], [0,0,0], [0,0,0],
-                       [0,150,0], [0,0,0], [0,0,0],
-                       [0,150,0], [0,0,0], [0,0,0],
-                       [0,120,0], [0,0,0], [0,0,0]]
+# landmark_names = [
+#  "L.UArm", "L.LArm", "L.Wrist",
+#  "R.UArm", "R.LArm", "R.Wrist",
+#  "L.ULeg", "L.LLeg", "L.Foot",
+#  "R.ULeg", "R.LLeg", "R.Foot",
+#  "neck.001", "neck", "root"
+# ]
+#
+# landmark_positions = [ [0,0,0], [0,0,0], [0,0,0],
+#                        [0,0,0], [0,0,0], [0,0,0],
+#                        [0,150,0], [0,0,0], [0,0,0],
+#                        [0,150,0], [0,0,0], [0,0,0],
+#                        [0,120,0], [0,0,0], [0,0,0]]
 
 
 # MHAD Correspondences
-# landmark_names = ['L.torso', 'L.ULeg', 'L.LLeg',
-#                   'R.torso', 'R.ULeg', 'R.LLeg',
-#                   'L.shoulder','L.UArm', 'L.Wrist',
-#                   'R.shoulder','R.UArm', 'R.Wrist',
-#                   'neck.001',  'root']
-# landmark_positions = [ [0,440,0], [0,350,0], [0,350,0],
-#                        [0,440,0], [0,350,0], [0,350,0],
-#                        [0,150,0], [0,200,0], [0,70,0],
-#                        [0,150,0], [0,200,0], [0,70,0],
-#                        [0,-20,0], [0,0,0]]
+landmark_names = ['L.torso', 'L.ULeg', 'L.LLeg',
+                  'R.torso', 'R.ULeg', 'R.LLeg',
+                  'L.shoulder','L.UArm', 'L.Wrist',
+                  'R.shoulder','R.UArm', 'R.Wrist',
+                  'neck.001',  'root']
+landmark_positions = [ [0,440,0], [0,350,0], [0,350,0],
+                       [0,440,0], [0,350,0], [0,350,0],
+                       [0,150,0], [0,200,0], [0,70,0],
+                       [0,150,0], [0,200,0], [0,70,0],
+                       [0,-20,0], [0,0,0]]
 landmark_names_mbv = mbv.Core.StringVector(landmark_names)
 landmark_positions_mbv = mbv.Core.Vector3fStorage([mbv.Core.Vector3(lp) for lp in landmark_positions])
 
