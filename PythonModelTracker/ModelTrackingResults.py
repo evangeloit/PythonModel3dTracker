@@ -1,5 +1,6 @@
 import json
 import copy
+import os
 
 
 class ModelTrackingResults:
@@ -76,9 +77,29 @@ class ModelTrackingResults:
             print('Cannot save results, invalid filename: <{}>'.format(filename) )
 
 
+    def check_file(self, filename, required_fields=None):
+        valid_results_file = False
+        if required_fields is None:
+            required_fields = ["did", "models", "states", "landmark_names", "landmarks"]
+
+        f_base, f_ext = os.path.splitext(filename)
+        if (f_ext == '.json') and os.path.isfile(filename):
+            valid_results_file = True
+            with open(filename, 'r') as fp:
+                json_dict = json.load(fp)
+                for rf in required_fields:
+                    if rf not in json_dict:
+                        valid_results_file = False
+                        break
+        return valid_results_file
+
+
+
     def load(self, filename):
-        json_target = open(filename, 'r')
-        self.__dict__ = json.load(json_target)
+        assert self.check_file(filename)
+
+        with open(filename, 'r') as fp:
+            self.__dict__ = json.load(fp)
 
         states = copy.deepcopy(self.states)
         self.states = {}

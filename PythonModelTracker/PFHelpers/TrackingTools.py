@@ -108,7 +108,7 @@ class ParticleFilterTools:
         primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
             opg.OpenPoseGrabber.landmark_names[landmarks_source],landmarks_source, model3d.model_name)
 
-        if pf_params['smart_pf_interpolate_bones'] and pf_params['smart_pf_interpolate_num'] > 1:
+        if pf_params['pf']['smart_pf_interpolate_bones'] and pf_params['pf']['smart_pf_interpolate_num'] > 1:
             lnames, landmarks = \
                 M3DU.GetInterpModelLandmarks(model3d=model3d,default_bones=primitive_names,
                     interpolated_bones=pf_params['pf']['smart_pf_interpolate_bones'],
@@ -355,7 +355,7 @@ class TrackingLoopTools:
     @staticmethod
     def Grab(f,params_ds,grabbers):
 
-        print('frame:', f)
+        if f%50 == 0: print 'frame:', f
         grabber = grabbers[0]
         grabber_ldm = grabbers[1]
         grabber.seek(f)
@@ -446,7 +446,7 @@ class TrackingLoopTools:
 
         grabbers[0].seek(params_ds.limits[0])
         # Main loop
-        print("entering loop")
+        #print("entering loop")
         continue_loop = True
         f = params_ds.limits[0]
         state = pf_params['init_state']
@@ -528,7 +528,7 @@ class TrackingLoopTools:
         landmarks_decoder = mbv.PF.LandmarksDecoder()
         landmarks_decoder.decoder = decoder
         landmark_points = landmarks_decoder.decode(state, landmarks)
-        
+
         if (len(lnames) > 0) and (len(detnames) > 0):
             disp_landmark_sets = ['LandmarksModel', 'LandmmarksObs']
             disp_landmark_names = [lnames, detnames]

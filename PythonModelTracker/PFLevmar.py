@@ -1,5 +1,5 @@
 import numpy as np
-import PyMBVAll as mbv
+import PythonModel3dTracker.PyMBVAll as mbv
 import PyCeresIK as IK
 from PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber import OpenPoseGrabber
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
@@ -106,7 +106,7 @@ class SmartPF:
 
 
         if self.keypoints3d is not None:
-            print 'SmartPF Dynamic: LEVMAR'
+            #print 'SmartPF Dynamic: LEVMAR'
             for i in range(self.smart_particles):
                 keypoints_cur = OpenPoseGrabber.FilterKeypointsRandom(self.keypoints3d,
                                                                       self.keypoints2d,

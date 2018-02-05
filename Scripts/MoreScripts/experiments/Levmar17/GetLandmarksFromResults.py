@@ -1,13 +1,10 @@
 import os.path
 
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
-from PythonModel3dTracker.PythonModelTracker.ResultLandmarksGenerator import GenerateLandmarks
+from PythonModel3dTracker.PythonModelTracker.TrackingResults.ResultLandmarksGenerator import GenerateLandmarks
 import PythonModel3dTracker.Paths as Paths
 import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.TrackingTools as tt
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
-
-
 
 dry_run = False
 input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/")
