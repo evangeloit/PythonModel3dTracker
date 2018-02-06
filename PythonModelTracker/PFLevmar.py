@@ -1,5 +1,5 @@
 import numpy as np
-import PyMBVAll as mbv
+import PythonModel3dTracker.PyMBVAll as mbv
 import PyCeresIK as IK
 from PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber import OpenPoseGrabber
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
