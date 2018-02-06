@@ -29,25 +29,25 @@ objective_params = {
 
 
 
-# model_names = ["mh_body_male_custom_0950", "mh_body_male_custom_1050", "mh_body_male_custom_1100",
-#                "mh_body_male_custom_0950", "mh_body_male_custom_1050", "mh_body_male_custom",
-#                "mh_body_male_custom_0900", "mh_body_male_custom_0950", "mh_body_male_custom_0950",
-#                "mh_body_male_custom_0950", "mh_body_male_custom_0950", "mh_body_male_custom_0950",
-#                "mh_body_male_custom_0950", "mh_body_male_custom_0950", "mh_body_male_custom_0950",
-#                "mh_body_male_custom_0950", "mh_body_male_custom_0950", "mh_body_male_custom_0950",
-#                "mh_body_male_custom_0950", "mh_body_male_custom",      "mh_body_male_custom",
-#                "mh_body_male_custom"]
-# datasets = ['mhad_s01_a04', 'mhad_s02_a04', 'mhad_s03_a04',
-#             'mhad_s04_a04', 'mhad_s05_a04', 'mhad_s06_a04',
-#             'mhad_s07_a04', 'mhad_s08_a04', 'mhad_s09_a01',
-#             'mhad_s09_a02', 'mhad_s09_a03', 'mhad_s09_a04',
-#             'mhad_s09_a05', 'mhad_s09_a06', 'mhad_s09_a07',
-#             'mhad_s09_a08', 'mhad_s09_a09', 'mhad_s09_a10',
-#             'mhad_s09_a11', 'mhad_s10_a04', 'mhad_s11_a04',
-#             'mhad_s12_a04'
-# ]
-model_names = ["mh_body_male_custom"]
-datasets = ["mhad_ammar"]
+model_names = ["mh_body_male_custom_0950", "mh_body_male_custom_1050", "mh_body_male_custom_1100",
+               "mh_body_male_custom_0950", "mh_body_male_custom_1050", "mh_body_male_custom",
+               "mh_body_male_custom_0900", "mh_body_male_custom_0950", "mh_body_male_custom_0950",
+               "mh_body_male_custom_0950", "mh_body_male_custom_0950", "mh_body_male_custom_0950",
+               "mh_body_male_custom_0950", "mh_body_male_custom_0950", "mh_body_male_custom_0950",
+               "mh_body_male_custom_0950", "mh_body_male_custom_0950", "mh_body_male_custom_0950",
+               "mh_body_male_custom_0950", "mh_body_male_custom",      "mh_body_male_custom",
+               "mh_body_male_custom"]
+datasets = ['mhad_s01_a04', 'mhad_s02_a04', 'mhad_s03_a04',
+            'mhad_s04_a04', 'mhad_s05_a04', 'mhad_s06_a04',
+            'mhad_s07_a04', 'mhad_s08_a04', 'mhad_s09_a01',
+            'mhad_s09_a02', 'mhad_s09_a03', 'mhad_s09_a04',
+            'mhad_s09_a05', 'mhad_s09_a06', 'mhad_s09_a07',
+            'mhad_s09_a08', 'mhad_s09_a09', 'mhad_s09_a10',
+            'mhad_s09_a11', 'mhad_s10_a04', 'mhad_s11_a04',
+            'mhad_s12_a04'
+]
+#model_names = ["mh_body_male_custom"]
+#datasets = ["mhad_ammar"]
 
 # Command line parameters.
 sel_rep = int(sys.argv[1])
@@ -55,8 +55,10 @@ dry_run = int(sys.argv[2])
 
 # Experiment Parameters.
 dataset_model_pairs = [(d, m) for (d, m) in zip(datasets, model_names)]
-ransac = [[0.0, 0.1],[0.0, 0.2],[0.0, 0.3],[0.0, 0.4],[0.05, 0.1],[0.05, 0.2],[0.05, 0.3],[0.05, 0.4],]
-levmar_particles = [1,5,10,20,50,75]
+ransac = [[0.0, 0.15],[0.0, 0.3],[0.0, 0.45],[0.0, 0.6],
+          [0.15, 0.15],[0.15, 0.3],[0.15, 0.45],[0.15, 0.6],
+          [0.3, 0.3],[0.3, 0.45],[0.3, 0.6]]
+levmar_particles = [1, 10, 20, 50]
 n_particles = [0]
 
 # Experiments loop.
@@ -89,9 +91,15 @@ for (dataset, model_name), r, lp, p in itertools.product(dataset_model_pairs, ra
             pf_params['pf']['init_state'] = tt.DatasetTools.GenInitState(params_ds, model3d)
             pf_params['meta_mult'] = 1
             pf_params['pf_listener_flag'] = False
+            pf_params['pf']['obs_filter_ratios'] = r
             pf_params['pf']['smart_pf'] = (lp > 0)
             pf_params['pf']['smart_particles'] = lp
-            pf_params['pf']['obs_filter_ratios'] = r
+            pf_params['pf']['smart_pf_model'] = "COCO"
+            pf_params['pf']['smart_pf_interpolate_bones'] = ["R.UArm", "R.LArm", "R.ULeg", "R.LLeg", "L.UArm", "L.LArm",
+                                                             "L.ULeg", "L.LLeg"]
+            pf_params['pf']['smart_pf_interpolate_num'] = 3
+
+
             enable_openpose_grabber = (lp > 0)
 
             #Performing tracking

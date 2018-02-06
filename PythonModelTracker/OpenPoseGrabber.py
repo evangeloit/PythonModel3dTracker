@@ -55,9 +55,9 @@ class OpenPoseGrabber():
             point_names = []
             self.keypoints = []
         else:
-            for i,p in enumerate(persons):
-                for n, kp in zip(OpenPoseGrabber.landmark_names[self.model_op], p):
-                    print 'person', i, n, kp
+            # for i,p in enumerate(persons):
+            #     for n, kp in zip(OpenPoseGrabber.landmark_names[self.model_op], p):
+            #         print 'person', i, n, kp
 
             self.keypoints = []
             self.keypoints2d = []

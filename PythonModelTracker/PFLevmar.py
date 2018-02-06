@@ -106,7 +106,7 @@ class SmartPF:
 
 
         if self.keypoints3d is not None:
-            print 'SmartPF Dynamic: LEVMAR'
+            #print 'SmartPF Dynamic: LEVMAR'
             for i in range(self.smart_particles):
                 keypoints_cur = OpenPoseGrabber.FilterKeypointsRandom(self.keypoints3d,
                                                                       self.keypoints2d,
