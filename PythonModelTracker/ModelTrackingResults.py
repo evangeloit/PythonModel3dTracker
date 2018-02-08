@@ -4,6 +4,10 @@ import os
 
 
 class ModelTrackingResults:
+
+    default_required_fields = ["did", "models", "states"]#, "landmark_names", "landmarks"]
+
+
     def __init__(self,did=None):
         self.did = did
         self.models = []
@@ -77,10 +81,8 @@ class ModelTrackingResults:
             print('Cannot save results, invalid filename: <{}>'.format(filename) )
 
 
-    def check_file(self, filename, required_fields=None):
+    def check_file(self, filename, required_fields=default_required_fields):
         valid_results_file = False
-        if required_fields is None:
-            required_fields = ["did", "models", "states", "landmark_names", "landmarks"]
 
         f_base, f_ext = os.path.splitext(filename)
         if (f_ext == '.json') and os.path.isfile(filename):
@@ -89,6 +91,7 @@ class ModelTrackingResults:
                 json_dict = json.load(fp)
                 for rf in required_fields:
                     if rf not in json_dict:
+                        print "Field", rf, "is missing from results."
                         valid_results_file = False
                         break
         return valid_results_file
