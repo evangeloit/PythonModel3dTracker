@@ -16,7 +16,7 @@ grabber = AutoGrabber.create('oni',[''])
 
 gui = mtg.ModelTrackingGuiOpencv(visualize=visualize, init_frame=0)
 
-did = 'box_eps_02'
+did = 'box_regilait'
 rel_path = 'object_tracking/co4robots/'
 output_dir = os.path.join(Paths.datasets, rel_path, did)
 gt_filename = did + '_gt.json'

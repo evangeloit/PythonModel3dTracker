@@ -7,7 +7,7 @@ import PythonModel3dTracker.Paths as Paths
 wait_time = 1
 dataset = "mhad_ammar"
 model_name = "mh_body_male_custom" #"hand_skinned"#"mh_body_male_meta_glbscl"
-res = 'box_eps_02_gt'
+res = 'box_regilait_gt_blender'
 results_txt = os.path.join(Paths.datasets, "object_tracking/co4robots/{}.json".format(res))
 visualize = {'enable':True,
              'client': 'opencv',
@@ -16,7 +16,7 @@ assert visualize['client'] in ['opencv','blender']
 sel_landmarks = "gt" #"gt"   #see dataset json for available landmarks.
 
 # Output options
-results_txt_out = None #results_txt# os.path.join(paths.datasets, "object_tracking/co4robots/{}_new.json".format(res))
+results_txt_out = None #os.path.join(Paths.datasets, "object_tracking/co4robots/{}_blender.json".format(res))
 output_video = None #os.path.join(paths.datasets,"object_tracking/co4robots/{}.avi".format(res))
 output_frames = None #os.path.join(Paths.datasets,"object_tracking/co4robots/frames/{1}.png".format(res,"{:05d}"))
 

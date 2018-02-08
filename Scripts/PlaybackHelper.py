@@ -181,10 +181,13 @@ class PlaybackHelper:
                     state = optimizer.optimize(images, calibs, state )
                     if visualize['client'] == 'blender':
 
-                        frame_data = blconv.getFrameDataMBV(self.model3d, state, ['LandmarkObs'], [points3d_det_names], [points3d_det],
-                                                            calibs[0],
-                                                            [self.params_ds.limits[0], f, self.params_ds.limits[1]],
-                                                            [depth, rgb], 0.001)
+                        frame_data = blconv.getFrameDataMBV(model3dmeta=self.model3d,state=state,
+                                                            landmark_sets=['LandmarkObs'],
+                                                            landmark_names=[points3d_det_names],
+                                                            landmark_positions=[points3d_det],
+                                                            mbv_camera=calibs[0],
+                                                            frames=[self.params_ds.limits[0], f, self.params_ds.limits[1]],
+                                                            images=[depth, rgb],scale = 0.001)
                         gui.send_frame(frame_data)
 
             if gui_command.name == "state":
