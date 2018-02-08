@@ -87,7 +87,7 @@ class PlaybackHelper:
         #self.grabber = htpf.FlipInputGrabber(self.grabber_auto, self.params_ds.flip_images)
         self.grabber_ldm = None
 
-        if self.sel_landmarks and (self.sel_landmarks in self.params_ds.landmarks):
+        if self.sel_landmarks and self.params_ds.landmarks and (self.sel_landmarks in self.params_ds.landmarks):
             print('Landmarks filename: ', self.params_ds.landmarks[self.sel_landmarks]['filename'])
             self.grabber_ldm = LG.LandmarksGrabber(self.params_ds.landmarks[self.sel_landmarks]['format'],
                                                     self.params_ds.landmarks[self.sel_landmarks]['filename'],

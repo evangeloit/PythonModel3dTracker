@@ -53,8 +53,7 @@ class SmartPF:
     def CreateBA(model3d,decoder,landmarks):
         ba = IK.ModelAwareBundleAdjuster()
         lmv = IK.LandmarksVector()
-        for l in landmarks:
-            lmv.append(l)
+        for l in landmarks: lmv.append(l)
         ba.decoder = decoder
         ba.low_bounds = model3d.low_bounds
         ba.high_bounds = model3d.high_bounds

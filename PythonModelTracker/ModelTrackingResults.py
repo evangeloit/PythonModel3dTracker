@@ -99,7 +99,7 @@ class ModelTrackingResults:
 
 
     def load(self, filename):
-        assert self.check_file(filename)
+        #assert self.check_file(filename, ["did", "models", "states"])
 
         with open(filename, 'r') as fp:
             self.__dict__ = json.load(fp)

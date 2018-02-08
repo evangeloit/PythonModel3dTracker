@@ -54,13 +54,19 @@ class RigidObjectDetectorORB:
 
 
     def filter_depth(self, keypoints, descriptors, camera, depth):
-        p3d_np, p2d_np = f2d.GetPointsFromKeypoints(keypoints, camera, depth)
-        kp_mask = np.array([p[2] > 0 for p in p3d_np.T])
-        #print "kp_mask:,", kp_mask
-        kp_filt = [kp for kp, m in zip(keypoints, kp_mask) if m]
-        des_filt = descriptors[np.array(kp_mask)]
-        p3d_np = p3d_np[:, kp_mask]
-        p2d_np = p2d_np[:, kp_mask]
+        if len(keypoints) > 0:
+            p3d_np, p2d_np = f2d.GetPointsFromKeypoints(keypoints, camera, depth)
+            kp_mask = np.array([p[2] > 0 for p in p3d_np.T])
+            #print "kp_mask:,", kp_mask
+            kp_filt = [kp for kp, m in zip(keypoints, kp_mask) if m]
+            des_filt = descriptors[np.array(kp_mask)]
+            p3d_np = p3d_np[:, kp_mask]
+            p2d_np = p2d_np[:, kp_mask]
+        else:
+            kp_filt = []
+            des_filt = descriptors
+            p3d_np = np.array([])
+            p2d_np = np.array([])
         return kp_filt, des_filt, p3d_np, p2d_np
 
 
