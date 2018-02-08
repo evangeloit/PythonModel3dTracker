@@ -1,6 +1,7 @@
 import os
 import PythonModel3dTracker.Paths as Paths
 import PythonModel3dTracker.PyMBVAll as mbv
+import copy
 
 valid_input_formats = ['SFSerializedAcq', 'SFOni', 'SFImage','ser','oni','image', None]
 default_openni_xml = os.path.join(Paths.media, 'openni.xml')
@@ -30,4 +31,31 @@ def create(input_format, input_stream, input_calib=None, openni_xml = default_op
         assert len(input_stream) == 1
         grabber = mbv.Acq.SerializedAcquisition(str(input_stream[0]))
     return grabber
+
+
+def set_focal_length(clbs_in, f):
+    clbs = []
+    for clb_in in clbs_in:
+        clb = copy.deepcopy(clb_in)
+        cf = clb.camera
+        fx, fy, cx, cy, zNear, zFar = cf.getIntrinsics(clb.size)
+        fx = f
+        fy = f
+        cf.setIntrinsics(fx, fy, cx, cy, clb.width, clb.height, zNear, zFar)
+        clb.camera = cf
+        clbs.append(clb)
+    return clbs
+
+
+def set_extrinsics(clbs_in, position = mbv.Core.Vector3([0, 0, 0]),
+                     orientation = mbv.Core.Quaternion(x=0, y=0, z=0, w=1)):
+    clbs = []
+    for clb_in in clbs_in:
+        clb = copy.deepcopy(clb_in)
+        cf = clb.camera
+        cf.position = position
+        cf.orientation = orientation
+        clb.camera = cf
+        clbs.append(clb)
+    return clbs
 
