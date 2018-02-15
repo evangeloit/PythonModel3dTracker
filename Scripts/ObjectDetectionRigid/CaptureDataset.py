@@ -10,21 +10,21 @@ import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.Paths as Paths
 
 visualize = {'enable':True,
-             'labels':True, 'depth':True, 'rgb':True, 'wait_time':0}
+             'labels':True, 'depth':True, 'rgb':True, 'wait_time':33}
 
 grabber = AutoGrabber.create('oni',[''])
 
 gui = mtg.ModelTrackingGuiOpencv(visualize=visualize, init_frame=0)
 
-did = 'box_regilait'
-rel_path = 'object_tracking/co4robots/'
+did = 'ms1_gestures_04'
+rel_path = 'gestures/co4robots/'
 output_dir = os.path.join(Paths.datasets, rel_path, did)
 gt_filename = did + '_gt.json'
 ds_filename = did + '.json'
 gt_path = os.path.join(Paths.datasets, rel_path, gt_filename)
 ds_path = os.path.join(Paths.datasets, rel_path, ds_filename)
 
-model_name = 'box'
+model_name = 'mh_body_male_custom'
 model3d = mbv.PF.Model3dMeta.create(str(Paths.model3d_dict[model_name]['path']))
 state = model3d.default_state
 gt = mtr.ModelTrackingResults()
@@ -37,7 +37,6 @@ f = 0
 f_counter = 0
 continue_loop = True
 while continue_loop:
-    print gui.__class__
     gui_command = gui.recv_command()
     if gui_command.name == "quit":
         continue_loop = False

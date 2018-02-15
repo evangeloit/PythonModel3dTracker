@@ -5,9 +5,9 @@ import PythonModel3dTracker.Paths as Paths
 
 # Input
 wait_time = 1
-dataset = "mhad_ammar"
+dataset = ""
 model_name = "mh_body_male_custom" #"hand_skinned"#"mh_body_male_meta_glbscl"
-res = 'box_regilait_gt_blender'
+res = 'box_reem_gt'
 results_txt = os.path.join(Paths.datasets, "object_tracking/co4robots/{}.json".format(res))
 visualize = {'enable':True,
              'client': 'opencv',
