@@ -44,12 +44,12 @@ landmark_positions_mbv = mbv.Core.Vector3fStorage([mbv.Core.Vector3(lp) for lp i
 for i,f in enumerate(os.listdir(input_dir)):
     results_in = os.path.join(input_dir, f)
     f_base, f_ext = os.path.splitext(f)
-    if (f_ext == '.json') and os.path.isfile(results_in):
+    results = mtr.ModelTrackingResults()
+    if results.load(results_in) and (len(results.landmark_names) == 0):
         results_out = results_in#os.path.join(input_dir, f_base + '_ldm.json')
         print i,results_in, results_out
         if dry_run == False:
-            results = mtr.ModelTrackingResults()
-            results.load(results_in)
+            #results.load(results_in)
             results.landmark_names = {}
             results.landmarks = {}
             model_name = results.models[0]

@@ -6,6 +6,7 @@ import os
 class ModelTrackingResults:
 
     default_required_fields = ["did", "models", "states"]#, "landmark_names", "landmarks"]
+    all_required_fields = ["did", "models", "states", "landmark_names", "landmarks"]
 
 
     def __init__(self,did=None):
@@ -81,7 +82,8 @@ class ModelTrackingResults:
             print('Cannot save results, invalid filename: <{}>'.format(filename) )
 
 
-    def check_file(self, filename, required_fields=default_required_fields):
+    @staticmethod
+    def check_file(filename, required_fields=default_required_fields):
         valid_results_file = False
 
         f_base, f_ext = os.path.splitext(filename)
@@ -99,19 +101,21 @@ class ModelTrackingResults:
 
 
     def load(self, filename):
-        #assert self.check_file(filename, ["did", "models", "states"])
+        valid_file = self.check_file(filename)
 
-        with open(filename, 'r') as fp:
-            self.__dict__ = json.load(fp)
+        if valid_file:
+            with open(filename, 'r') as fp:
+                self.__dict__ = json.load(fp)
 
-        states = copy.deepcopy(self.states)
-        self.states = {}
-        for s in states:
-            self.states[int(s)] = states[s]
+            states = copy.deepcopy(self.states)
+            self.states = {}
+            for s in states:
+                self.states[int(s)] = states[s]
 
-        landmarks = copy.deepcopy(self.landmarks)
-        self.landmarks = {}
-        for l in landmarks:
-            self.landmarks[int(l)] = landmarks[l]
-        #print(self.did, self.models)
-         #self.datasets_xml, self.did, self.models, self.states
+            landmarks = copy.deepcopy(self.landmarks)
+            self.landmarks = {}
+            for l in landmarks:
+                self.landmarks[int(l)] = landmarks[l]
+            #print(self.did, self.models)
+             #self.datasets_xml, self.did, self.models, self.states
+        return valid_file

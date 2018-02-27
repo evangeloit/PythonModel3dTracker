@@ -23,7 +23,7 @@ def CalculateMetricsDir(input_dir):
     for i,f in enumerate(sorted(os.listdir(input_dir))):
         results_in = os.path.join(input_dir, f)
         res = ModelTrackingResults()
-        if res.check_file(results_in):
+        if res.check_file(results_in, ModelTrackingResults.all_required_fields):
             print results_counter,
             results_counter += 1
             did, model_name, seq_dist, seq_dist_corr = CalculateMetricsJson(fname=results_in)
