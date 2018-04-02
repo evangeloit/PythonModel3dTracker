@@ -139,7 +139,6 @@ class ModelTrackingGuiZeromq(ModelTrackingGui):
             return None
 
 
-
     def recv_frame(self):
         socks = dict(self.bmc_server.poller.poll(ModelTrackingGuiZeromq.sendtimeo))
         if self.bmc_server.sockets["data_in"] in socks and socks[self.bmc_server.sockets["data_in"]] == zmq.POLLIN:
@@ -150,13 +149,13 @@ class ModelTrackingGuiZeromq(ModelTrackingGui):
             return None
 
 
-
     def send_init(self,frame_data_mbv):
         try:
             self.bmc_server.sockets["data_out"].send_json(json.dumps(frame_data_mbv))
         except:
             print('Failed to send init to client.')
         self.frame_data = frame_data_mbv
+
 
     def send_frame(self,frame_data_mbv):
         try:

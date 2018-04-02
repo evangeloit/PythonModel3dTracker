@@ -217,8 +217,11 @@ class PlaybackHelper:
                     depth = images[0]
                     rgb = images[1]
                     if (len(rgb.shape) == 2):
-                        images[1] = cv2.merge((rgb, rgb, rgb))
+                        #images[1] = cv2.merge((rgb, rgb, rgb))
                         rgb = cv2.merge((rgb, rgb, rgb))
+                    if (rgb.shape[0:2]) != (depth.shape[0:2]):
+                        rgb = cv2.resize(rgb, (depth.shape[1], depth.shape[0]) )
+                    images[1] = rgb
                     #depth_filt = dmu.Filter3DRect(depth, bb, self.state[2], 500)
 
                     cur_results_flag = False

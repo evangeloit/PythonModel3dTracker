@@ -375,8 +375,11 @@ class TrackingLoopTools:
         depth_filt = depth
         rgb = images[1]
         if (len(rgb.shape) == 2):
-            images[1] = cv2.merge((rgb, rgb, rgb))
+            #images[1] = cv2.merge((rgb, rgb, rgb))
             rgb = cv2.merge((rgb, rgb, rgb))
+        if (rgb.shape[0:2]) != (depth.shape[0:2]):
+            rgb = cv2.resize(rgb, (depth.shape[1], depth.shape[0]))
+        images[1] = rgb
         observations = {}
         observations['images'] = images
         observations['calibs'] = calibs
@@ -426,8 +429,8 @@ class TrackingLoopTools:
             interpolate_set = pf_params['smart_pf_interpolate_bones']
             n_interp = pf_params['smart_pf_interpolate_num']
             points3d_det_names, points3d_det, points2d_det = \
-                M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names, points3d_det, points2d_det,
-                                             interpolate_set, n_interp)
+                M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names,
+                                             points3d_det, points2d_det, interpolate_set, n_interp)
         #for i,(p, k3, k2) in enumerate(zip(points3d_det_names, points3d_det, points2d_det)): print i, p, k3, k2
         smart_pf.calib = ldm_calib
         smart_pf.keypoints3d = points3d_det

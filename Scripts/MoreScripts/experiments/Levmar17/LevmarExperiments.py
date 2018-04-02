@@ -55,12 +55,11 @@ dry_run = int(sys.argv[2])
 
 # Experiment Parameters.
 dataset_model_pairs = [(d, m) for (d, m) in zip(datasets, model_names)]
-ransac = [  [0.0, 0.7], [0.0, 0.8], [0.0, 0.9],
-            [0.05, 0.6], [0.05, 0.7], [0.05, 0.8], [0.05, 0.9] ]
+ransac = [  [0.0, 0.0] ]
 #[[0.0, 0.15],[0.0, 0.3],[0.0, 0.45],[0.0, 0.6],
 # [0.15, 0.15],[0.15, 0.3],[0.15, 0.45],[0.15, 0.6],
 # [0.3, 0.3],[0.3, 0.45],[0.3, 0.6]]
-levmar_particles = [20, 50] #[1, 10, 20, 50]
+levmar_particles = [1] #[1, 10, 20, 50]
 n_particles = [0]
 
 # Experiments loop.

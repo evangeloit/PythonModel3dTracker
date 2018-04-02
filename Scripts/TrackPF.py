@@ -12,28 +12,29 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'mhad_s01_a04'
-model_name = 'mh_body_male_custom_0950'
+dataset = 'mhad_s04_a04'
+model_name = 'mh_body_male_custom'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
 enable_openpose_grabber = True
 
 
-res_filename = os.path.join(Paths.results,"Human_tracking/Levmar/{0}.json".format(dataset))
+res_filename = None #os.path.join(Paths.datasets,"human_tracking/co4robots/ms1_gestures/{0}_gt1.json".format(dataset))
 
 # PF Initialization
 hmf_arch_type = "2levels"
 pf_params = pfs.Load(model_name, model_class,hmf_arch_type)
-pf_params['pf']['n_particles'] = 5
+pf_params['pf']['n_particles'] = 1
 pf_params['pf']['init_state'] = tt.DatasetTools.GenInitState(params_ds, model3d)
 pf_params['meta_mult'] = 1
 pf_params['pf_listener_flag'] = False
 pf_params['pf']['smart_pf'] = True
-pf_params['pf']['smart_particles'] = 15
+pf_params['pf']['smart_particles'] = 1
 pf_params['pf']['smart_pf_model'] = "COCO"
-pf_params['pf']['smart_pf_interpolate_bones'] = ["R.UArm", "R.LArm","R.ULeg", "R.LLeg","L.UArm", "L.LArm","L.ULeg", "L.LLeg"]
-pf_params['pf']['smart_pf_interpolate_num'] = 3
-pf_params['pf']['obs_filter_ratios'] = [0.25, 0.5]
+pf_params['pf']['smart_pf_interpolate_bones'] = ["R.UArm", "R.LArm", "R.ULeg", "R.LLeg",
+                                                 "L.UArm", "L.LArm", "L.ULeg", "L.LLeg"]
+pf_params['pf']['smart_pf_interpolate_num'] = 1
+pf_params['pf']['obs_filter_ratios'] = [0, 0]
 
 # Objectives
 objective_params = {

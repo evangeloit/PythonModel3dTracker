@@ -7,7 +7,7 @@ import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.TrackingTools as tt
 
 dry_run = False
-input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/")
+input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/mhad_26dofs/more")
 
 # AMMAR Synthetic MHAD Correspondences.
 # landmark_names = [

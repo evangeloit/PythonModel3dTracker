@@ -11,19 +11,18 @@ class SmartPF:
     default_smart_particles = 10
     default_filter_ratios = [0.1, 0.2]
 
-    def __init__(self,rng,model3d,pf_params,decoder=None,landmarks=None,model2keypoints=None):
+    def __init__(self,rng,model3d,pf_params,decoder=None,landmarks=None):
 
         self.model3d = model3d
         #self.std_dev = pf_params['std_dev']
         self.pf = SmartPF.CreatePF(rng,model3d,pf_params)#SmartPF.CreatePF(rng,model3d,pf_params)
         #self.pf.dynamic_model = mpf.DynamicModel(self.DynamicModel)
 
-        if (decoder is not None and landmarks is not None and model2keypoints is not None):
+        self.decoder = None
+        self.ba = None
+        if (decoder is not None and landmarks is not None):
             self.decoder = decoder
-            self.ba = SmartPF.CreateBA(model3d,decoder,landmarks,model2keypoints)
-        else:
-            self.decoder = None
-            self.ba = None
+            self.ba = SmartPF.CreateBA(model3d,decoder,landmarks)
 
         self.lnames = None
         self.landmarks = None
@@ -48,13 +47,15 @@ class SmartPF:
     def track(self,state,objective):
         self.pf.particles = mbv.PF.ParticlesMatrix(self.DynamicModel(self.pf.particles.particles))
         self.pf.track(state, objective)
+        return state
 
     @staticmethod
     def CreateBA(model3d,decoder,landmarks):
-        ba = IK.ModelAwareBundleAdjuster()
+        ba = IK.ModelAwareBABlocks()
         lmv = IK.LandmarksVector()
         for l in landmarks: lmv.append(l)
         ba.decoder = decoder
+        ba.model3d = model3d
         ba.low_bounds = model3d.low_bounds
         ba.high_bounds = model3d.high_bounds
         # assert (type(decoder) is mbv.Dec.GenericDecoderGPU) or \
@@ -114,7 +115,6 @@ class SmartPF:
                 observations = OpenPoseGrabber.ConvertIK([keypoints_cur], self.calib)
                 # do something with
                 cur_state = mbv.Core.DoubleVector(particles[:, i])
-
                 #print 'cur_state:', cur_state
                 score, results = self.ba.solve(observations[0], cur_state)
 
