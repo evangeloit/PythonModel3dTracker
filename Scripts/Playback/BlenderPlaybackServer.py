@@ -1,12 +1,12 @@
 import os
 
-from PythonModel3dTracker.Scripts.PlaybackHelper import PlaybackHelper
+from PythonModel3dTracker.PythonModelTracker.PlaybackHelper import PlaybackHelper
 import PythonModel3dTracker.Paths as Paths
 
 # Input
 wait_time = 1
-dataset = 'test_kinect_12_03'
-model_name = None
+dataset = 'mhad_s01_a04'
+model_name = 'mh_body_male_custom'
 res = ''
 results_txt = None #os.path.join(Paths.datasets, "human_tracking/co4robots/ms1_gestures/{}.json".format(res))
 visualize = {'enable':True,

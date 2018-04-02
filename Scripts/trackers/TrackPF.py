@@ -12,7 +12,7 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'ms1_gestures_02'
+dataset = 'mhad_s01_a04'
 model_name = 'mh_body_male_custom'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)

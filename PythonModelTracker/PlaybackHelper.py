@@ -127,7 +127,8 @@ class PlaybackHelper:
                 state = mbv.Core.DoubleVector(self.results.states[f][self.model3d.model_name])
             elif self.results.has_state(f+1, self.model3d.model_name):
                 state = mbv.Core.DoubleVector(self.results.states[f+1][self.model3d.model_name])
-        elif self.model3d.model_name in self.params_ds.initialization:
+        elif (self.model3d.model_name in self.params_ds.initialization) and \
+             (len(self.params_ds.initialization[self.model3d.model_name]) == self.model3d.n_dims):
             state = mbv.Core.DoubleVector(self.params_ds.initialization[self.model3d.model_name])
         else:
             state = self.model3d.default_state
