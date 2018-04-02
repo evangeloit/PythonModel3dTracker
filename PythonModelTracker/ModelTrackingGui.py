@@ -61,7 +61,7 @@ class ModelTrackingGuiNone(ModelTrackingGui):
 
 
 class ModelTrackingGuiOpencv(ModelTrackingGui):
-    accepted_keys = ['q', 'p', 'n', 'c', 'b', 's']
+    accepted_keys = ['q', 'p', 'n', 'c', 'b', 's','v']
     visualize_defaults = {'enable': True,
                           'client': 'opencv', 'labels': True, 'depth': True, 'rgb': True,
                           'wait_time': 0}
@@ -86,6 +86,8 @@ class ModelTrackingGuiOpencv(ModelTrackingGui):
                     cur_command = 'frame'
                 if (key == 's'):
                     cur_command = 'save'
+                if (key == 'v'):
+                    cur_command = 'state'
                 if key == 'c':
                     self.next_frame = self.frame_data.n_frame + 1
                     self.visualize['wait_time'] = 10

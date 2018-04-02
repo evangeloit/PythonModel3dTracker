@@ -464,6 +464,8 @@ class TrackingLoopTools:
                     if state_gui is not None:
                         state = mbv.Core.DoubleVector(state_gui)
                         pf.state = state
+                #else: state_gui = state
+                #print state_gui[7:11], ", "
 
             if gui_command.name == "init":
                 if visualize_params['client'] == 'blender':
