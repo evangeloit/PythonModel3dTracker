@@ -3,7 +3,7 @@ import PyOpenPose as OP
 import os
 import PyMBVCore as core
 
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
 import PyCeresIK as IK
 import copy
 import cv2
@@ -36,6 +36,7 @@ class OpenPoseGrabber():
         self.op = OP.OpenPose(net_size, (240, 240), res_size, model_op, model_op_path, 0, True)
         self.keypoints = None
         self.keypoints2d = None
+        self.source = 'COCO'
 
     def seek(self,f): pass
 
@@ -72,7 +73,7 @@ class OpenPoseGrabber():
 
             point_names = OpenPoseGrabber.landmark_names[self.model_op]
 
-        return point_names, self.keypoints, self.keypoints2d, clb
+        return point_names, self.keypoints, self.keypoints2d, clb, self.source
 
 
     @staticmethod
@@ -80,7 +81,7 @@ class OpenPoseGrabber():
         obsVecList = []
         if keypoints_vec is not None:
             for kv in keypoints_vec:
-                keypoints = ldm.LandmarksGrabber.pvec2np(kv).T.astype(np.float32)
+                keypoints = LG.LandmarksGrabber.pvec2np(kv).T.astype(np.float32)
                 Kp = IK.Observations(IK.ObservationType.DEPTH, clb, keypoints)
                 obsVec = IK.ObservationsVector([Kp])
                 obsVecList.append(obsVec)
@@ -114,6 +115,7 @@ class OpenPoseGrabber():
 
     @staticmethod
     def FilterKeypointsRandom(keypoints3d, keypoints2d, ratios=[0.1, 0.2]):
+        print ratios
         keypoints_out = core.Vector3fStorage(keypoints3d)
         n = len(keypoints3d)
         ratio2d = min(ratios[0],ratios[1])

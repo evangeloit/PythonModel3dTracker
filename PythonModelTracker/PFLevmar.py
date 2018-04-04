@@ -33,10 +33,10 @@ class SmartPF:
         self.model3dobj = None
         self.smart_particles = SmartPF.default_smart_particles
         self.filter_ratios = SmartPF.default_filter_ratios
-        if 'smart_particles' in pf_params:
-            self.smart_particles = min(pf_params['smart_particles'], pf_params['n_particles'])
-        if 'obs_filter_ratios' in pf_params:
-            self.filter_ratios = pf_params['obs_filter_ratios']
+        if 'smart_particles' in pf_params['smart_pf']:
+            self.smart_particles = min(pf_params['smart_pf']['smart_particles'], pf_params['n_particles'])
+        if 'obs_filter_ratios' in pf_params['smart_pf']:
+            self.filter_ratios = pf_params['smart_pf']['obs_filter_ratios']
 
 
 
@@ -49,9 +49,15 @@ class SmartPF:
         self.pf.track(state, objective)
         return state
 
+
+    def setLandmarks(self, landmark_names, landmarks):
+        self.lnames = landmark_names
+        self.landmarks = landmarks
+        if self.ba is not None: self.ba.landmarks = landmarks
+
     @staticmethod
     def CreateBA(model3d,decoder,landmarks):
-        ba = IK.ModelAwareBABlocks()
+        ba = IK.ModelAwareBA()
         lmv = IK.LandmarksVector()
         for l in landmarks: lmv.append(l)
         ba.decoder = decoder

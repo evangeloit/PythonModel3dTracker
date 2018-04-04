@@ -3,7 +3,6 @@ import os
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFSettings as pfs
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.TrackingTools as tt
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.VisualizationTools as vt
-import PythonModel3dTracker.Paths as Paths
 
 #Viz Parameters
 visualize_params = {'enable':True,
@@ -12,11 +11,11 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'mhad_s01_a04'
+dataset = 'mhad_s02_a04'
 model_name = 'mh_body_male_custom'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
-enable_openpose_grabber = True
+landmarks_source = ['gt', 'detections', 'openpose'][0]
 
 
 res_filename = None #os.path.join(Paths.datasets,"human_tracking/co4robots/ms1_gestures/{0}_gt1.json".format(dataset))
@@ -28,13 +27,9 @@ pf_params['pf']['n_particles'] = 1
 pf_params['pf']['init_state'] = tt.DatasetTools.GenInitState(params_ds, model3d)
 pf_params['meta_mult'] = 1
 pf_params['pf_listener_flag'] = False
-pf_params['pf']['smart_pf'] = True
-pf_params['pf']['smart_particles'] = 1
-pf_params['pf']['smart_pf_model'] = "COCO"
-pf_params['pf']['smart_pf_interpolate_bones'] = ["R.UArm", "R.LArm", "R.ULeg", "R.LLeg",
-                                                 "L.UArm", "L.LArm", "L.ULeg", "L.LLeg"]
-pf_params['pf']['smart_pf_interpolate_num'] = 1
-pf_params['pf']['obs_filter_ratios'] = [0, 0]
+pf_params['pf']['enable_smart'] = True
+pf_params['pf']['smart_pf']['n_particles'] = 1
+pf_params['pf']['smart_pf']['smart_particles'] = 1
 
 # Objectives
 objective_params = {
@@ -50,7 +45,7 @@ mesh_manager = tt.ObjectiveTools.GenMeshManager(model3d)
 model3dobj, decoder, renderer = tt.ObjectiveTools.GenObjective(mesh_manager, model3d, objective_params)
 visualizer = vt.Visualizer(model3d, mesh_manager, decoder, renderer)
 decoder = visualizer.decoder
-grabbers = tt.DatasetTools.GenGrabbers(params_ds, model3d, enable_openpose_grabber)
+grabbers = tt.DatasetTools.GenGrabbers(params_ds, model3d, landmarks_source)
 pf, rng = tt.ParticleFilterTools.GenPF(pf_params, model3d, decoder)
 
 results = tt.TrackingLoopTools.loop(params_ds,model3d, grabbers, pf,

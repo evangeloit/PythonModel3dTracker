@@ -20,8 +20,6 @@ import PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber as opg
 
 
 
-
-
 class ModelTools:
     @staticmethod
     def GenModel(model_name):
@@ -59,24 +57,27 @@ class DatasetTools:
 
 
     @staticmethod
-    def GenGrabbers(params_ds,model3d, openpose_grabber = False):
+    def GenGrabbers(params_ds,model3d, landmarks_source = None):
         grabber = DatasetTools.GenGrabber(params_ds)
-        grabber_ldm = DatasetTools.GenLandmarksGrabber(params_ds, model3d, openpose_grabber)
+        grabber_ldm = DatasetTools.GenLandmarksGrabber(params_ds, model3d, landmarks_source)
         return grabber, grabber_ldm
 
     @staticmethod
-    def GenLandmarksGrabber(params_ds, model3d, openpose_grabber = False):
+    def GenLandmarksGrabber(params_ds, model3d, landmarks_source = None):
         grabber_ldm = None
-        if openpose_grabber:
+
+        if landmarks_source == 'openpose':
             grabber_ldm = opg.OpenPoseGrabber(model_op_path=Paths.models_openpose)
         else:
-            if params_ds.landmarks and len(params_ds.landmarks) > 0:
-                print('Landmarks filename: ', params_ds.landmarks['detections']['filename'])
-                print('Landmarks calib_filename: ', params_ds.landmarks['detections']['calib_filename'])
-                grabber_ldm = LG.LandmarksGrabber(params_ds.landmarks['detections']['format'],
-                                                   params_ds.landmarks['detections']['filename'],
-                                                   params_ds.landmarks['detections']['calib_filename'],
+            if params_ds.landmarks and (landmarks_source in params_ds.landmarks):
+                print('Landmarks filename: ', params_ds.landmarks[landmarks_source]['filename'])
+                print('Landmarks calib_filename: ', params_ds.landmarks[landmarks_source]['calib_filename'])
+                grabber_ldm = LG.LandmarksGrabber(params_ds.landmarks[landmarks_source]['format'],
+                                                   params_ds.landmarks[landmarks_source]['filename'],
+                                                   params_ds.landmarks[landmarks_source]['calib_filename'],
                                                    model3d.model_name)
+                grabber_ldm.filter_landmarks = True
+
         return grabber_ldm
 
     @staticmethod
@@ -98,29 +99,28 @@ class ParticleFilterTools:
 
     @staticmethod
     def GenPF(pf_params, model3d, decoder=None, rng=None):
-        if pf_params['pf']['smart_pf']: return ParticleFilterTools.GenSmartPF(pf_params, model3d, decoder, rng)
+        if pf_params["pf"]["enable_smart"]: return ParticleFilterTools.GenSmartPF(pf_params, model3d, decoder, rng)
         else: return ParticleFilterTools.GenRegularPF(pf_params, model3d, rng)
 
     @staticmethod
     def GenSmartPF(pf_params, model3d, decoder, rng=None):
         if rng is None: rng = mbv.PF.RandomNumberGeneratorOpencv()
-        landmarks_source = pf_params['pf']['smart_pf_model']
+        landmarks_source = pf_params['pf']['smart_pf']['model']
         primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
             opg.OpenPoseGrabber.landmark_names[landmarks_source],landmarks_source, model3d.model_name)
 
-        if pf_params['pf']['smart_pf_interpolate_bones'] and pf_params['pf']['smart_pf_interpolate_num'] > 1:
+        if pf_params['pf']['smart_pf']['interpolate_bones'] and pf_params['pf']['smart_pf']['interpolate_num'] > 1:
             lnames, landmarks = \
                 M3DU.GetInterpModelLandmarks(model3d=model3d,default_bones=primitive_names,
-                    interpolated_bones=pf_params['pf']['smart_pf_interpolate_bones'],
-                    n_interp=pf_params['pf']['smart_pf_interpolate_num'])
+                    interpolated_bones=pf_params['pf']['smart_pf']['interpolate_bones'],
+                    n_interp=pf_params['pf']['smart_pf']['interpolate_num'])
         else:
             lnames, landmarks = M3DU.GetDefaultModelLandmarks(model3d, primitive_names)
         for i,l in enumerate(landmarks): print i, l.name, l.linked_geometry, l.bone_id, l.pos, l.ref_frame
 
         smart_pf = pfl.SmartPF(rng, model3d, pf_params['pf'])
-        smart_pf.lnames = lnames
-        smart_pf.landmarks = landmarks
         smart_pf.ba = pfl.SmartPF.CreateBA(model3d, decoder, landmarks)
+        smart_pf.setLandmarks(lnames, landmarks)
         return smart_pf, rng
 
 
@@ -416,18 +416,34 @@ class TrackingLoopTools:
 
 
     @staticmethod
-    def SetupSmartPFObjective(observations, smart_pf, pf_params):
+    def SetupSmartPFObjective(observations, smart_pf, smart_pf_params):
         # images = observations['images']
         # calibs = observations['calibs']
         landmark_observations = observations['landmarks']
         points3d_det_names = landmark_observations[0]
+
         points3d_det = landmark_observations[1][0]
         points2d_det = landmark_observations[2][0]
         ldm_calib = landmark_observations[3]
-        if pf_params['smart_pf_interpolate_bones'] and pf_params['smart_pf_interpolate_num'] >1:
-            smart_pf_model = pf_params['smart_pf_model']
-            interpolate_set = pf_params['smart_pf_interpolate_bones']
-            n_interp = pf_params['smart_pf_interpolate_num']
+        ldm_source = landmark_observations[4]
+
+        # primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(points3d_det_names,
+        #                                                                          ldm_source,
+        #                                                                          smart_pf.model3d.model_name)
+        #print 'Landmark Observations:', points3d_det_names
+        #points3d_det_names, points3d_det = M3DU.GetObservationLandmarks(smart_pf.model3d.model_name, ldm_source, points3d_det_names, points3d_det)
+        model_landmark_names, model_landmarks = M3DU.GenerateModelLandmarksfromObservationLandmarks(smart_pf.model3d, ldm_source)
+        # model_landmark_names, model_landmarks = M3DU.GetDefaultModelLandmarks(smart_pf.model3d, primitive_names)
+
+        #print 'Landmark Observations:', points3d_det_names
+        #print 'PrimitiveNames:', model_landmark_names
+
+        smart_pf.setLandmarks(model_landmark_names, model_landmarks)
+
+        if smart_pf_params['interpolate_bones'] and (smart_pf_params['interpolate_num'] > 1):
+            smart_pf_model = smart_pf_params['model']
+            interpolate_set = smart_pf_params['interpolate_bones']
+            n_interp = smart_pf_params['interpolate_num']
             points3d_det_names, points3d_det, points2d_det = \
                 M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names,
                                              points3d_det, points2d_det, interpolate_set, n_interp)
@@ -482,9 +498,8 @@ class TrackingLoopTools:
                     if (f > params_ds.limits[1]) or (f < 0): break
                     observations = TrackingLoopTools.Grab(f, params_ds, grabbers)
 
-
-                    if pf_params['smart_pf']:
-                        objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf, pf_params)
+                    if pf_params['enable_smart']:
+                        objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf, pf_params['smart_pf'])
                         landmarks = pf.landmarks
                     else: landmarks = []
                     if objective_params['enable']:
