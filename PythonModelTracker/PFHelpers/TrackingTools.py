@@ -239,15 +239,20 @@ class ObjectiveTools:
         #depth_filt = dmu.Filter3DRect(depth_filt, bb, state[2], 500)
 
     @staticmethod
-    def SetupLandmarkDistObjective(model3dobj, points3d_det_names, points3d_det, model3d):
-        primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(points3d_det_names,
-                                                                                  model3d.model_name)
-        landmarks = M3DU.GetDefaultModelLandmarks(model3d, primitive_names)
+    def SetupLandmarkDistObjective(model3dobj, landmark_observations, model3d):
+        ldm_obs_names = landmark_observations[0]
+        ldm_obs_points3d = landmark_observations[1]
+        ldm_obs_points2d = landmark_observations[2]
+        ldm_calib = landmark_observations[3]
+        ldm_obs_source = landmark_observations[4]
+
+        landmark_names, landmarks = \
+            M3DU.GenerateModelLandmarksfromObservationLandmarks(model3d, ldm_obs_source, ldm_obs_names)
         for g in model3dobj.decoding_objectives:
             for d in g.data():
                 if (type(d) is m3dt.LandmarksDistObjective) or \
                         (type(d) is m3dt.FilteredLandmarksDistObjective):
-                    d.setObservations(landmarks, points3d_det)
+                    d.setObservations(landmarks, ldm_obs_points3d)
                     # print("Observations/landmarks num:",len(d.observations), len(d.landmarks))
 
     @staticmethod
@@ -406,10 +411,7 @@ class TrackingLoopTools:
         #images, calibs, landmark_observations = observations  # points3d_det_names, points3d_det, ldm_calib
 
         if (objective_params['objective_weights']['primitives'] > 0) and (landmark_observations is not None):
-            points3d_det_names = landmark_observations[0]
-            points3d_det = landmark_observations[1]
-            # ldm_calib = landmark_observations[2]
-            ObjectiveTools.SetupLandmarkDistObjective(model3dobj, points3d_det_names, points3d_det, model3d)
+            ObjectiveTools.SetupLandmarkDistObjective(model3dobj, landmark_observations, model3d)
         if objective_params['objective_weights']['rendering'] > 0:
             ObjectiveTools.SetupRenderingObjective(model3dobj, images, calibs, state)
         return model3dobj.getPFObjective()
@@ -427,16 +429,8 @@ class TrackingLoopTools:
         ldm_calib = landmark_observations[3]
         ldm_source = landmark_observations[4]
 
-        # primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(points3d_det_names,
-        #                                                                          ldm_source,
-        #                                                                          smart_pf.model3d.model_name)
-        #print 'Landmark Observations:', points3d_det_names
-        #points3d_det_names, points3d_det = M3DU.GetObservationLandmarks(smart_pf.model3d.model_name, ldm_source, points3d_det_names, points3d_det)
-        model_landmark_names, model_landmarks = M3DU.GenerateModelLandmarksfromObservationLandmarks(smart_pf.model3d, ldm_source)
-        # model_landmark_names, model_landmarks = M3DU.GetDefaultModelLandmarks(smart_pf.model3d, primitive_names)
-
-        #print 'Landmark Observations:', points3d_det_names
-        #print 'PrimitiveNames:', model_landmark_names
+        model_landmark_names, model_landmarks = \
+            M3DU.GenerateModelLandmarksfromObservationLandmarks(smart_pf.model3d, ldm_source, points3d_det_names)
 
         smart_pf.setLandmarks(model_landmark_names, model_landmarks)
 
@@ -545,23 +539,18 @@ class TrackingLoopTools:
         disp_landmarks = []
 
         lnames = [l.name for l in landmarks]
-        landmarks_decoder = mbv.PF.LandmarksDecoder()
-        landmarks_decoder.decoder = decoder
-        landmark_points = landmarks_decoder.decode(state, landmarks)
+        if len(lnames) > 0:
+            landmarks_decoder = mbv.PF.LandmarksDecoder()
+            landmarks_decoder.decoder = decoder
+            landmark_points = landmarks_decoder.decode(state, landmarks)
+            disp_landmark_sets.append('LandmarksModel')
+            disp_landmark_names.append(lnames)
+            disp_landmarks.append(landmark_points)
 
-        if (len(lnames) > 0) and (len(detnames) > 0):
-            disp_landmark_sets = ['LandmarksModel', 'LandmmarksObs']
-            disp_landmark_names = [lnames, detnames]
-            disp_landmarks = [landmark_points, detpoints]
-        elif len(lnames) > 0:
-            disp_landmark_sets = ['LandmarksModel']
-            disp_landmark_names = [lnames]
-            disp_landmarks = [landmark_points]
-
-        elif len(detnames) > 0:
-            disp_landmark_sets = ['LandmarksObs']
-            disp_landmark_names = [detnames]
-            disp_landmarks = [detpoints]
+        if len(detnames) > 0:
+            disp_landmark_sets.append('LandmarksObs')
+            disp_landmark_names.append(detnames)
+            disp_landmarks.append(detpoints)
 
         return disp_landmark_sets, disp_landmark_names, disp_landmarks
 

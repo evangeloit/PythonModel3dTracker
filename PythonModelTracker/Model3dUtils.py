@@ -96,16 +96,12 @@ def GetCorrespondingLandmarks(model_name, ldm_model_names, ldm_model, ldm_obs_so
     return names_model_cor, ldm_model_cor, names_obs_cor, ldm_obs_cor
 
 
-def GenerateModelLandmarksfromObservationLandmarks(model3d, ldm_obs_source):
+def GenerateModelLandmarksfromObservationLandmarks(model3d, ldm_obs_source, ldm_obs_names = None):
     ldm_obs_source = str(ldm_obs_source)
     model_name = str(model3d.model_name)
-
     prim_dict = LG.primitives_dict[(ldm_obs_source, model_name)]
 
-    if ldm_obs_source in LG.observation_landmark_order:
-        ldm_obs_names = LG.observation_landmark_order[ldm_obs_source]
-        #print "ldm_obs_names",ldm_obs_names
-    else:
+    if ldm_obs_names is None:
         ldm_obs_names = [l for l in prim_dict]
     if (ldm_obs_source, model_name) in LG.model_landmark_positions:
         pos_dict = LG.model_landmark_positions[(ldm_obs_source, model_name)]

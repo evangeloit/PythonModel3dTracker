@@ -23,19 +23,19 @@ res_filename = None #os.path.join(Paths.datasets,"human_tracking/co4robots/ms1_g
 # PF Initialization
 hmf_arch_type = "2levels"
 pf_params = pfs.Load(model_name, model_class,hmf_arch_type)
-pf_params['pf']['n_particles'] = 1
+pf_params['pf']['n_particles'] = 100
 pf_params['pf']['init_state'] = tt.DatasetTools.GenInitState(params_ds, model3d)
 pf_params['meta_mult'] = 1
 pf_params['pf_listener_flag'] = False
-pf_params['pf']['enable_smart'] = True
+pf_params['pf']['enable_smart'] = False
 pf_params['pf']['smart_pf']['n_particles'] = 1
 pf_params['pf']['smart_pf']['smart_particles'] = 1
 
 # Objectives
 objective_params = {
     'enable': True, #pf_params['pf']['n_particles'] > pf_params['pf']['levmar_particles'],
-    'objective_weights':{'rendering':1.,
-                         'primitives':0.,
+    'objective_weights':{'rendering':0.5,
+                         'primitives':0.5,
                          'collisions':0.
                          },
     'depth_cutoff': 500,
