@@ -103,7 +103,7 @@ def CreateAuxModelMap(rng,model3d,hmf_params):
 
 
 def CreatePF(rng,model3d,pf_params):
-    if pf_params['type'] == 1:
+    if pf_params['type'] == "pf_std":
         return CreatePFStd(rng, model3d, pf_params)
     else:
         return CreatePFHMF(rng, model3d, pf_params)

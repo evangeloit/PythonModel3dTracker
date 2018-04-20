@@ -432,6 +432,7 @@ class TrackingLoopTools:
         model_landmark_names, model_landmarks = \
             M3DU.GenerateModelLandmarksfromObservationLandmarks(smart_pf.model3d, ldm_source, points3d_det_names)
 
+        smart_pf.SetObservationBlocks(smart_pf.ba, smart_pf.model3d, ldm_source, points3d_det_names)
         smart_pf.setLandmarks(model_landmark_names, model_landmarks)
 
         if smart_pf_params['interpolate_bones'] and (smart_pf_params['interpolate_num'] > 1):
@@ -510,7 +511,7 @@ class TrackingLoopTools:
                             frame_data = blconv.getFrameDataMBV(model3dmeta=model3d, state=state,
                                                                 mbv_camera=observations['calibs'][0],
                                                                 frames=[params_ds.limits[0], f, params_ds.limits[1]],
-                                                                images=observations[0], scale=0.001)
+                                                                images=observations['images'], scale=0.001)
                         else:
                             viz = visualizer.visualize_overlay(state, observations['calibs'][0],
                                                                observations['images'][1], disp_landmarks)

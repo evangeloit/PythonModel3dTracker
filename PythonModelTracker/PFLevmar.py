@@ -2,11 +2,21 @@ import numpy as np
 import PythonModel3dTracker.PyMBVAll as mbv
 import PyCeresIK as IK
 from PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber import OpenPoseGrabber
+from PythonModel3dTracker.PythonModelTracker.LandmarksCorrespondences import model_landmark_partitions
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
 import copy
 
 
+
+
+
+
 class SmartPF:
+    model_partitions = {
+        "mh_body_male_custom": ["global_pos", "r_arm", "l_arm", "r_leg", "l_leg", "head"],
+        "mh_body_male_customquat": ["global_pos", "r_arm", "l_arm", "r_leg", "l_leg", "head"],
+        "mh_body_male_custom_vector": ["global_pos", "r_arm", "l_arm", "r_leg", "l_leg", "head"]
+    }
 
     default_smart_particles = 10
     default_filter_ratios = [0.1, 0.2]
@@ -55,30 +65,47 @@ class SmartPF:
         self.landmarks = landmarks
         if self.ba is not None: self.ba.landmarks = landmarks
 
+
+    @staticmethod
+    def SetObservationBlocks(ba, model3d, obs_landmark_source, obs_landmark_names):
+
+        mlp = model_landmark_partitions[(obs_landmark_source, model3d.model_name)]
+        obs_blocks = IK.ObservationBlocks()
+        for n in model3d.partitions.partition_names:
+            cur_partition_mask = []
+            for l in obs_landmark_names:
+                if mlp[l] == n: cur_partition_mask.append(1)
+                else: cur_partition_mask.append(0)
+            obs_blocks.append(mbv.Core.UIntVector(cur_partition_mask))
+            # print n, cur_partition_mask
+            # obs_blocks.append(mbv.Core.UIntVector([0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0]))
+            # obs_blocks.append(mbv.Core.UIntVector([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]))
+            # obs_blocks.append(mbv.Core.UIntVector([0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0]))
+            # obs_blocks.append(mbv.Core.UIntVector([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0]))
+            # obs_blocks.append(mbv.Core.UIntVector([0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]))
+            # obs_blocks.append(mbv.Core.UIntVector([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+        ba.observation_blocks = obs_blocks
+
     @staticmethod
     def CreateBA(model3d,decoder,landmarks):
-        ba = IK.ModelAwareBA()
+        ba = IK.ModelAwareBABlocks()
+
         lmv = IK.LandmarksVector()
         for l in landmarks: lmv.append(l)
         ba.decoder = decoder
+
+        partitions = mbv.PF.StatePartition()
+        for n, p in zip(model3d.partitions.partitions.keys(), model3d.partitions.partitions.values()):
+            if n in SmartPF.model_partitions[model3d.model_name]:
+                partitions.addNamedPartition(n, model3d.partitions.partitions[n])
+        model3d.partitions = partitions
         ba.model3d = model3d
-        ba.low_bounds = model3d.low_bounds
-        ba.high_bounds = model3d.high_bounds
-        # assert (type(decoder) is mbv.Dec.GenericDecoderGPU) or \
-        #        (type(decoder) is mbv.Dec.StateTransformDecoder)
-        # if type(decoder) is mbv.Dec.GenericDecoderGPU:
-        #     ba.decoder = decoder
-        #     ba.low_bounds = model3d.low_bounds
-        #     ba.high_bounds = model3d.high_bounds
-        # else:
-        #     ba.decoder = decoder.delegate
-        #     st = decoder.state_transformer
-        #     ba.low_bounds = st.process(model3d.low_bounds, mbv.Dec.StateTransformDirection.Forward)
-        #     ba.high_bounds = st.process(model3d.high_bounds, mbv.Dec.StateTransformDirection.Forward)
-        #     print 'highBounds length:', len(ba.high_bounds)
+        #ba.low_bonunds = model3d.low_bounds
+        #ba.high_bounds = model3d.high_bounds
+
         ba.landmarks = lmv
-        ba.ceres_report = False
-        ba.max_iterations = 500
+        ba.ceres_report = True
+        ba.max_iterations = 50
         # ba.soft_bounds = True
 
         return ba

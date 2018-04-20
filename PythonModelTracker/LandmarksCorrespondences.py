@@ -80,6 +80,8 @@ primitives_dict = {
 primitives_dict[("damien", "human_ext_collisions")] = primitives_dict[("damien", "human_ext")]
 primitives_dict[("damien", "mh_body_male_meta")] = primitives_dict[("damien", "mh_body_male")]
 primitives_dict[("damien", "mh_body_male_meta_grpscl")] = primitives_dict[("damien", "mh_body_male")]
+primitives_dict[("COCO", "mh_body_male_customquat")] = primitives_dict[("COCO", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_custom_vector")] = primitives_dict[("COCO", "mh_body_male_custom")]
 primitives_dict[("COCO", "mh_body_male_custom_meta")] = primitives_dict[("COCO", "mh_body_male_custom")]
 primitives_dict[("COCO", "mh_body_male_custom_0850")] = primitives_dict[("COCO", "mh_body_male_custom")]
 primitives_dict[("COCO", "mh_body_male_custom_0900")] = primitives_dict[("COCO", "mh_body_male_custom")]
@@ -95,7 +97,11 @@ primitives_dict[("bvh", "mh_body_male_custom_0950")] = primitives_dict[("bvh", "
 primitives_dict[("bvh", "mh_body_male_custom_1050")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_custom_1100")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_custom_1150")] = primitives_dict[("bvh", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_customquat")] = primitives_dict[("bvh", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_custom_vector")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("csv", "mh_body_male_custom_0950")] = primitives_dict[("csv", "mh_body_male_custom")]
+primitives_dict[("csv", "mh_body_male_customquat")] = primitives_dict[("csv", "mh_body_male_custom")]
+primitives_dict[("csv", "mh_body_male_custom_vector")] = primitives_dict[("csv", "mh_body_male_custom")]
 
 # AMMAR Synthetic MHAD Correspondences.
 # landmark_names = [
@@ -127,15 +133,22 @@ model_landmark_positions = {
          'LeftArm': [0,0,0], 'LeftForeArm': [0, 0, 0], 'LeftHand': [0,0,0],
          'RightArm': [0,0,0], 'RightForeArm': [0, 0, 0], 'RightHand': [0,0,0],
          'Neck': [0,-20,0], 'spine': [0,0,0]
-        },
+        }
 }
+model_landmark_positions[("bvh", "mh_body_male_custom_vector")] = model_landmark_positions[("bvh", "mh_body_male_custom")]
+model_landmark_positions[("bvh", "mh_body_male_customquat")] = model_landmark_positions[("bvh", "mh_body_male_custom")]
 
 
-observation_landmark_order = {
-    "COCO":["Nose","neck",
-            "R.UArm","R.LArm","R.Wrist",
-            "L.UArm","L.LArm","L.Wrist",
-            "R.ULeg","R.LLeg","R.Foot",
-            "L.ULeg","L.LLeg","L.Foot",
-            "R.eye","L.eye","R.ear","L.ear"]
+# Maps observation landmarks to model partitions
+# for each (landmard_detection_source, skinned_model) pair.
+model_landmark_partitions = {
+    ("bvh", "mh_body_male_custom"):
+        {'LeftUpLeg': "global_pos", 'LeftLeg': "l_leg", 'LeftFoot': "l_leg",
+         'RightUpLeg':"global_pos", 'RightLeg': "r_leg", 'RightFoot': "r_leg",
+         'LeftArm': "global_pos", 'LeftForeArm': "l_arm", 'LeftHand': "l_arm",
+         'RightArm': "global_pos", 'RightForeArm': "r_arm", 'RightHand': "r_arm",
+         'Neck': "head", 'spine': "global_pos"
+        }
 }
+model_landmark_partitions[("bvh", "mh_body_male_custom_vector")] = model_landmark_partitions[("bvh", "mh_body_male_custom")]
+model_landmark_partitions[("bvh", "mh_body_male_customquat")] = model_landmark_partitions[("bvh", "mh_body_male_custom")]
