@@ -112,12 +112,12 @@ def GenerateModelLandmarksfromObservationLandmarks(model3d, ldm_obs_source, ldm_
     model_primitive_names = mbv.Core.StringVector([LG.primitives_dict[(ldm_obs_source, model_name)][n] for n in ldm_obs_names ])
 
     model_landmark_names = mbv.Core.StringVector(ldm_obs_names)
-    print model_primitive_names
+    #print model_primitive_names
     if pos_dict:
         model_landmark_positions = mbv.Core.Vector3fStorage([mbv.Core.Vector3(lp) for n,lp in pos_dict.items()])
     else:
         model_landmark_positions = mbv.Core.Vector3fStorage([mbv.Core.Vector3([0,0,0])] * len(ldm_obs_names))
-    print len(model_landmark_positions), len(model_landmark_names), len(model_primitive_names)
+    #print len(model_landmark_positions), len(model_landmark_names), len(model_primitive_names)
 
     model_landmarks = mbv.PF.Landmark3dInfoSkinned.create_multiple(model_landmark_names,
                                                                    model_primitive_names,

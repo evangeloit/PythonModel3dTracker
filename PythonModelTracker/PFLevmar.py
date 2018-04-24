@@ -5,7 +5,7 @@ from PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber import OpenPoseGrab
 from PythonModel3dTracker.PythonModelTracker.LandmarksCorrespondences import model_landmark_partitions
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
 import copy
-
+import time
 
 
 
@@ -77,18 +77,19 @@ class SmartPF:
                 if mlp[l] == n: cur_partition_mask.append(1)
                 else: cur_partition_mask.append(0)
             obs_blocks.append(mbv.Core.UIntVector(cur_partition_mask))
-            # print n, cur_partition_mask
-            # obs_blocks.append(mbv.Core.UIntVector([0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0]))
-            # obs_blocks.append(mbv.Core.UIntVector([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]))
-            # obs_blocks.append(mbv.Core.UIntVector([0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0]))
-            # obs_blocks.append(mbv.Core.UIntVector([0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0]))
-            # obs_blocks.append(mbv.Core.UIntVector([0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]))
-            # obs_blocks.append(mbv.Core.UIntVector([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+            print n, cur_partition_mask
         ba.observation_blocks = obs_blocks
 
     @staticmethod
-    def CreateBA(model3d,decoder,landmarks):
-        ba = IK.ModelAwareBABlocks()
+    def CreateBA(model3d,decoder,landmarks,
+                 params={"enable_blocks" : False,
+                         "ceres_report": False,
+                         "max_iterations": 50}):
+
+        if params["enable_blocks"]:
+            ba = IK.ModelAwareBABlocks()
+        else:
+            ba = IK.ModelAwareBA()
 
         lmv = IK.LandmarksVector()
         for l in landmarks: lmv.append(l)
@@ -100,12 +101,12 @@ class SmartPF:
                 partitions.addNamedPartition(n, model3d.partitions.partitions[n])
         model3d.partitions = partitions
         ba.model3d = model3d
-        #ba.low_bonunds = model3d.low_bounds
-        #ba.high_bounds = model3d.high_bounds
+        ba.low_bounds = model3d.low_bounds
+        ba.high_bounds = model3d.high_bounds
 
         ba.landmarks = lmv
-        ba.ceres_report = True
-        ba.max_iterations = 50
+        ba.ceres_report = params["ceres_report"]
+        ba.max_iterations = params["max_iterations"]
         # ba.soft_bounds = True
 
         return ba
@@ -149,7 +150,9 @@ class SmartPF:
                 # do something with
                 cur_state = mbv.Core.DoubleVector(particles[:, i])
                 #print 'cur_state:', cur_state
+                t1 = time.time()
                 score, results = self.ba.solve(observations[0], cur_state)
+                print "Opt fps:", 1.0 / (time.time() - t1)
 
                 particles[:,i] = results
         #for f in range(n_particles):

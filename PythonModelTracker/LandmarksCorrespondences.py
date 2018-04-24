@@ -22,24 +22,24 @@ primitives_dict = {
      'thumb.03.R':'thumb.03.R',
      'f_index.03.R':'f_index.03.R'},
     ("COCO", "mh_body_male_custom"):
-    {'L.LLeg': 'L.LLeg',
-     'L.ULeg': 'L.ULeg',
-     'R.LLeg': 'R.LLeg',
-     'R.Foot': 'R.Foot',
-     'R.LArm': 'R.LArm',
-     'R.eye': 'R.eye',
-     'L.LArm': 'L.LArm',
-     'L.Wrist': 'L.Wrist',
-     'R.ULeg': 'R.ULeg',
-     'R.ear': 'R.ear',
-     'L.ear': 'L.ear',
-     'L.eye': 'L.eye',
+    {'LKnee': 'L.LLeg',
+     'LHip': 'L.ULeg',
+     'RKnee': 'R.LLeg',
+     'RAnkle': 'R.Foot',
+     'RElbow': 'R.LArm',
+     'REye': 'R.eye',
+     'LElbow': 'L.LArm',
+     'LWrist': 'L.Wrist',
+     'RHip': 'R.ULeg',
+     'REar': 'R.ear',
+     'LEar': 'L.ear',
+     'LEye': 'L.eye',
      'Nose': 'Nose',
-     'L.UArm': 'L.UArm',
-     'neck': 'neck',
-     'R.Wrist': 'R.Wrist',
-     'R.UArm': 'R.UArm',
-     'L.Foot': 'L.Foot'},
+     'LShoulder': 'L.UArm',
+     'Neck': 'neck',
+     'RWrist': 'R.Wrist',
+     'RShoulder': 'R.UArm',
+     'LAnkle': 'L.Foot'},
     ("bvh", "mh_body_male_custom"):
         {'LeftUpLeg': 'L.ULeg', 'LeftLeg': 'L.LLeg', 'LeftFoot': 'L.Foot',
          'RightUpLeg': 'R.ULeg', 'RightLeg': 'R.LLeg', 'RightFoot': 'R.Foot',
@@ -148,7 +148,17 @@ model_landmark_partitions = {
          'LeftArm': "global_pos", 'LeftForeArm': "l_arm", 'LeftHand': "l_arm",
          'RightArm': "global_pos", 'RightForeArm': "r_arm", 'RightHand': "r_arm",
          'Neck': "head", 'spine': "global_pos"
-        }
+        },
+    ("COCO", "mh_body_male_custom"):
+    {"Nose":"head", "Neck":"head",
+             "RShoulder":"global_pos", "RElbow":"r_arm", "RWrist":"r_arm",
+             "LShoulder":"global_pos", "LElbow":"l_arm", "LWrist":"l_arm",
+             "RHip":"global_pos", "RKnee": "r_leg", "RAnkle": "r_leg",
+             "LHip":"global_pos", "LKnee": "l_leg", "LAnkle": "l_leg",
+             "REye": "head", "LEye": "head", "REar": "head", "LEar": "head"
+     }
 }
 model_landmark_partitions[("bvh", "mh_body_male_custom_vector")] = model_landmark_partitions[("bvh", "mh_body_male_custom")]
 model_landmark_partitions[("bvh", "mh_body_male_customquat")] = model_landmark_partitions[("bvh", "mh_body_male_custom")]
+model_landmark_partitions[("COCO", "mh_body_male_custom_vector")] = model_landmark_partitions[("COCO", "mh_body_male_custom")]
+model_landmark_partitions[("COCO", "mh_body_male_customquat")] = model_landmark_partitions[("COCO", "mh_body_male_custom")]

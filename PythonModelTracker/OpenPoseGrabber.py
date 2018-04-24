@@ -12,22 +12,22 @@ import cv2
 
 class OpenPoseGrabber():
     landmark_names = {
-        "COCO":["Nose","neck",
-                "R.UArm","R.LArm","R.Wrist",
-                "L.UArm","L.LArm","L.Wrist",
-                "R.ULeg","R.LLeg","R.Foot",
-                "L.ULeg","L.LLeg","L.Foot",
-                "R.eye","L.eye","R.ear","L.ear"]
-        # "COCO":[
-        #     "Nose", "Neck",
-        #     "RShoulder", "RElbow", "RWrist",
-        #     "LShoulder", "LElbow", "LWrist",
-        #     "RHip", "RKnee", "RAnkle",
-        #     "LHip", "LKnee", "LAnkle",
-        #     "REye", "LEye", "REar", "LEar",
-        #     "Background"
-        # ]
+         "COCO": [
+             "Nose", "Neck",
+             "RShoulder", "RElbow", "RWrist",
+             "LShoulder", "LElbow", "LWrist",
+             "RHip", "RKnee", "RAnkle",
+             "LHip", "LKnee", "LAnkle",
+             "REye", "LEye", "REar", "LEar"
+         ]
+    #     "COCO":["Nose","neck",
+    #             "R.UArm","R.LArm","R.Wrist",
+    #             "L.UArm","L.LArm","L.Wrist",
+    #             "R.ULeg","R.LLeg","R.Foot",
+    #             "L.ULeg","L.LLeg","L.Foot",
+    #             "R.eye","L.eye","R.ear","L.ear"]
     }
+
     depth_diffs = {"COCO": [11,90,80,40,20,80,40,20,100,70,44,100,70,44,25,25,15,15]}
     def __init__(self,net_size=(320,240),res_size=(640,480),model_op = 'COCO',
                  model_op_path=None):

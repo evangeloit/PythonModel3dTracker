@@ -119,7 +119,7 @@ class ParticleFilterTools:
         for i,l in enumerate(landmarks): print i, l.name, l.linked_geometry, l.bone_id, l.pos, l.ref_frame
 
         smart_pf = pfl.SmartPF(rng, model3d, pf_params['pf'])
-        smart_pf.ba = pfl.SmartPF.CreateBA(model3d, decoder, landmarks)
+        smart_pf.ba = pfl.SmartPF.CreateBA(model3d, decoder, landmarks, pf_params['pf']['smart_pf'])
         smart_pf.setLandmarks(lnames, landmarks)
         return smart_pf, rng
 
@@ -432,7 +432,8 @@ class TrackingLoopTools:
         model_landmark_names, model_landmarks = \
             M3DU.GenerateModelLandmarksfromObservationLandmarks(smart_pf.model3d, ldm_source, points3d_det_names)
 
-        smart_pf.SetObservationBlocks(smart_pf.ba, smart_pf.model3d, ldm_source, points3d_det_names)
+        if smart_pf_params['enable_blocks']:
+            smart_pf.SetObservationBlocks(smart_pf.ba, smart_pf.model3d, ldm_source, points3d_det_names)
         smart_pf.setLandmarks(model_landmark_names, model_landmarks)
 
         if smart_pf_params['interpolate_bones'] and (smart_pf_params['interpolate_num'] > 1):
