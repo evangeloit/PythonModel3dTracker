@@ -115,7 +115,7 @@ class OpenPoseGrabber():
 
     @staticmethod
     def FilterKeypointsRandom(keypoints3d, keypoints2d, ratios=[0.1, 0.2]):
-        print ratios
+        #print ratios
         keypoints_out = core.Vector3fStorage(keypoints3d)
         n = len(keypoints3d)
         ratio2d = min(ratios[0],ratios[1])

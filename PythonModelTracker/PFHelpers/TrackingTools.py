@@ -106,21 +106,21 @@ class ParticleFilterTools:
     def GenSmartPF(pf_params, model3d, decoder, rng=None):
         if rng is None: rng = mbv.PF.RandomNumberGeneratorOpencv()
         landmarks_source = pf_params['pf']['smart_pf']['model']
-        primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
-            opg.OpenPoseGrabber.landmark_names[landmarks_source],landmarks_source, model3d.model_name)
-
-        if pf_params['pf']['smart_pf']['interpolate_bones'] and pf_params['pf']['smart_pf']['interpolate_num'] > 1:
-            lnames, landmarks = \
-                M3DU.GetInterpModelLandmarks(model3d=model3d,default_bones=primitive_names,
-                    interpolated_bones=pf_params['pf']['smart_pf']['interpolate_bones'],
-                    n_interp=pf_params['pf']['smart_pf']['interpolate_num'])
-        else:
-            lnames, landmarks = M3DU.GetDefaultModelLandmarks(model3d, primitive_names)
-        for i,l in enumerate(landmarks): print i, l.name, l.linked_geometry, l.bone_id, l.pos, l.ref_frame
+        # primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
+        #     #opg.OpenPoseGrabber.landmark_names[landmarks_source],landmarks_source, model3d.model_name)
+        #
+        # if pf_params['pf']['smart_pf']['interpolate_bones'] and pf_params['pf']['smart_pf']['interpolate_num'] > 1:
+        #     lnames, landmarks = \
+        #         M3DU.GetInterpModelLandmarks(model3d=model3d,default_bones=primitive_names,
+        #             interpolated_bones=pf_params['pf']['smart_pf']['interpolate_bones'],
+        #             n_interp=pf_params['pf']['smart_pf']['interpolate_num'])
+        # else:
+        #     lnames, landmarks = M3DU.GetDefaultModelLandmarks(model3d, primitive_names)
+        # for i,l in enumerate(landmarks): print i, l.name, l.linked_geometry, l.bone_id, l.pos, l.ref_frame
 
         smart_pf = pfl.SmartPF(rng, model3d, pf_params['pf'])
-        smart_pf.ba = pfl.SmartPF.CreateBA(model3d, decoder, landmarks, pf_params['pf']['smart_pf'])
-        smart_pf.setLandmarks(lnames, landmarks)
+        smart_pf.ba = pfl.SmartPF.CreateBA(model3d, decoder, [], pf_params['pf']['smart_pf'])
+        #smart_pf.setLandmarks(lnames, landmarks)
         return smart_pf, rng
 
 

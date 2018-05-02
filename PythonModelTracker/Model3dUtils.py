@@ -1,6 +1,7 @@
 import numpy as np
 import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
+import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as DMU
 
 
 
@@ -185,12 +186,20 @@ def p3d_interp(p0, p1, n):
     return points
 
 
-def GetInterpKeypointsModel(landmark_source, model3d, point_names, keypoints3d, keypoints2d, interpolate_set, n_interp=5):
-    #interpolate_set = ["R.UArm", "R.LArm", "R.ULeg", "R.LLeg", "L.UArm", "L.LArm", "L.ULeg", "L.LLeg"]
+def GetInterpKeypointsModel(camera, depth, landmark_source, model3d, point_names,  keypoints2d, interpolate_set, n_interp=5):
     point_pairs = GetConsecutiveKeypointPairs(point_names, landmark_source, model3d, interpolate_set)
     point_names_, keypoints3d_, keypoints2d_ = \
-        GetInterpKeypoints(point_names=point_names, keypoints3d=keypoints3d,
+        GetInterpKeypoints(camera=camera, depth=depth,point_names=point_names,
                            keypoints2d=keypoints2d, point_pairs=point_pairs, n_interp=n_interp)
+    return point_names_, keypoints3d_, keypoints2d_
+
+
+def GetInterpKeypointsModelSets(camera, depth,landmark_source, model3d, point_names, keypoints2d, interpolate_set, n_interp=5):
+    point_pairs = GetConsecutiveKeypointPairs(point_names, landmark_source, model3d, interpolate_set)
+    point_names_, keypoints3d_, keypoints2d_ = \
+        GetInterpKeypointsSets(camera=camera, depth=depth,
+                               point_names=point_names,
+                               keypoints2d=keypoints2d, point_pairs=point_pairs, n_interp=n_interp)
     return point_names_, keypoints3d_, keypoints2d_
 
 
@@ -207,36 +216,57 @@ def GetConsecutiveKeypointPairs(point_names, landmark_source, model3d, selected_
     return point_pairs
 
 
-def GetInterpKeypoints(point_names, keypoints3d, keypoints2d, point_pairs=[], n_interp=5):
+def GetInterpKeypoints(camera, depth, point_names, keypoints2d, point_pairs=[], n_interp=5):
+    point_names_sets, keypoints3d_sets, keypoints2d_sets = \
+        GetInterpKeypointsSets(camera, depth, point_names, keypoints2d, point_pairs, n_interp)
+
+    point_names_ = [p for ps in point_names_sets for p in ps]
+    keypoints2d_ = mbv.Core.Vector2fStorage([p for ps in keypoints2d_sets for p in ps])
+    keypoints3d_ = mbv.Core.Vector3fStorage([p for ps in keypoints3d_sets for p in ps])
+    return point_names_, keypoints3d_, keypoints2d_
+
+
+def GetInterpKeypointsSets(camera, depth, point_names, keypoints2d, point_pairs=[], n_interp=5):
     #children = GetNodeChildren(model3d)
     kp2d_dict = {}
     for n, p2d in zip(point_names, keypoints2d): kp2d_dict[n] = p2d
-    kp3d_dict = {}
-    for n, p3d in zip(point_names, keypoints3d): kp3d_dict[n] = p3d
+    #kp3d_dict = {}
+    #for n, p3d in zip(point_names, keypoints3d): kp3d_dict[n] = p3d
 
     interpolate_set = [p0 for (p0,p1) in point_pairs]
     default_set = [n for n in point_names if n not in interpolate_set]
 
     point_names_ = []
-    keypoints2d_ = mbv.Core.Vector2fStorage()
-    keypoints3d_ = mbv.Core.Vector3fStorage()
+    keypoints2d_ = []
+    keypoints3d_ = []
 
     for n in default_set:
-        point_names_.append(n)
-        keypoints2d_.append(kp2d_dict[n])
-        keypoints3d_.append(kp3d_dict[n])
+        point_names_.append([n])
+        k2d = mbv.Core.Vector2fStorage([kp2d_dict[n]])
+        keypoints2d_.append(k2d)
+        k3d = DMU.UnprojectPoints(k2d, camera, depth)
+        keypoints3d_.append(k3d)
 
     for n0,n1 in point_pairs:
+        keypoints2d_cur = mbv.Core.Vector2fStorage()
+        #keypoints3d_cur = mbv.Core.Vector3fStorage()
+        point_names_cur = []
+
         p0 = kp2d_dict[n0]
         p1 = kp2d_dict[n1]
         cur_p2d = p2d_interp(p0, p1, n_interp)
         for i, p in enumerate(cur_p2d):
             lname = "{0}_{1:02d}".format(n0, i)
-            point_names_.append(lname)
-            keypoints2d_.append(p)
+            point_names_cur.append(lname)
+            keypoints2d_cur.append(p)
 
-        p0 = kp3d_dict[n0]
-        p1 = kp3d_dict[n1]
-        cur_p3d = p3d_interp(p0, p1, n_interp)
-        for p in cur_p3d: keypoints3d_.append(p)
+        keypoints3d_cur = DMU.UnprojectPoints(keypoints2d_cur,camera,depth)
+
+        #p0 = kp3d_dict[n0]
+        #p1 = kp3d_dict[n1]
+        #cur_p3d = p3d_interp(p0, p1, n_interp)
+        #for p in cur_p3d: keypoints3d_cur.append(p)
+        keypoints2d_.append(keypoints2d_cur)
+        keypoints3d_.append(keypoints3d_cur)
+        point_names_.append(point_names_cur)
     return point_names_, keypoints3d_, keypoints2d_

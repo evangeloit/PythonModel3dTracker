@@ -101,8 +101,9 @@ class SmartPF:
                 partitions.addNamedPartition(n, model3d.partitions.partitions[n])
         model3d.partitions = partitions
         ba.model3d = model3d
-        ba.low_bounds = model3d.low_bounds
-        ba.high_bounds = model3d.high_bounds
+        if params["enable_bounds"]:
+            ba.low_bounds = model3d.low_bounds
+            ba.high_bounds = model3d.high_bounds
 
         ba.landmarks = lmv
         ba.ceres_report = params["ceres_report"]

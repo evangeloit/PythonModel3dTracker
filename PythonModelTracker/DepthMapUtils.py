@@ -1,5 +1,5 @@
 import numpy as np
-
+import PythonModel3dTracker.PyMBVAll as mbv
 
 
 
@@ -12,6 +12,11 @@ def Filter3DRect(depthmap,bb,z,depth_cutoff):
     depthmap[depthmap < z - depth_cutoff] = 0
     return depthmap
 
+def GetMedianDepths(points, depthmap, w=4):
+    depths = []
+    for p in points:
+        depths.append(GetMedianDepth(p,depthmap,w))
+    return depths
 
 def GetMedianDepth(p,depthmap,w=4):
     x = p.x
@@ -25,3 +30,8 @@ def GetMedianDepth(p,depthmap,w=4):
     else:
         d = 0
     return d
+
+def UnprojectPoints(points2d, camera, depth, w=4):
+    kp_depths = mbv.Core.SingleVector(GetMedianDepths(points2d, depth, w))
+    points3d = camera.unproject(points2d, kp_depths)
+    return points3d

@@ -17,7 +17,7 @@ if __name__ == '__main__':
     images, calibs = grabber.grab()
 
     op = opg.OpenPoseGrabber(model_op_path=Paths.models_openpose)
-    point_names, keypoints, keypoints2d, clb = op.acquire(images, calibs)
+    point_names, keypoints, keypoints2d, clb, _ = op.acquire(images, calibs)
     viz = images[1]
     viz = ru.disp_points(keypoints2d[0], viz)
 

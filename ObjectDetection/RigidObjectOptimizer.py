@@ -68,7 +68,7 @@ class RigidObjectOptimizer:
     def optimize(self,imgs,clbs, state_):
         state = mbv.Core.DoubleVector(state_)
         camera = clbs[0]
-        print 'state posest:', state
+
         self.model3dobj.observations = imgs
         self.model3dobj.virtual_camera = camera
         bb = self.model3dobj.computeBoundingBox(state, .2)
@@ -76,6 +76,7 @@ class RigidObjectOptimizer:
         self.model3dobj.preprocessObservations()
 
         m3d = self.model3d
+        print 'Dimensions:', m3d.n_dims
 
         pso = mbv.Opt.PSOVariantOptimizer(self.settings['particles'],self.settings['generations'])
         pso.setBounds(m3d.low_bounds, m3d.high_bounds)
