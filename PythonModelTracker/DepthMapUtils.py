@@ -35,3 +35,9 @@ def UnprojectPoints(points2d, camera, depth, w=4):
     kp_depths = mbv.Core.SingleVector(GetMedianDepths(points2d, depth, w))
     points3d = camera.unproject(points2d, kp_depths)
     return points3d
+
+def UnprojectPointSets(points2dsets, camera, depth, w=4):
+    keypoints3dsets = []
+    for kps2d in points2dsets:
+        keypoints3dsets.append(UnprojectPoints(kps2d,camera,depth,w))
+    return keypoints3dsets

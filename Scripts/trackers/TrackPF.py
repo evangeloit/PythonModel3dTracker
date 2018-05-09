@@ -11,7 +11,7 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'mhad_s05_a04'
+dataset = 'mhad_s09_a04'
 model_name = 'mh_body_male_custom_vector'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
@@ -29,7 +29,7 @@ pf_params['meta_mult'] = 1
 pf_params['pf_listener_flag'] = False
 pf_params['pf']['enable_smart'] = True
 pf_params['pf']['smart_pf']['smart_particles'] = 1
-pf_params['pf']['smart_pf']['enable_blocks'] = True
+pf_params['pf']['smart_pf']['enable_blocks'] = False
 pf_params['pf']['smart_pf']['enable_bounds'] = True
 pf_params['pf']['smart_pf']['ceres_report'] = False
 pf_params['pf']['smart_pf']['max_iterations'] = 50

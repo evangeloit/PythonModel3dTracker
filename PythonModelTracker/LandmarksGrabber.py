@@ -52,8 +52,7 @@ class LandmarksGrabber:
         idx_obs = [ldm_obs_names.index(g) for g in lnames_cor]
 
         names_obs_cor = [ldm_obs_names[l] for l in idx_obs]
-        ldm_obs_cor = [[float(ldm_obs[l].data[0, 0]), float(ldm_obs[l].data[1, 0]),
-                        float(ldm_obs[l].data[2, 0])] for l in idx_obs]
+        ldm_obs_cor = mbv.Core.Vector3fStorage([ldm_obs[l] for l in idx_obs])
         return names_obs_cor, ldm_obs_cor
 
     @staticmethod
@@ -95,13 +94,17 @@ class LandmarksGrabber:
 
         self.points_vec = LandmarksGrabber.np2pvec(points)
 
+
         self.f_count += 1
 
         if self.filter_landmarks:
             self.point_names, self.points_vec = \
                 LandmarksGrabber.GetFilteredLandmarks(self.model_name, self.source, self.point_names, self.points_vec)
 
-        return self.point_names, [self.points_vec], [ [] ], self.clb, self.source
+
+        self.points2d_vec = calibs[0].project(mbv.Core.Vector3fStorage(self.points_vec))
+
+        return self.point_names, [self.points_vec], [ self.points2d_vec ], self.clb, self.source
 
 
     @staticmethod

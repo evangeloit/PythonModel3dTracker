@@ -3,7 +3,7 @@ import PythonModel3dTracker.PyMBVAll as mbv
 import PyCeresIK as IK
 from PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber import OpenPoseGrabber
 from PythonModel3dTracker.PythonModelTracker.LandmarksCorrespondences import model_landmark_partitions
-import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
+import PythonModel3dTracker.PythonModelTracker.Features2DUtils as FU
 import copy
 import time
 
@@ -143,9 +143,9 @@ class SmartPF:
         if self.keypoints3d is not None:
             #print 'SmartPF Dynamic: LEVMAR'
             for i in range(self.smart_particles):
-                keypoints_cur = OpenPoseGrabber.FilterKeypointsRandom(self.keypoints3d,
-                                                                      self.keypoints2d,
-                                                                      self.filter_ratios)
+                keypoints_cur = FU.FilterKeypointsRandom(self.keypoints3d,
+                                                         self.keypoints2d,
+                                                         self.filter_ratios)
                 #print 'keypoints_cur:',keypoints_cur
                 observations = OpenPoseGrabber.ConvertIK([keypoints_cur], self.calib)
                 # do something with

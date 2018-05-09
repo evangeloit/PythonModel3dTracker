@@ -8,21 +8,12 @@ import PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber as opg
 import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
 import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as DMU
 import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
+import PythonModel3dTracker.PythonModelTracker.GeomUtils as GU
 import PythonModel3dTracker.Paths as Paths
 import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 
 
-def LineDist(p1, p2, points):
-    p1 = np.array([p1.x, p1.y, p1.z])
-    p2 = np.array([p2.x, p2.y, p2.z])
-    dists = []
-    for p in points:
-        p = np.array([p.x, p.y, p.z])
-        cur_dist = np.linalg.norm(np.cross(p2-p1, p-p1))/np.linalg.norm(p2-p1)
-        #print p1, p2, p, cur_dist
-        dists.append(cur_dist)
-    mean_dist = np.average(dists)
-    return mean_dist
+
 
 
 # Unit test.
@@ -56,31 +47,32 @@ if __name__ == '__main__':
         rgb = images[1]
 
         #kp_depths = DMU.GetMedianDepths(keypoints2d[0], dpt, 4)
-        point_names_, keypoints3d_, keypoints2d_ =\
-            M3DU.GetInterpKeypointsModelSets(camera=calibs[0],
-                                             depth=dpt,
-                                             landmark_source=ldm_source,
+        point_names_, keypoints2d_ =\
+            M3DU.GetInterpKeypointsModelSets(landmark_source=ldm_source,
                                              model3d=model3d,
                                              point_names=point_names,
                                              keypoints2d=keypoints2d[0],
                                              interpolate_set=interpolate_bones)
+        keypoints3d_ = DMU.UnprojectPointSets(keypoints2d_, calibs[0], dpt)
 
-        _, _, keypoints2d_all = \
-            M3DU.GetInterpKeypointsModel(camera=calibs[0],
-                                        depth=dpt,
-                                        landmark_source=ldm_source,
-                                        model3d=model3d,
-                                        point_names=point_names,
-                                        keypoints2d=keypoints2d[0],
-                                        interpolate_set=interpolate_bones)
+        _, keypoints2d_all = \
+            M3DU.GetInterpKeypointsModel(landmark_source=ldm_source,
+                                         model3d=model3d,
+                                         point_names=point_names,
+                                         keypoints2d=keypoints2d[0],
+                                         interpolate_set=interpolate_bones)
+
+
 
         for n, p3d, p2d in zip(point_names_, keypoints3d_, keypoints2d_):
             if len(p3d)>2:
-                line_dist = LineDist(p3d[0], p3d[-1],p3d[2:-1])
+                line_dist = GU.NormalizedLineDist(p3d[0], p3d[-1],p3d[2:-1],50)
             else:
                 line_dist = 0
 
-            print n[0], '\t', line_dist
+
+
+            print n[0], '\t', line_dist, p2d
 
 
         viz = ru.disp_points(keypoints2d_all, rgb)

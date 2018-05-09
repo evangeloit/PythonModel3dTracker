@@ -113,28 +113,7 @@ class OpenPoseGrabber():
         #print kp
         return kp
 
-    @staticmethod
-    def FilterKeypointsRandom(keypoints3d, keypoints2d, ratios=[0.1, 0.2]):
-        #print ratios
-        keypoints_out = core.Vector3fStorage(keypoints3d)
-        n = len(keypoints3d)
-        ratio2d = min(ratios[0],ratios[1])
-        ratio3d = max(ratios[0], ratios[1])
-        xclude_indices_3d = np.unique(np.random.choice(n, int(ratio3d*n), replace=True))
-        if xclude_indices_3d.size == 0:
-            xclude_indices_2d = xclude_indices_3d
-        else:
-            xclude_indices_2d = np.unique(np.random.choice(xclude_indices_3d, int(ratio2d*n), replace=True))
-        for xind in xclude_indices_3d:
-            keypoints_out[xind].x = keypoints2d[xind].x
-            keypoints_out[xind].y = keypoints2d[xind].y
-            keypoints_out[xind].z = 0
-        for xind in xclude_indices_2d:
-            keypoints_out[xind].x = 0
-            keypoints_out[xind].y = 0
-            keypoints_out[xind].z = 0
-        # print 'Keypoints_out:\n', keypoints_out
-        return keypoints_out
+
 
     @staticmethod
     def PrepareRGBDKeypoints(points2d_, depth, clb, w=4):

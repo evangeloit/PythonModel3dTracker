@@ -11,6 +11,8 @@ import PythonModel3dTracker.Paths as Paths
 import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
 import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
 import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
+import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as DMU
+import PythonModel3dTracker.PythonModelTracker.Features2DUtils as FU
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
@@ -419,7 +421,7 @@ class TrackingLoopTools:
 
     @staticmethod
     def SetupSmartPFObjective(observations, smart_pf, smart_pf_params):
-        # images = observations['images']
+        depth = observations['images'][0]
         # calibs = observations['calibs']
         landmark_observations = observations['landmarks']
         points3d_det_names = landmark_observations[0]
@@ -429,24 +431,47 @@ class TrackingLoopTools:
         ldm_calib = landmark_observations[3]
         ldm_source = landmark_observations[4]
 
-        model_landmark_names, model_landmarks = \
-            M3DU.GenerateModelLandmarksfromObservationLandmarks(smart_pf.model3d, ldm_source, points3d_det_names)
-
         if smart_pf_params['enable_blocks']:
             smart_pf.SetObservationBlocks(smart_pf.ba, smart_pf.model3d, ldm_source, points3d_det_names)
-        smart_pf.setLandmarks(model_landmark_names, model_landmarks)
+
 
         if smart_pf_params['interpolate_bones'] and (smart_pf_params['interpolate_num'] > 1):
+            primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
+                points3d_det_names, ldm_source, smart_pf.model3d.model_name)
+            model_landmark_names_, model_landmarks_ = \
+                M3DU.GetInterpModelLandmarks(model3d=smart_pf.model3d, default_bones=primitive_names,
+                                             interpolated_bones=smart_pf_params['interpolate_bones'],
+                                             n_interp=smart_pf_params['interpolate_num'])
+
             smart_pf_model = smart_pf_params['model']
             interpolate_set = smart_pf_params['interpolate_bones']
             n_interp = smart_pf_params['interpolate_num']
-            points3d_det_names, points3d_det, points2d_det = \
-                M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names,
-                                             points3d_det, points2d_det, interpolate_set, n_interp)
-        #for i,(p, k3, k2) in enumerate(zip(points3d_det_names, points3d_det, points2d_det)): print i, p, k3, k2
+            # points3d_det_names, points3d_det, points2d_det = \
+            #     M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names,
+            #                                  points3d_det, points2d_det, interpolate_set, n_interp)
+            points3d_det_setnames_, points3d_det_names_, points2d_det_ = \
+                M3DU.GetInterpKeypointsModelSets(landmark_source=ldm_source,
+                                                 model3d=smart_pf.model3d,
+                                                 point_names=points3d_det_names,
+                                                 keypoints2d=points2d_det,
+                                                 interpolate_set=interpolate_set,
+                                                 n_interp=n_interp)
+            points3d_det_ = DMU.UnprojectPointSets(points2d_det_, ldm_calib, depth)
+            accepted_det_mask, points3d_det_names, points3d_det,points2d_det = \
+                FU.FilterKeypointsDepth(points3d_det_names_, points3d_det_, points2d_det_, 0.5)
+            model_landmark_names = [m for m,a in zip(model_landmark_names_, accepted_det_mask) if a]
+            model_landmarks_ = [m for m, a in zip(model_landmarks_, accepted_det_mask) if a]
+            model_landmarks = mbv.PF.Landmark3dInfoVec(mbv.PF.Landmark3dInfoSkinnedVec())
+            for l in model_landmarks_: model_landmarks.append(l)
+        else:
+            model_landmark_names, model_landmarks = \
+                M3DU.GenerateModelLandmarksfromObservationLandmarks(smart_pf.model3d, ldm_source ,points3d_det_names)
+        print len(model_landmarks), len(points3d_det), len(points2d_det), len(model_landmark_names)
+        for i,(no, nm) in enumerate(zip(points3d_det_names, model_landmark_names)): print i, nm, no
         smart_pf.calib = ldm_calib
         smart_pf.keypoints3d = points3d_det
         smart_pf.keypoints2d = points2d_det
+        smart_pf.setLandmarks(model_landmark_names, model_landmarks)
 
         observations['landmarks'] = (points3d_det_names, [points3d_det], [points2d_det])
 
