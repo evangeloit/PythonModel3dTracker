@@ -150,7 +150,7 @@ def GetInterpModelLandmarks(model3d, default_bones=None, interpolated_bones=None
         positions.append(mbv.Core.Vector3(0, 0, 0))
 
     for b in interpolated_bones:
-        cur_y = np.linspace(0., bone_lengths[b], n_interp, endpoint=False)
+        cur_y = np.linspace(0., bone_lengths[b], n_interp, endpoint=True)
         for i, y in enumerate(cur_y):
             lname = "{0}_{1:02d}".format(b, i)
             landmark_names.append(lname)
@@ -171,16 +171,16 @@ def GetInterpModelLandmarks(model3d, default_bones=None, interpolated_bones=None
 
 
 def p2d_interp(p0, p1, n):
-    X = np.linspace(p0.x, p1.x, n, endpoint=False)
-    Y = np.linspace(p0.y, p1.y, n, endpoint=False)
+    X = np.linspace(p0.x, p1.x, n, endpoint=True)
+    Y = np.linspace(p0.y, p1.y, n, endpoint=True)
     points = mbv.Core.Vector2fStorage()
     for x,y in zip(X,Y): points.append(mbv.Core.Vector2(x,y))
     return points
 
 def p3d_interp(p0, p1, n):
-    X = np.linspace(p0.x, p1.x, n, endpoint=False)
-    Y = np.linspace(p0.y, p1.y, n, endpoint=False)
-    Z = np.linspace(p0.z, p1.z, n, endpoint=False)
+    X = np.linspace(p0.x, p1.x, n, endpoint=True)
+    Y = np.linspace(p0.y, p1.y, n, endpoint=True)
+    Z = np.linspace(p0.z, p1.z, n, endpoint=True)
     points = mbv.Core.Vector3fStorage()
     for x,y,z in zip(X,Y,Z): points.append(mbv.Core.Vector3(x,y,z))
     return points

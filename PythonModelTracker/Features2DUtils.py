@@ -112,8 +112,8 @@ def FilterKeypointsDepth(point_names, keypoints3d, keypoints2d, thres = 0.5):
                 keypoints3d_out.append(p3d)
                 keypoints2d_out.append(p2d)
             else:
-                accepted_mask.append(False)
-            #     keypoints3d_out.append(mbv.Core.Vector3(p2d.x, p2d.y, 0))
-            #     keypoints2d_out.append(p2d)
+                accepted_mask.append(True)
+                keypoints3d_out.append(mbv.Core.Vector3(p2d.x, p2d.y, 0))
+                keypoints2d_out.append(p2d)
 
     return accepted_mask, point_names_out, keypoints3d_out, keypoints2d_out

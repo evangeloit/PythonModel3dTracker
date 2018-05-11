@@ -126,7 +126,7 @@ class OpenPoseGrabber():
         for i,(x, y) in enumerate(points2d_):
             p = core.Vector2(np.float(x),np.float(y))
             d = OpenPoseGrabber.getMedianDepth((x,y), depth, w)
-            if d > 0: d += OpenPoseGrabber.depth_diffs["COCO"][i]
+            #if d > 0: d += OpenPoseGrabber.depth_diffs["COCO"][i]
             points2d.append(p)
             kp_depths.append(d)
         points3d = clb.unproject(points2d, kp_depths)

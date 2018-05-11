@@ -458,7 +458,7 @@ class TrackingLoopTools:
                                                  n_interp=n_interp)
             points3d_det_ = DMU.UnprojectPointSets(points2d_det_, ldm_calib, depth)
             accepted_det_mask, points3d_det_names, points3d_det,points2d_det = \
-                FU.FilterKeypointsDepth(points3d_det_names_, points3d_det_, points2d_det_, 0.5)
+                FU.FilterKeypointsDepth(points3d_det_names_, points3d_det_, points2d_det_, smart_pf_params['depth_filt_thres'])
             model_landmark_names = [m for m,a in zip(model_landmark_names_, accepted_det_mask) if a]
             model_landmarks_ = [m for m, a in zip(model_landmarks_, accepted_det_mask) if a]
             model_landmarks = mbv.PF.Landmark3dInfoVec(mbv.PF.Landmark3dInfoSkinnedVec())
@@ -467,11 +467,11 @@ class TrackingLoopTools:
             model_landmark_names, model_landmarks = \
                 M3DU.GenerateModelLandmarksfromObservationLandmarks(smart_pf.model3d, ldm_source ,points3d_det_names)
         print len(model_landmarks), len(points3d_det), len(points2d_det), len(model_landmark_names)
-        for i,(no, nm) in enumerate(zip(points3d_det_names, model_landmark_names)): print i, nm, no
-        smart_pf.calib = ldm_calib
-        smart_pf.keypoints3d = points3d_det
-        smart_pf.keypoints2d = points2d_det
-        smart_pf.setLandmarks(model_landmark_names, model_landmarks)
+        # for i,(no, nm, po, pm) in enumerate(zip(points3d_det_names, model_landmark_names, points3d_det, model_landmarks)):
+        #     print i, nm, pm.pos, no, po
+
+
+        smart_pf.setLandmarks(ldm_calib, model_landmark_names, model_landmarks,points3d_det, points2d_det)
 
         observations['landmarks'] = (points3d_det_names, [points3d_det], [points2d_det])
 

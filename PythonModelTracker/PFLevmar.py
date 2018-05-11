@@ -20,13 +20,14 @@ class SmartPF:
 
     default_smart_particles = 10
     default_filter_ratios = [0.1, 0.2]
+    default_landmarks_history_size = 10
 
     def __init__(self,rng,model3d,pf_params,decoder=None,landmarks=None):
 
         self.model3d = model3d
         #self.std_dev = pf_params['std_dev']
         self.pf = SmartPF.CreatePF(rng,model3d,pf_params)#SmartPF.CreatePF(rng,model3d,pf_params)
-        #self.pf.dynamic_model = mpf.DynamicModel(self.DynamicModel)
+        self.pf.dynamic_model = mbv.PF.DynamicModel(self.DynamicModel)
 
         self.decoder = None
         self.ba = None
@@ -43,6 +44,8 @@ class SmartPF:
         self.model3dobj = None
         self.smart_particles = SmartPF.default_smart_particles
         self.filter_ratios = SmartPF.default_filter_ratios
+        self.landmarks_history = []
+        self.landmarks_history_size = SmartPF.default_landmarks_history_size
         if 'smart_particles' in pf_params['smart_pf']:
             self.smart_particles = min(pf_params['smart_pf']['smart_particles'], pf_params['n_particles'])
         if 'obs_filter_ratios' in pf_params['smart_pf']:
@@ -55,15 +58,45 @@ class SmartPF:
 
 
     def track(self,state,objective):
-        self.pf.particles = mbv.PF.ParticlesMatrix(self.DynamicModel(self.pf.particles.particles))
+        if self.decoder is None: self.decoder = self.ba.decoder
+        #self.pf.particles = mbv.PF.ParticlesMatrix(self.DynamicModel(self.pf.particles.particles))
         self.pf.track(state, objective)
+        landmark_positions_map = self.decodeLandmarks(state)
+        self.landmarks_history.append(landmark_positions_map)
+        if len(self.landmarks_history) > self.landmarks_history_size:
+            self.landmarks_history.pop(0)
+
+        print 'landmarks history:'
+        print self.landmarks_history
         return state
 
 
-    def setLandmarks(self, landmark_names, landmarks):
+    
+
+    def setLandmarks(self, calib, landmark_names, landmarks, keypoints3d, keypoints2d):
+        self.calib = calib
+        self.keypoints3d = keypoints3d
+        self.keypoints2d = keypoints2d
         self.lnames = landmark_names
         self.landmarks = landmarks
         if self.ba is not None: self.ba.landmarks = landmarks
+
+
+    def decodeLandmarks(self, state):
+
+        lnames = [l.name for l in self.landmarks]
+        landmark_points = []
+        if len(lnames) > 0:
+            landmarks_decoder = mbv.PF.LandmarksDecoder()
+            landmarks_decoder.decoder = self.decoder
+            landmark_points = landmarks_decoder.decode(state, self.landmarks)
+
+        landmark_positions_map = {}
+
+        for n, p in zip(lnames, landmark_points):
+            landmark_positions_map[n] = p
+
+        return landmark_positions_map
 
 
     @staticmethod
@@ -143,11 +176,11 @@ class SmartPF:
         if self.keypoints3d is not None:
             #print 'SmartPF Dynamic: LEVMAR'
             for i in range(self.smart_particles):
-                keypoints_cur = FU.FilterKeypointsRandom(self.keypoints3d,
-                                                         self.keypoints2d,
-                                                         self.filter_ratios)
+                # keypoints_cur = FU.FilterKeypointsRandom(self.keypoints3d,
+                #                                          self.keypoints2d,
+                #                                          self.filter_ratios)
                 #print 'keypoints_cur:',keypoints_cur
-                observations = OpenPoseGrabber.ConvertIK([keypoints_cur], self.calib)
+                observations = OpenPoseGrabber.ConvertIK([self.keypoints3d], self.calib)
                 # do something with
                 cur_state = mbv.Core.DoubleVector(particles[:, i])
                 #print 'cur_state:', cur_state

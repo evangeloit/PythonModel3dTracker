@@ -11,11 +11,11 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'mhad_s09_a04'
+dataset = 'mhad_s05_a04'
 model_name = 'mh_body_male_custom_vector'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
-landmarks_source = ['gt', 'detections', 'openpose'][0]
+landmarks_source = ['gt', 'detections', 'openpose'][2]
 
 
 res_filename = None #os.path.join(Paths.datasets,"human_tracking/co4robots/ms1_gestures/{0}_gt1.json".format(dataset))
@@ -33,6 +33,7 @@ pf_params['pf']['smart_pf']['enable_blocks'] = False
 pf_params['pf']['smart_pf']['enable_bounds'] = True
 pf_params['pf']['smart_pf']['ceres_report'] = False
 pf_params['pf']['smart_pf']['max_iterations'] = 50
+pf_params['pf']['smart_pf']['depth_filt_thres'] = 0.2
 
 # Objectives
 objective_params = {
