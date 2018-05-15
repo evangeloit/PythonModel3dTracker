@@ -19,11 +19,11 @@ class SmartPF:
     }
 
     default_smart_particles = 10
-    default_filter_ratios = [0.1, 0.2]
+    default_filter_random_ratios = [0.1, 0.2]
     default_landmarks_history_size = 10
 
     def __init__(self,rng,model3d,pf_params,decoder=None,landmarks=None):
-
+        self.pf_params = pf_params
         self.model3d = model3d
         #self.std_dev = pf_params['std_dev']
         self.pf = SmartPF.CreatePF(rng,model3d,pf_params)#SmartPF.CreatePF(rng,model3d,pf_params)
@@ -43,13 +43,21 @@ class SmartPF:
         self.particles_prev = None
         self.model3dobj = None
         self.smart_particles = SmartPF.default_smart_particles
-        self.filter_ratios = SmartPF.default_filter_ratios
+        self.filter_random = False
+        self.filter_random_ratios = SmartPF.default_filter_random_ratios
+        self.filter_history = False
+        self.filter_history_thres = 100
         self.landmarks_history = []
         self.landmarks_history_size = SmartPF.default_landmarks_history_size
         if 'smart_particles' in pf_params['smart_pf']:
             self.smart_particles = min(pf_params['smart_pf']['smart_particles'], pf_params['n_particles'])
-        if 'obs_filter_ratios' in pf_params['smart_pf']:
-            self.filter_ratios = pf_params['smart_pf']['obs_filter_ratios']
+        if 'filter_random' in pf_params['smart_pf']:
+            self.filter_random = pf_params['smart_pf']['filter_random']
+            self.filter_random_ratios = pf_params['smart_pf']['filter_random_ratios']
+        if 'filter_history' in pf_params['smart_pf']:
+            self.filter_history = pf_params['smart_pf']['filter_history']
+            self.filter_history_thres = pf_params['smart_pf']['filter_history_thres']
+
 
 
 
@@ -71,15 +79,38 @@ class SmartPF:
         return state
 
 
-    
-
     def setLandmarks(self, calib, landmark_names, landmarks, keypoints3d, keypoints2d):
+        assert len(landmarks) == len(keypoints3d)
         self.calib = calib
         self.keypoints3d = keypoints3d
         self.keypoints2d = keypoints2d
         self.lnames = landmark_names
         self.landmarks = landmarks
         if self.ba is not None: self.ba.landmarks = landmarks
+
+
+    def filterKeypointsHistory(self):
+        # print ratios
+        keypoints_out = mbv.Core.Vector3fStorage(self.keypoints3d)
+        N = len(self.keypoints3d)
+
+        xclude_mask_3d = []
+        for n,p3d in zip(self.lnames, self.keypoints3d):
+            if (len(self.landmarks_history)>0) and (n in self.landmarks_history[-1]):
+                pos_hist = self.landmarks_history[-1][n]
+                if mbv.Core.glm.distance(p3d, pos_hist) > self.filter_history_thres:
+                    xclude_mask_3d.append(True)
+                else:
+                    xclude_mask_3d.append(False)
+
+        xclude_indices_2d = [False]*N
+        for xind,p3d,p2d in zip(xclude_mask_3d, self.keypoints3d, self.keypoints2d):
+            if xind:
+                keypoints_out[xind].x = self.keypoints2d[xind].x
+                keypoints_out[xind].y = self.keypoints2d[xind].y
+                keypoints_out[xind].z = 0
+        print "xclude_mask_3d:", xclude_mask_3d
+        return keypoints_out
 
 
     def decodeLandmarks(self, state):
@@ -175,10 +206,12 @@ class SmartPF:
 
         if self.keypoints3d is not None:
             #print 'SmartPF Dynamic: LEVMAR'
+            if self.filter_history: self.filterKeypointsHistory()
             for i in range(self.smart_particles):
-                # keypoints_cur = FU.FilterKeypointsRandom(self.keypoints3d,
-                #                                          self.keypoints2d,
-                #                                          self.filter_ratios)
+                if self.filter_random:
+                    self.keypoints3d = FU.FilterKeypointsRandom(self.keypoints3d,
+                                                                self.keypoints2d,
+                                                                self.filter_random_ratios)
                 #print 'keypoints_cur:',keypoints_cur
                 observations = OpenPoseGrabber.ConvertIK([self.keypoints3d], self.calib)
                 # do something with
