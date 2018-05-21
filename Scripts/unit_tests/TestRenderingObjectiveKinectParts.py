@@ -21,8 +21,6 @@ model3d.parts.genBonesMap()
 model3d.setupMeshManager(mmanager)
 
 
-#for m in meshes:
-#    model3d.parts.mesh = mmanager.getMesh(tkt)
 
 #Loading Dataset
 params_ds = DSI.DatasetInfo()
@@ -37,7 +35,7 @@ model3dobj.renderer = \
         generateDefaultRenderer(2048, 2048, "opengl",
                                 model3d.n_bones,
                                 mbv.Ren.RendererOGLBase.Culling.CullFront)
-model3dobj.tile_size = (128, 128)
+#model3dobj.tile_size = (128, 128)
 model3dobj.bgfg = M3DT.Model3dObjectiveFrameworkRendering.generate3DBoxBGFG(depth_cutoff)
 rois = M3DT.RenderingObjectives()
 roi = M3DT.RenderingObjectiveKinectParts()
@@ -72,18 +70,21 @@ for f in range(5):
     states = mbv.Core.ParamVectors()
     for p in model3d.parts.parts_map:
         states.append(state)
-    print len(states)
-    model3dobj.observations = images
-    model3dobj.virtual_camera = calibs[0]
-    bb = model3dobj.computeBoundingBox(state, .2)
-    model3dobj.focus_rect = bb
-    model3dobj.preprocessObservations()
+
+    # model3dobj.observations = images
+    # model3dobj.virtual_camera = calibs[0]
+    # bb = model3dobj.computeBoundingBox(state, .2)
+    # model3dobj.focus_rect = bb
+    # model3dobj.preprocessObservations()
+    model3dobj.evaluateSetup(images, calibs[0], state, .2)
     obj_vals = model3dobj.evaluate(states, 0)
+
 
     for p, o in zip(model3d.parts.parts_map, obj_vals):
         print p.key(), o
+    viz = visualizer.visualize_parts(state, camera, rgb, model3d.parts)
 
-    viz = visualizer.visualize_overlay(state, camera, rgb)
+    #viz = visualizer.visualize_overlay(state, camera, rgb)
     cv2.imshow("rgb", viz)
     cv2.waitKey(0)
 

@@ -197,6 +197,15 @@ class ObjectiveTools:
             rois.append(roi)
         return rois
 
+    @staticmethod
+    def GenRenderingObjectiveKinectParts(depth_cutoff, model3d):
+        rois = m3dt.RenderingObjectives()
+        roi = m3dt.RenderingObjectiveKinectParts()
+        roi.model_parts = model3d.parts
+        roi.architecture = m3dt.Architecture.cuda
+        roi.depth_cutoff = depth_cutoff
+        rois.append(roi)
+        return rois
 
     @staticmethod
     def GenModel3dObjectiveFrameworkDecoding(mmanager, model3d):
@@ -292,6 +301,37 @@ class ObjectiveTools:
         return mmanager
 
     @staticmethod
+    def GenPartsObjective(mmanager, model3d, params, decoder = None, renderer = None):
+
+        model3dobj = m3dt.Model3dObjectiveFrameworkRendering(mmanager)
+        if decoder is None:
+            model3dobj.decoder = model3d.createDecoder()
+        else: model3dobj.decoder = decoder
+
+        if renderer is None:
+            model3dobj.renderer = \
+                m3dt.Model3dObjectiveFrameworkRendering. \
+                    generateDefaultRenderer(2048, 2048, "opengl",
+                                            model3d.n_bones,
+                                            mbv.Ren.RendererOGLBase.Culling.CullFront)
+            model3dobj.tile_size = (128, 128)
+            model3dobj.bgfg = m3dt.Model3dObjectiveFrameworkRendering.generate3DBoxBGFG(params['depth_cutoff'])
+        else:
+            model3dobj.renderer = renderer
+
+        model3d.parts.genBonesMap()
+        meshes = mbv.Core.MeshTicketList()
+        mmanager.enumerateMeshes(meshes)
+        model3d.parts.mesh = mmanager.getMesh(meshes[0])
+
+        rois = ObjectiveTools.GenRenderingObjectiveKinectParts(params['depth_cutoff'], model3d)
+        model3dobj.appendRenderingObjectivesGroup(rois)
+        renderer = model3dobj.renderer
+        decoder = model3dobj.decoder
+
+        return model3dobj, decoder, renderer
+
+    @staticmethod
     def GenObjective(mmanager,model3d,params):
 
         renderer = None
@@ -313,6 +353,7 @@ class ObjectiveTools:
                 #                                                               params['weighted_part_mult'])
                 # else:
                 rois = ObjectiveTools.GenRenderingObjectiveKinect(params['depth_cutoff'])
+
                 model3dobj.appendRenderingObjectivesGroup(rois)
                 # obj_combination.addObjective(model3dobj.getPFObjective(), objective_weights['rendering'])
                 obj_weight_vec.append(objective_weights['rendering'])
@@ -470,7 +511,6 @@ class TrackingLoopTools:
         # for i,(no, nm, po, pm) in enumerate(zip(points3d_det_names, model_landmark_names, points3d_det, model_landmarks)):
         #     print i, nm, pm.pos, no, po
 
-
         smart_pf.setLandmarks(ldm_calib, model_landmark_names, model_landmarks,points3d_det, points2d_det)
 
         observations['landmarks'] = (points3d_det_names, [points3d_det], [points2d_det])
@@ -483,6 +523,10 @@ class TrackingLoopTools:
 
         results = mtr.ModelTrackingResults(did=params_ds.did)
         gui = TrackingLoopTools.GenGui(visualize_params, params_ds)
+
+        # parts_obj,_,_ = ObjectiveTools.GenPartsObjective(model3dobj.mesh_manager, model3d, objective_params,
+        #                                              model3dobj.decoder, model3dobj.renderer)
+
 
         grabbers[0].seek(params_ds.limits[0])
         # Main loop
@@ -528,7 +572,15 @@ class TrackingLoopTools:
                                                                     model3dobj,objective_params)
                     pf.track(state, objective)
 
+                    # Evaluating part objective
+                    # TrackingLoopTools.SetupObjetive(state, observations, model3d, parts_obj, objective_params)
+                    # states = mbv.Core.ParamVectors()
+                    # for p in model3d.parts.parts_map:  states.append(state)
+                    # part_obj_results = parts_obj.evaluate(states, 0)
+                    # print "part_obj_results:"
+                    # for p, o in zip(model3d.parts.parts_map, part_obj_results): print p.key(), o,
 
+                    # Packing landmarks for visualization.
                     disp_landmark_sets, disp_landmark_names, disp_landmarks = \
                         TrackingLoopTools.PackLandmarks(state, model3dobj.decoder, landmarks, observations)
 

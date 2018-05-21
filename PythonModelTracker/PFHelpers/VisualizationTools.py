@@ -31,8 +31,13 @@ class Visualizer:
 
 
     def visualize_overlay(self, state, camera, image, points3d=None):
-        image = ru.visualize_overlay(self.renderer,self.mesh_manager,self.decoder,
+        viz = ru.visualize_overlay(self.renderer,self.mesh_manager,self.decoder,
                                      state,camera,image,self.model3d.n_bones, points3d)
-        return image
+        return viz
+
+    def visualize_parts(self, state, camera, image, parts):
+        viz = ru.visualize_parts(self.renderer, self.mesh_manager, self.decoder,
+                                     state, camera, image, self.model3d.n_bones, parts)
+        return viz
 
 
