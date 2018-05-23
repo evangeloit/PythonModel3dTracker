@@ -33,7 +33,7 @@ class SmartPF:
         self.ba = None
         if (decoder is not None and landmarks is not None):
             self.decoder = decoder
-            self.ba = SmartPF.CreateBA(model3d,decoder,landmarks)
+            self.ba = SmartPF.CreateBA(model3d,decoder,landmarks,pf_params['smart_pf'])
 
         self.lnames = None
         self.landmarks = None

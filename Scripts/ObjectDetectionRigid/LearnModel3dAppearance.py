@@ -36,9 +36,10 @@ import PythonModel3dTracker.Paths as Paths
 
 
 
-did = 'box_reem'
-appearance_filename = os.path.join(Paths.objdetect, 'box_reem_appearance.pck')
-frames = [0,1,3,4,5,6,7,8,10,11,12] #box_reem_gt.json
+did = 'boxtalosreem_01'
+appearance_filename = os.path.join(Paths.objdetect, 'boxtalosreem_appearance.pck')
+frames = range(14) #boxtalosreem_01_gt.json
+#frames = [0,1,3,4,5,6,7,8,10,11,12] #box_reem_gt.json
 # frames = [0,1,2,3,4,5,6,7] #box_regilait_gt.json
 #frames = [0,1,2,3,4,5,7,8,9,14,15,22,25] #box_eps_02_gt.json
 

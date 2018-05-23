@@ -16,15 +16,15 @@ grabber = AutoGrabber.create('oni',[''])
 
 gui = mtg.ModelTrackingGuiOpencv(visualize=visualize, init_frame=0)
 
-did = 'ms1_gestures_04'
-rel_path = 'gestures/co4robots/'
+did = 'boxtalosreem_01'
+rel_path = 'object_tracking/co4robots/'
 output_dir = os.path.join(Paths.datasets, rel_path, did)
 gt_filename = did + '_gt.json'
 ds_filename = did + '.json'
 gt_path = os.path.join(Paths.datasets, rel_path, gt_filename)
 ds_path = os.path.join(Paths.datasets, rel_path, ds_filename)
 
-model_name = 'mh_body_male_custom'
+model_name = 'box'
 model3d = mbv.PF.Model3dMeta.create(str(Paths.model3d_dict[model_name]['path']))
 state = model3d.default_state
 gt = mtr.ModelTrackingResults()

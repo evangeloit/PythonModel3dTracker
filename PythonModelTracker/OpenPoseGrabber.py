@@ -55,6 +55,7 @@ class OpenPoseGrabber():
         if persons is None:
             point_names = []
             self.keypoints = []
+            self.keypoints2d = []
         else:
             # for i,p in enumerate(persons):
             #     for n, kp in zip(OpenPoseGrabber.landmark_names[self.model_op], p):
