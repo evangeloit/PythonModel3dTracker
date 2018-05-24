@@ -4,12 +4,23 @@ import BlenderMBV.BlenderMBVLib.AngleTransformations as at
 import PythonModel3dTracker.Paths as Paths
 from PythonModel3dTracker.PythonModelTracker.PFHelpers.VisualizationTools import Visualizer
 import PythonModel3dTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as GUI
 import cv2
+import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as BMBVCONV
 
 import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
 
 
+def ExtractGeom(bone_geometry, state):
+    print state
+    bone_vectors = bone_geometry.calcVectors(state, ['root', 'R.UArm', 'R.LArm'])
+    bone_angles = bone_geometry.calcAngles(state, bone_vectors, [('root', 'R.UArm'), ('root', 'R.LArm'), ('R.UArm', 'R.LArm')])
+    for b, v in bone_vectors.items(): print 'vec:', b, v
+    for (b1, b2), a in bone_angles.items():
+        print 'angle:', b1, b2, a
 
+
+gui = ['opencv', 'blender'][1]
 model_xml = Paths.model3d_dict['mh_body_male_custom_vector']['path']
 model3d = mbv.PF.Model3dMeta.create(str(model_xml))
 model_parts = model3d.parts
@@ -18,7 +29,7 @@ print('Loaded model from <', model_xml, '>', ', bones:', model3d.n_bones, ', dim
 
 mmanager = mbv.Core.MeshManager()
 decoder = model3d.createDecoder()
-model3d.setupMeshManager(mmanager)
+model3d.setupMeshManager(mmanager )
 decoder.loadMeshTickets(mmanager)
 
 n_bones = model3d.n_bones
@@ -32,77 +43,67 @@ cam_meta = mbv.Lib.RGBDAcquisitionSimulation.getDefaultCalibration()
 cam_frust = cam_meta.camera
 renderer = mbv.Ren.RendererOGLCudaExposed.get()
 
-
-#Creating Landmark3dInfo structs.
+bone_geometry = M3DU.BoneGeometry(model3d, decoder)
 state = model3d.default_state
-default_decoding = decoder.quickDecode(state)
-landmarks_decoder = mbv.PF.LandmarksDecoder()
-landmarks_decoder.decoder = decoder
-bone_names = mbv.Core.StringVector([b.key() for b in model3d.parts.bones_map])
-landmark_names_0 = mbv.Core.StringVector([b.key()+'_0' for b in model3d.parts.bones_map])
-landmark_names_1 = mbv.Core.StringVector([b.key()+'_1' for b in model3d.parts.bones_map])
-#landmark_names, landmarks = M3DU.GetDefaultModelLandmarks(model3d,names_l)
-landmarks_0 = mbv.PF.Landmark3dInfoSkinned.create_multiple(landmark_names_0,
-                                                         bone_names,
-                                                         mbv.PF.ReferenceFrame.RFGeomLocal,
-                                                         mbv.Core.Vector3fStorage([mbv.Core.Vector3(0, 0, 0)]),
-                                                         model3d.parts.bones_map)
-landmarks_1 = mbv.PF.Landmark3dInfoSkinned.create_multiple(landmark_names_1,
-                                                         bone_names,
-                                                         mbv.PF.ReferenceFrame.RFGeomLocal,
-                                                         mbv.Core.Vector3fStorage([mbv.Core.Vector3(0, 1, 0)]),
-                                                         model3d.parts.bones_map)
+
+if gui == 'opencv':
+    value_range = model3d.high_bounds.data - model3d.low_bounds.data
+    visualizer = Visualizer(model3d, mmanager, decoder, renderer)
+    dims = [9,10]
+    steps = 4
+    for i in range(steps):
+        # Setting param Vector
+        state[2] = 2700#10 * f loat(i)
+        rot_q = at.quaternion_from_euler(1.5,0+0.1*i,0)
+        state[3] = rot_q[1]
+        state[4] = rot_q[2]
+        state[5] = rot_q[3]
+        state[6] = rot_q[0]
 
 
-transform_node = mbv.Dec.TransformNode()
-mbv.PF.LoadTransformNode(model3d.transform_node_filename, transform_node)
-landmarks_decoder.convertReferenceFrame(mbv.PF.ReferenceFrame.RFModel, transform_node, landmarks_0)
-landmarks_decoder.convertReferenceFrame(mbv.PF.ReferenceFrame.RFModel, transform_node, landmarks_1)
+        for d in dims:
+            state[d] = model3d.low_bounds[d] + i * value_range[d][0] / float(steps)
+
+        print 'state:', state
+
+        ExtractGeom(bone_geometry, state)
+
+        #Rendering model
+        viz = visualizer.visualize(state,cam_meta)
 
 
-init_pos = model3d.default_state
-value_range = model3d.high_bounds.data - model3d.low_bounds.data
-visualizer = Visualizer(model3d, mmanager, decoder, renderer)
-dims = [9,10]
-steps = 4
-for i in range(steps):
-    # Setting param Vector
-    init_pos[2] = 2700#10 * f loat(i)
-    rot_q = at.quaternion_from_euler(1.5,0+0.1*i,0)
-    init_pos[3] = rot_q[1]
-    init_pos[4] = rot_q[2]
-    init_pos[5] = rot_q[3]
-    init_pos[6] = rot_q[0]
+        #Visualizing
+        cv2.imshow("viz",viz)
+        key = chr(cv2.waitKey(0) & 255)
+        if key == 'q': break
+
+elif gui == 'blender':
+    continue_loop = True
+    gui = GUI.ModelTrackingGuiZeromq()
+    while continue_loop:
+        gui_command = gui.recv_command()
+        if gui_command.name == "quit":
+            continue_loop = False
+
+        if gui_command.name == "state":
+            state_gui = gui.recv_state(model3d, state)
+            if state_gui is not None: state = mbv.Core.DoubleVector(state_gui)
+            ExtractGeom(bone_geometry, state)
 
 
-    for d in dims:
-         init_pos[d] = model3d.low_bounds[d] + i * value_range[d][0] / float(steps)
-
-    print 'state:', init_pos
-
-    #calculating new landmark_positions.
-    landmark_positions_0 = landmarks_decoder.decode(init_pos, landmarks_0)
-    landmark_positions_1 = landmarks_decoder.decode(init_pos, landmarks_1)
-
-    for b,l0,l1 in zip(bone_names, landmark_positions_0, landmark_positions_1):
-        bone_vec = l1 - l0
-        print b, bone_vec
-        if b == 'R.UArm': vec_uarm = copy.deepcopy(bone_vec)
-        if b == 'R.LArm': vec_larm = copy.deepcopy(bone_vec)
-        if b == 'root': vec_root = copy.deepcopy(bone_vec)
-
-    print 'angle ruarm, root', vec_uarm, vec_root, mbv.Core.glm.angle(vec_uarm, vec_root)
-    print 'angle rlarm, ruarm', vec_uarm, vec_larm, mbv.Core.glm.angle(vec_uarm, vec_larm)
-    print 'angle rlarm, root', vec_larm, vec_root, mbv.Core.glm.angle(vec_root, vec_larm)
-
-    #Rendering model
-    viz = visualizer.visualize(init_pos,cam_meta,[landmark_positions_0, landmark_positions_1])
+        if gui_command.name == "init":
+            gui.send_init(BMBVCONV.getFrameDataMBV(model3dmeta=model3d, state=state,
+                                                 frames=[0, 1,100],
+                                                 scale=0.001))
 
 
-    #Visualizing
-    cv2.imshow("viz",viz)
-    key = chr(cv2.waitKey(0) & 255)
-    if key == 'q': break
-
-
-
+        if gui_command.name == "frame":
+            f_gui = gui.recv_frame()
+            if f_gui is not None:
+                f = f_gui
+                if (f > 100) or (f < 0): f = 0
+                frame_data = BMBVCONV.getFrameDataMBV(model3dmeta=model3d, state=state,
+                                                      mbv_camera=cam_meta,
+                                                      frames=[0, f, 100],
+                                                      images=None, scale=0.001)
+                gui.send_frame(frame_data)

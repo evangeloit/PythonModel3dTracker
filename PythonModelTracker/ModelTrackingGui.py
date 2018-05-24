@@ -63,7 +63,7 @@ class ModelTrackingGuiNone(ModelTrackingGui):
 class ModelTrackingGuiOpencv(ModelTrackingGui):
     accepted_keys = ['q', 'p', 'n', 'c', 'b', 's','v']
     visualize_defaults = {'enable': True,
-                          'client': 'opencv', 'labels': True, 'depth': True, 'rgb': True,
+                          'labels': True, 'depth': True, 'rgb': True,
                           'wait_time': 0}
 
     def __init__(self, visualize=visualize_defaults, init_frame=0):
