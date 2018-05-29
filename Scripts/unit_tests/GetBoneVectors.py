@@ -7,14 +7,13 @@ import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as GUI
 import cv2
 import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as BMBVCONV
-
 import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
 
 
 def ExtractGeom(bone_geometry, state):
     print state
-    bone_vectors = bone_geometry.calcVectors(state, ['root', 'R.UArm', 'R.LArm'])
-    bone_angles = bone_geometry.calcAngles(state, bone_vectors, [('root', 'R.UArm'), ('root', 'R.LArm'), ('R.UArm', 'R.LArm')])
+    bone_vectors = bone_geometry.calcVectors(state, ['root', 'R.UArm', 'R.LArm', 'R.shoulder'])
+    bone_angles = bone_geometry.calcAngles(state, bone_vectors, [('R.shoulder', 'R.UArm'), ('root', 'R.LArm'), ('R.UArm', 'R.LArm')])
     for b, v in bone_vectors.items(): print 'vec:', b, v
     for (b1, b2), a in bone_angles.items():
         print 'angle:', b1, b2, a
