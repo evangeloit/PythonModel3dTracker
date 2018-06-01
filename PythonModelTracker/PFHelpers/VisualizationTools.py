@@ -38,9 +38,9 @@ class Visualizer:
                                      state,camera,image,self.model3d.n_bones, points3d)
         return viz
 
-    def visualize_parts(self, state, camera, image, parts):
+    def visualize_parts(self, state, camera, image, model_parts, seleted_parts = None, part_colors=None):
         viz = ru.visualize_parts(self.renderer, self.mesh_manager, self.decoder,
-                                     state, camera, image, self.model3d.n_bones, parts)
+                                     state, camera, image, self.model3d.n_bones, model_parts, seleted_parts, part_colors)
         return viz
 
 

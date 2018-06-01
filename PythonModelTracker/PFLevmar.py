@@ -74,8 +74,8 @@ class SmartPF:
         if len(self.landmarks_history) > self.landmarks_history_size:
             self.landmarks_history.pop(0)
 
-        print 'landmarks history:'
-        print self.landmarks_history
+        #print 'landmarks history:'
+        #print self.landmarks_history
         return state
 
 
