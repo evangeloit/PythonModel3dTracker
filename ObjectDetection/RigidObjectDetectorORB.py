@@ -30,14 +30,25 @@ class ObjectData:
 
 
 class RigidObjectDetectorORB:
-    def __init__(self, objects_data, settings):#min_matches = 10, inliers_ratio = 0.5):
-
-        self.objects_data = objects_data
-        self.n_objects = len(objects_data)
-        self.orb = cv2.ORB_create()
-        self.bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    def __init__(self, objects_data=None, settings=None):#min_matches = 10, inliers_ratio = 0.5):
+        assert settings is not None
         self.settings = settings
         self.check_settings()
+        if objects_data is not None:
+            self.objects_data = objects_data
+            self.n_objects = len(objects_data)
+
+        if self.settings["features_type"] == 'orb':
+            self.detector = cv2.ORB_create()
+            self.detector.setMaxFeatures(self.settings["max_features"])
+            self.bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+        elif self.settings["features_type"] == 'sift':
+            self.detector = cv2.xfeatures2d.SIFT_create(nfeatures=self.settings["max_features"])
+            self.bf = cv2.BFMatcher()
+
+
+
         #self.min_matches = min_matches
         #self.inliers_ratio = inliers_ratio
         self.states = []
@@ -46,10 +57,14 @@ class RigidObjectDetectorORB:
         self.outliers = []
 
     def check_settings(self):
+        assert "max_features" in self.settings
         assert "method" in self.settings
         assert "min_matches" in self.settings
         assert "inliers_ratio" in self.settings
+        assert "features_type" in self.settings
         assert self.settings["method"] in ["2d3d", "3d3d"]
+        assert self.settings["features_type"] in ["sift", "orb"]
+
 
 
 
@@ -69,6 +84,20 @@ class RigidObjectDetectorORB:
             p2d_np = np.array([])
         return kp_filt, des_filt, p3d_np, p2d_np
 
+    def match(self,des,oi):
+        if self.settings['features_type'] == 'orb':
+            matches = self.bf.match(des, oi.appearance.descriptors)
+            matches = sorted(matches, key=lambda x: x.distance)
+            matches_good = matches
+        elif self.settings["features_type"] == 'sift':
+            matches = self.bf.knnMatch(des, oi.appearance.descriptors, k=2)
+            matches_good = []
+            for m, n in matches:
+                if m.distance < 0.85 * n.distance:
+                    matches_good.append(m)
+
+        print "Matched features:", len(matches_good)
+        return matches_good
 
     def detect(self,imgs,clbs):
         depth = imgs[0]
@@ -77,7 +106,7 @@ class RigidObjectDetectorORB:
         else: mask = np.ones_like(img)
         camera = clbs[0]
 
-        kp, des = self.orb.detectAndCompute(img, mask)
+        kp, des = self.detector.detectAndCompute(img, mask)
         if self.settings['method'] == '3d3d':
             kp, des, p3d, p2d = self.filter_depth(kp, des, clbs[0], depth)
             #p3d, p2d = f2d.GetPointsFromKeypoints(kp, clbs[0], depth)
@@ -93,15 +122,8 @@ class RigidObjectDetectorORB:
         self.inliers = []
         self.outliers = []
         for oi in self.objects_data:
-            matches = self.bf.match(des, oi.appearance.descriptors)
-            # FLANN matching
-            # FLANN_INDEX_KDTREE = 0
-            # index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
-            # search_params = dict(checks = 50)
-            # flann = cv2.FlannBasedMatcher(index_params, search_params)
-            # matches = flann.match(des1,des2)
-            matches = sorted(matches, key=lambda x: x.distance)
-            matches_good = matches
+            matches_good = self.match(des,oi)
+
             src_match_indices = np.array([m.trainIdx for m in matches_good])
             dst_match_indices = np.array([m.queryIdx for m in matches_good])
 

@@ -16,7 +16,7 @@ grabber = AutoGrabber.create('oni',[''])
 
 gui = mtg.ModelTrackingGuiOpencv(visualize=visualize, init_frame=0)
 
-did = 'boxtalosreem_01'
+did = 'boxiw3_large'
 rel_path = 'object_tracking/co4robots/'
 output_dir = os.path.join(Paths.datasets, rel_path, did)
 gt_filename = did + '_gt.json'
@@ -49,13 +49,10 @@ while continue_loop:
         f_gui = gui.recv_frame()
         if f_gui is not None:
             f = f_gui
-            print 'frame  :', f
-
+            # print 'frame  :', f
             images, calibs = grabber.grab()
-
             depth = images[0]
             rgb = images[1]
-
             frame_data = mtg.FrameDataOpencv(depth, None, rgb, f )
             gui.send_frame(frame_data)
 
@@ -64,6 +61,7 @@ while continue_loop:
             os.makedirs(output_dir)
         rgb_fname = os.path.join(output_dir,"rgb_{:04d}.png".format(f_counter))
         dpt_fname = os.path.join(output_dir, "dpt_{:04d}.png".format(f_counter))
+        print 'saving ', rgb_fname, dpt_fname
         cv2.imwrite(rgb_fname,rgb)
         cv2.imwrite(dpt_fname,depth)
         gt.add(f_counter,model_name,state)

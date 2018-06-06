@@ -12,36 +12,29 @@ import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
 import PythonModel3dTracker.PythonModelTracker.Features2DUtils as f2d
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
 import PythonModel3dTracker.PyMBVAll as mbv
-from PythonModel3dTracker.ObjectDetection.RigidObjectDetectorORB import ObjectAppearance
+from PythonModel3dTracker.ObjectDetection.RigidObjectDetectorORB import ObjectAppearance, RigidObjectDetectorORB
 import PythonModel3dTracker.Paths as Paths
 
-# Returns R,T for Y=TmatX --- X = TinvY
-# def RigidInv(Tin):
-#
-#     Tvec, S, Q = mbv.Core.DecomposeMatrix(Tin)
-#     T = np.zeros([3,1])
-#     T[0] = Tvec.x
-#     T[1] = Tvec.y
-#     T[2] = Tvec.z
-#     print 'T:\n',T
-#     R = at.quaternion_matrix([Q.w, Q.x, Q.y, Q.z])
-#     print 'R:\n', R
-#     T = -R[:3,:3].dot(T)
-#     print '-Rt:\n',T
-#     R[0:3,3] = T.T
-#     print 'Tout:\n',R
-#
-#     return R
+settings = {
+            "features_type": 'sift', # Supported types: sift, orb
+            "max_features": 400,
+            "min_matches": 4,
+            "inliers_ratio": 0.05,
+            "method": "3d3d", #3d3d or 2d3d
+            "ransac": {
+                "Nreps": 300,
+                "dmax": 15,
+                "Npoints": 3
+            }
+        }
 
-
-
-
-did = 'boxtalosreem_01'
-appearance_filename = os.path.join(Paths.objdetect, 'boxtalosreem_appearance.pck')
-frames = range(14) #boxtalosreem_01_gt.json
-#frames = [0,1,3,4,5,6,7,8,10,11,12] #box_reem_gt.json
+did = 'boxiw3_large'
+appearance_filename = os.path.join(Paths.objdetect, 'boxiw3_large_appearance_sift.pck')
+frames = range(0,9) + range(10,15) #boxiw3_large_gt.json
+# frames = range(14) #boxtalosreem_01_gt.json
+# frames = [0,1,3,4,5,6,7,8,10,11,12] #box_reem_gt.json
 # frames = [0,1,2,3,4,5,6,7] #box_regilait_gt.json
-#frames = [0,1,2,3,4,5,7,8,9,14,15,22,25] #box_eps_02_gt.json
+# frames = [0,1,2,3,4,5,7,8,9,14,15,22,25] #box_eps_02_gt.json
 
 
 # Initializing MBV rendering stack.
@@ -58,7 +51,8 @@ model3d.setupMeshManager(mesh_manager)
 decoder.loadMeshTickets(mesh_manager)
 renderer = mbv.Ren.RendererOGLCudaExposed.get()
 grabber = AutoGrabber.create_di(params_ds)
-orb = cv2.ORB_create()
+rigid_detector = RigidObjectDetectorORB(settings=settings)
+#orb = cv2.ORB_create()
 p3d_ren_all = None
 
 
@@ -84,7 +78,8 @@ for f in frames:
     mask = (issue > 0).astype(img.dtype)
     kernel = np.ones((5,5),mask.dtype)
     mask = cv2.erode(mask,kernel,iterations = 1)
-    kp, des = orb.detectAndCompute(img,mask)
+    #kp, des = orb.detectAndCompute(img,mask)
+    kp, des = rigid_detector.detector.detectAndCompute(img,mask)
 
     # Transforming points to model space.
     Tmat = decoding[0].matrices[0]
