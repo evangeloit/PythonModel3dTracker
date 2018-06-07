@@ -17,7 +17,7 @@ import PythonModel3dTracker.Paths as Paths
 
 settings = {
             "features_type": 'sift', # Supported types: sift, orb
-            "max_features": 400,
+            "max_features": 2500,
             "min_matches": 4,
             "inliers_ratio": 0.05,
             "method": "3d3d", #3d3d or 2d3d
@@ -28,9 +28,10 @@ settings = {
             }
         }
 
-did = 'boxiw3_large'
-appearance_filename = os.path.join(Paths.objdetect, 'boxiw3_large_appearance_sift.pck')
-frames = range(0,9) + range(10,15) #boxiw3_large_gt.json
+did = 'boxiw3_small'
+appearance_filename = os.path.join(Paths.objdetect, '{0}_appearance_{1}.pck'.format(did, settings['features_type']))
+frames = range(0,14) #boxiw3_small_gt.json
+# frames = range(0,9) + range(10,15) #boxiw3_large_gt.json
 # frames = range(14) #boxtalosreem_01_gt.json
 # frames = [0,1,3,4,5,6,7,8,10,11,12] #box_reem_gt.json
 # frames = [0,1,2,3,4,5,6,7] #box_regilait_gt.json
@@ -76,10 +77,13 @@ for f in frames:
     ru.render(renderer,mesh_manager,decoding,camera,[1,1],mbv.Ren.RendererOGLBase.Culling.CullNone,1)
     positions, normals, colors, issue, instance, V = ru.genMaps(renderer)
     mask = (issue > 0).astype(img.dtype)
+    #img[mask == 0] = 0
     kernel = np.ones((5,5),mask.dtype)
     mask = cv2.erode(mask,kernel,iterations = 1)
     #kp, des = orb.detectAndCompute(img,mask)
     kp, des = rigid_detector.detector.detectAndCompute(img,mask)
+
+    print f, 'Features num:', len(kp)
 
     # Transforming points to model space.
     Tmat = decoding[0].matrices[0]
@@ -94,8 +98,8 @@ for f in frames:
         print i,p, p_ren, p_dpt, np.linalg.norm(p_ren - p_dpt)
 
     p3d_model = f2d.ApplyRigid(p3d_ren,Tinv)
-    print 'Tinit:', '\n' ,Tinit
-    print 'Tinv:', '\n' ,Tinv
+    #print 'Tinit:', '\n' ,Tinit
+    #print 'Tinv:', '\n' ,Tinv
 
 
     # Generating Landmarks & transforming points in default (neutral) pose.
@@ -103,9 +107,9 @@ for f in frames:
     landmarks_decoder = mbv.PF.LandmarksDecoder(decoder)
     p3d_def = landmarks_decoder.decode(def_state,landmarks)
     p3d_defpose = np.array(p3d_def.__pythonize__()).T
-    print 'Default Pose State:',def_state
-    for i,l in enumerate(landmarks):
-        print l.name, l.linked_geometry, l.pos, p3d_def[i]
+    #print 'Default Pose State:',def_state
+    #for i,l in enumerate(landmarks):
+    #    print l.name, l.linked_geometry, l.pos, p3d_def[i]
 
 
 

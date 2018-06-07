@@ -3,6 +3,7 @@ import os
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFSettings as pfs
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.TrackingTools as tt
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.VisualizationTools as vt
+import PythonModel3dTracker.Paths as Paths
 
 #Viz Parameters
 visualize_params = {'enable':True,
@@ -11,14 +12,14 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'ms1_gestures_04'
+dataset = 'humaniw3_01'
 model_name = 'mh_body_male_customquat'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
 landmarks_source = ['gt', 'detections', 'openpose'][2]
 
 
-res_filename = None #os.path.join(Paths.datasets,"human_tracking/co4robots/ms1_gestures/{0}_gt1.json".format(dataset))
+res_filename = os.path.join(Paths.datasets,"human_tracking/{0}_tracked.json".format(dataset))
 
 # PF Initialization
 hmf_arch_type = "2levels"
