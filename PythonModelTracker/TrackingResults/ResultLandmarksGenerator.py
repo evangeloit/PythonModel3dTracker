@@ -2,7 +2,7 @@ import PyMBVCore as core
 import PyMBVOpenMesh as mbvom
 import PyMBVParticleFilter as mpf
 
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as ldm
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.TrackingTools as tt
 
 

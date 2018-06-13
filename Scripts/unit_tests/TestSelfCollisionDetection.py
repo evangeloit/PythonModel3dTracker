@@ -11,7 +11,7 @@ import PyMBVPhysics as phys
 np.set_printoptions(precision=3)
 import cv2
 import BlenderMBVLib.RenderingUtils as ru
-import PythonModelTracker.BulletCollisionUtils as bcu
+import PythonModel3dTracker.PythonModelTracker.BulletCollisionUtils as bcu
 import os
 os.chdir(os.environ['bmbv']+"/Scripts/")
 

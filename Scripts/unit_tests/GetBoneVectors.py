@@ -1,5 +1,3 @@
-import numpy as np
-import copy
 import BlenderMBV.BlenderMBVLib.AngleTransformations as at
 import PythonModel3dTracker.Paths as Paths
 from PythonModel3dTracker.PythonModelTracker.PFHelpers.VisualizationTools import Visualizer
@@ -7,7 +5,7 @@ import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as GUI
 import cv2
 import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as BMBVCONV
-import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
+import PythonModel3dTracker.PythonModelTracker.Model3dUtils.Model3dUtils as M3DU
 
 
 def ExtractGeom(bone_geometry, state):

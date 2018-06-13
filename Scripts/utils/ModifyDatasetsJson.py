@@ -5,7 +5,7 @@
 
 import os
 
-import PythonModelTracker.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
 
 os.chdir(os.environ['bmbv']+"/Scripts/")
 

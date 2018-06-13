@@ -12,14 +12,14 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'humaniw3_01'
+dataset = 'mhad_s03_a04'
 model_name = 'mh_body_male_customquat'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
 landmarks_source = ['gt', 'detections', 'openpose'][2]
 
 
-res_filename = os.path.join(Paths.datasets,"human_tracking/{0}_tracked.json".format(dataset))
+res_filename = None #os.path.join(Paths.datasets,"human_tracking/{0}_tracked.json".format(dataset))
 
 # PF Initialization
 hmf_arch_type = "2levels"
@@ -37,7 +37,7 @@ pf_params['pf']['smart_pf']['max_iterations'] = 50
 pf_params['pf']['smart_pf']['depth_filt_thres'] = 0.2
 pf_params['pf']['smart_pf']['filter_random'] = False
 pf_params['pf']['smart_pf']['filter_history'] = True
-pf_params['pf']['smart_pf']['filter_history_thres'] = 1
+pf_params['pf']['smart_pf']['filter_history_thres'] = 100
 
 # Objectives
 objective_params = {

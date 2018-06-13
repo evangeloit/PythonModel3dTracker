@@ -6,9 +6,9 @@ import BlenderMBVLib.RenderingUtils as ru
 import PyModel3dTracker as pm3d
 import cv2
 
-import PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModelTracker.ModelTrackingResults as mtr
-import PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
 from ObjectDetection.RigidObjectDetectorORB import RigidObjectDetectorORB, ObjectData
 from ObjectDetection.RigidObjectOptimizer import RigidObjectOptimizer
 

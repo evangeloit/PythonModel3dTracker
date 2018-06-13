@@ -1,12 +1,8 @@
-import numpy as np
-
 import BlenderMBV.BlenderMBVLib.AngleTransformations as at
 import PythonModel3dTracker.Paths as Paths
 from PythonModel3dTracker.PythonModelTracker.PFHelpers.VisualizationTools import Visualizer
 import PythonModel3dTracker.PyMBVAll as mbv
 import cv2
-
-import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
 
 
 def print_lanmark_info(l):

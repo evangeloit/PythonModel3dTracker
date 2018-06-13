@@ -5,7 +5,7 @@ import PyMBVRendering as ren
 import PyMBVAcquisition as acq
 import PyMBVLibraries as lib
 import numpy as np
-import PythonModelTracker.AngleTransformations as at
+import PythonModel3dTracker.PythonModelTracker.AngleTransformations as at
 import PyHandTracker
 import PyMBVPhysics as phys
 import PySynergyTrackerRGBD as st
@@ -14,7 +14,7 @@ np.set_printoptions(precision=1)
 import cv2
 import copy
 import BlenderMBVLib.RenderingUtils as ru
-import PythonModelTracker.BulletCollisionUtils as bcu
+import PythonModel3dTracker.PythonModelTracker.BulletCollisionUtils as bcu
 
 """
 Renders a primitives based model and checks for collisions.

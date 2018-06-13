@@ -5,8 +5,7 @@ import cv2
 import csv
 import numpy as np
 import os.path
-from PythonModel3dTracker.PythonModelTracker.LandmarksCorrespondences import primitives_dict
-from PythonModel3dTracker.PythonModelTracker.LandmarksCorrespondences import model_landmark_positions
+from PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksCorrespondences import primitives_dict, model_landmark_positions
 
 
 class LandmarksGrabber:

@@ -6,11 +6,11 @@ import PyMBVCore as core
 import PyMBVOpenMesh as mbvom
 import PyMBVParticleFilter as mpf
 import PyModel3dTracker as htpf
-import PythonModelTracker.PFSettings as pfs
+import PythonModel3dTracker.PythonModelTracker.PFSettings as pfs
 import cv2
 
-import PythonModelTracker.LandmarksGrabber as ldm
-import PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
 
 os.chdir(os.environ['bmbv']+'/Scripts')
 

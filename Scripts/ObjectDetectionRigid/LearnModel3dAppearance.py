@@ -7,10 +7,10 @@ import BlenderMBV.BlenderMBVLib.AngleTransformations as at
 import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 import cv2
 
-import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
 import PythonModel3dTracker.PythonModelTracker.Features2DUtils as f2d
-import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
 import PythonModel3dTracker.PyMBVAll as mbv
 from PythonModel3dTracker.ObjectDetection.RigidObjectDetectorORB import ObjectAppearance, RigidObjectDetectorORB
 import PythonModel3dTracker.Paths as Paths

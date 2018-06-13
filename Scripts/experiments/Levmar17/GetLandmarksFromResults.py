@@ -1,6 +1,6 @@
 import os.path
 
-import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
 from PythonModel3dTracker.PythonModelTracker.TrackingResults.ResultLandmarksGenerator import GenerateLandmarks
 import PythonModel3dTracker.Paths as Paths
 import PythonModel3dTracker.PyMBVAll as mbv

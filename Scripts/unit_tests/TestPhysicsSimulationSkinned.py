@@ -15,7 +15,7 @@ os.chdir(os.environ['bmbv']+"/Scripts/")
 np.set_printoptions(precision=1)
 import cv2
 import BlenderMBVLib.RenderingUtils as ru
-import PythonModelTracker.BulletCollisionUtils as bcu
+import PythonModel3dTracker.PythonModelTracker.BulletCollisionUtils as bcu
 
 """
 Renders a primitives based model and checks for collisions.

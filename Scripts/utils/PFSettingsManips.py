@@ -1,6 +1,6 @@
 import PyMBVParticleFilter as pf
 
-import PythonModelTracker.PFHelpers.PFSettings as pfs
+import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFSettings as pfs
 
 model_name = 'mh_body_male'
 

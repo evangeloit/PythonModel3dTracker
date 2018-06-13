@@ -7,8 +7,8 @@ import os
 
 import PyModel3dTracker as mt
 
-import PythonModelTracker.DatasetInfo as dsi
-import PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
 
 os.chdir(os.environ['bmbv']+"/Scripts/")
 

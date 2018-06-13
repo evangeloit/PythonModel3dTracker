@@ -6,7 +6,6 @@ import os
 import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
 import BlenderMBV.BlenderMBVLib.RenderingUtils as ru
 import PyMBVCore as core
-import PyMBVAcquisition as acq
 import PyMBVLibraries as lib
 import PyMBVOpenMesh as mbvom
 import PyMBVParticleFilter as mpf
@@ -14,13 +13,13 @@ import PyMBVPhysics as phys
 import PyModel3dTracker as htpf
 import cv2
 
-import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
 import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as dmu
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as ldm
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
-import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
-import PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber as opg
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.Landmarks.OpenPoseGrabber as opg
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
 import PythonModel3dTracker.PythonModelTracker.PFLevmar as pfl
 import PythonModel3dTracker.Paths as Paths
@@ -90,8 +89,8 @@ class PFTracking:
 
         print('Opening dataset:', self.params_ds.stream_filename)
         grabber_auto = AutoGrabber.create(str(self.params_ds.format),
-                                               core.StringVector([str(s) for s in self.params_ds.stream_filename]),
-                                               str(self.params_ds.calib_filename))
+                                          core.StringVector([str(s) for s in self.params_ds.stream_filename]),
+                                          str(self.params_ds.calib_filename))
 
         self.grabber = grabber_auto
         #self.grabber = htpf.FlipInputGrabber(grabber_auto, self.params_ds.flip_images)

@@ -2,17 +2,17 @@ import os
 
 import cv2
 
-import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
-import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
 import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.Paths as Paths
 
 visualize = {'enable':True,
              'labels':True, 'depth':True, 'rgb':True, 'wait_time':33}
 
-grabber = AutoGrabber.create('oni',[''])
+grabber = AutoGrabber.create('oni', [''])
 
 gui = mtg.ModelTrackingGuiOpencv(visualize=visualize, init_frame=0)
 

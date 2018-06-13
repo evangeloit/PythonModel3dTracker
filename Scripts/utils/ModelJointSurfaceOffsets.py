@@ -8,7 +8,7 @@ import PyMBVLibraries as lib
 import PyMBVParticleFilter as mpf
 import cv2
 
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as ldm
+import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as ldm
 
 model3d_xml = Paths.model3d_dict['mh_body_male_custom']['path']
 

@@ -2,14 +2,14 @@ import PyMBVParticleFilter as pf
 import os
 
 import PyMBVParticleFilter as pf
-import PythonModelTracker.PFSettings as pfs
-import PythonModelTracker.PFSettings.Hand.Architecture as architecture_a
-import PythonModelTracker.PFSettings.Hand.hand_skinned as settings_a
-import PythonModelTracker.PFSettings.Human.Architecture as architecture_h
-import PythonModelTracker.PFSettings.Human.mh_body_male_meta_glbscl as settings_h
-import PythonModelTracker.PFSettings.Object.Architecture as architecture_o
-import PythonModelTracker.PFSettings.Object.cylinder as settings_o
-import PythonModelTracker.PFSettings.PFSettingsGen as pfg
+import PythonModel3dTracker.PythonModelTracker.PFSettings as pfs
+import PythonModel3dTracker.PythonModelTracker.PFSettings.Hand.Architecture as architecture_a
+import PythonModel3dTracker.PythonModelTracker.PFSettings.Hand.hand_skinned as settings_a
+import PythonModel3dTracker.PythonModelTracker.PFSettings.Human.Architecture as architecture_h
+import PythonModel3dTracker.PythonModelTracker.PFSettings.Human.mh_body_male_meta_glbscl as settings_h
+import PythonModel3dTracker.PythonModelTracker.PFSettings.Object.Architecture as architecture_o
+import PythonModel3dTracker.PythonModelTracker.PFSettings.Object.cylinder as settings_o
+import PythonModel3dTracker.PythonModelTracker.PFSettings.PFSettingsGen as pfg
 
 mdict = Paths.model3d_dict
 s_dict = {}

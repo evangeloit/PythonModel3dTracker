@@ -3,9 +3,9 @@ import os
 import PyMBVCore as core
 import PyMBVOptimization as opt
 import PyMBVParticleFilter as pf
-import PythonModelTracker.PFSettings as pfs
+import PythonModel3dTracker.PythonModelTracker.PFSettings as pfs
 
-import PythonModelTracker.PFHelpers.PFInitialization as pfi
+import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
 
 os.chdir(os.path.join(os.environ['bmbv'],'Scripts'))
 

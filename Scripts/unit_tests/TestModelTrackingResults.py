@@ -1,4 +1,4 @@
-import PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
 
 
 results_txt = "/home/mad/Development/Results/Human_tracking/Levmar/mhad_s02_a04_mh_body_male_custom_p1_lp1_ransac[0.0, 0.0].json"

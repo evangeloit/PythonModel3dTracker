@@ -7,12 +7,12 @@ import PythonModel3dTracker.PyMBVAll as mbv
 import PyModel3dTracker as htpf
 
 
-import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
-import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
+import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as LG
+import PythonModel3dTracker.PythonModelTracker.Model3dUtils.Model3dUtils as M3DU
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
-import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
 from PythonModel3dTracker.ObjectDetection.RigidObjectOptimizer import RigidObjectOptimizer
 import PythonModel3dTracker.Paths as Paths
 
@@ -82,8 +82,8 @@ class PlaybackHelper:
         assert self.params_ds is not None
         print self.params_ds.calib_filename
         self.grabber = AutoGrabber.create(str(self.params_ds.format),
-                                                    mbv.Core.StringVector([str(s) for s in self.params_ds.stream_filename]),
-                                                    str(self.params_ds.calib_filename))
+                                          mbv.Core.StringVector([str(s) for s in self.params_ds.stream_filename]),
+                                          str(self.params_ds.calib_filename))
         #self.grabber = htpf.FlipInputGrabber(self.grabber_auto, self.params_ds.flip_images)
         self.grabber_ldm = None
 

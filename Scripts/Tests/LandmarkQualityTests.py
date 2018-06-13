@@ -1,13 +1,12 @@
 import cv2
 import os
-import numpy as np
 
 import PythonModel3dTracker.PyMBVAll as mbv
-import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
-import PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber as opg
-import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.Landmarks.OpenPoseGrabber as opg
+import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
 import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as DMU
-import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
+import PythonModel3dTracker.PythonModelTracker.Model3dUtils.Model3dUtils as M3DU
 import PythonModel3dTracker.PythonModelTracker.GeomUtils as GU
 import PythonModel3dTracker.Paths as Paths
 import BlenderMBV.BlenderMBVLib.RenderingUtils as ru

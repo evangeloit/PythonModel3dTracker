@@ -1,13 +1,9 @@
 import numpy as np
 import PyOpenPose as OP
-import os
 import PyMBVCore as core
 
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
+import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as LG
 import PyCeresIK as IK
-import copy
-import cv2
-
 
 
 class OpenPoseGrabber():

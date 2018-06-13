@@ -3,10 +3,10 @@ import numpy as np
 
 import cv2
 
-import PythonModelTracker.AutoGrabber as AutoGrabber
-import PythonModelTracker.DatasetInfo as dsi
-import PythonModelTracker.ModelTrackingResults as mtr
-import PythonModelTracker.PyMBVAll as mbv
+import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.PyMBVAll as mbv
 
 
 # Does not work!!

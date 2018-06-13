@@ -2,10 +2,10 @@ import numpy as np
 import os
 
 import PythonModel3dTracker.Paths as Paths
-from PythonModel3dTracker.PythonModelTracker.ModelTrackingResults import ModelTrackingResults
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
-import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
-import PythonModel3dTracker.PythonModelTracker.DatasetInfo as DI
+from PythonModelTracker.TrackingResults.ModelTrackingResults import ModelTrackingResults
+import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as LG
+import PythonModel3dTracker.PythonModelTracker.Model3dUtils.Model3dUtils as M3DU
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as DI
 
 
 def IsResultsFile(filename):

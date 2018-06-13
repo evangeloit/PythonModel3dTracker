@@ -1,8 +1,8 @@
 import numpy as np
 import PythonModel3dTracker.PyMBVAll as mbv
 import PyCeresIK as IK
-from PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber import OpenPoseGrabber
-from PythonModel3dTracker.PythonModelTracker.LandmarksCorrespondences import model_landmark_partitions
+from PythonModelTracker.Landmarks.OpenPoseGrabber import OpenPoseGrabber
+from PythonModelTracker.Landmarks.LandmarksCorrespondences import model_landmark_partitions
 import PythonModel3dTracker.PythonModelTracker.Features2DUtils as FU
 import copy
 import time
@@ -102,8 +102,10 @@ class SmartPF:
                     xclude_mask_3d.append(True)
                 else:
                     xclude_mask_3d.append(False)
+            else:
+                xclude_mask_3d.append(False)
 
-        xclude_indices_2d = [False]*N
+        #xclude_indices_2d = [False]*N
         for xind,p3d,p2d in zip(xclude_mask_3d, self.keypoints3d, self.keypoints2d):
             if xind:
                 keypoints_out[xind].x = self.keypoints2d[xind].x

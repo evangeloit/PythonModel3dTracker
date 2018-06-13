@@ -1,6 +1,6 @@
-import PythonModelTracker.PFSettings as pfs
+import PythonModel3dTracker.PythonModelTracker.PFSettings as pfs
 
-import PythonModelTracker.PFHelpers.PFTrackingHelper as pfh
+import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFTrackingHelper as pfh
 
 #Viz Parameters
 visualize = {'enable':False,

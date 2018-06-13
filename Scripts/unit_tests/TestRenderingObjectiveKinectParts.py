@@ -1,11 +1,11 @@
 import cv2
 import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.Paths as Paths
-import PythonModel3dTracker.PythonModelTracker.DatasetInfo as DSI
-import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as DSI
+import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
 from PythonModel3dTracker.PythonModelTracker.PFHelpers.VisualizationTools import Visualizer
-from PythonModel3dTracker.PythonModelTracker.ModelTrackingResults import ModelTrackingResults
-import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
+from PythonModelTracker.TrackingResults.ModelTrackingResults import ModelTrackingResults
+import PythonModel3dTracker.PythonModelTracker.Model3dUtils.Model3dUtils as M3DU
 
 
 model_name = 'mh_body_male_custom_1050'

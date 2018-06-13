@@ -1,24 +1,23 @@
 import cv2
 import os
 
-import PyCeresIK
 import PythonModel3dTracker.PyMBVAll as mbv
 import PyModel3dTracker as m3dt
 
 import BlenderMBV.BlenderMBVLib.BlenderMBVConversions as blconv
 
 import PythonModel3dTracker.Paths as Paths
-import PythonModel3dTracker.PythonModelTracker.DatasetInfo as dsi
-import PythonModel3dTracker.PythonModelTracker.LandmarksGrabber as LG
-import PythonModel3dTracker.PythonModelTracker.Model3dUtils as M3DU
+import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
+import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as LG
+import PythonModel3dTracker.PythonModelTracker.Landmarks.Model3dLandmarks as M3DU
 import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as DMU
 import PythonModel3dTracker.PythonModelTracker.Features2DUtils as FU
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
-import PythonModel3dTracker.PythonModelTracker.ModelTrackingResults as mtr
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFInitialization as pfi
-import PythonModel3dTracker.PythonModelTracker.AutoGrabber as AutoGrabber
+import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
 import PythonModel3dTracker.PythonModelTracker.PFLevmar as pfl
-import PythonModel3dTracker.PythonModelTracker.OpenPoseGrabber as opg
+import PythonModel3dTracker.PythonModelTracker.Landmarks.OpenPoseGrabber as opg
 
 
 
@@ -92,8 +91,8 @@ class DatasetTools:
     def GenGrabber(params_ds):
         print('Opening dataset:', params_ds.stream_filename)
         grabber = AutoGrabber.create(str(params_ds.format),
-                                               mbv.Core.StringVector([str(s) for s in params_ds.stream_filename]),
-                                               str(params_ds.calib_filename))
+                                     mbv.Core.StringVector([str(s) for s in params_ds.stream_filename]),
+                                     str(params_ds.calib_filename))
 
         return grabber
 
