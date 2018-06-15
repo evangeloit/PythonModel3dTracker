@@ -108,9 +108,9 @@ class SmartPF:
         #xclude_indices_2d = [False]*N
         for xind,p3d,p2d in zip(xclude_mask_3d, self.keypoints3d, self.keypoints2d):
             if xind:
-                keypoints_out[xind].x = self.keypoints2d[xind].x
-                keypoints_out[xind].y = self.keypoints2d[xind].y
-                keypoints_out[xind].z = 0
+                p3d.x = p2d.x
+                p3d.y = p2d.y
+                p3d.z = 0
         print "xclude_mask_3d:", xclude_mask_3d
         return keypoints_out
 
@@ -214,7 +214,8 @@ class SmartPF:
                     self.keypoints3d = FU.FilterKeypointsRandom(self.keypoints3d,
                                                                 self.keypoints2d,
                                                                 self.filter_random_ratios)
-                #print 'keypoints_cur:',keypoints_cur
+
+                print 'keypoints_cur:', self.keypoints3d
                 observations = OpenPoseGrabber.ConvertIK([self.keypoints3d], self.calib)
                 # do something with
                 cur_state = mbv.Core.DoubleVector(particles[:, i])
