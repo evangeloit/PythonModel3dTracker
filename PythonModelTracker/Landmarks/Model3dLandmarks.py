@@ -1,6 +1,9 @@
 import numpy as np
 import PythonModel3dTracker.PyMBVAll as mbv
 import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as LG
+import PythonModel3dTracker.PythonModelTracker.DepthMapUtils as DMU
+import PythonModel3dTracker.PythonModelTracker.GeomUtils as GU
+from math import exp
 
 def GetNode(tf, tfname):
     if tf.name == tfname:
@@ -191,10 +194,10 @@ def GetInterpKeypointsModel(landmark_source, model3d, point_names,  keypoints2d,
 
 def GetInterpKeypointsModelSets(landmark_source, model3d, point_names, keypoints2d, interpolate_set, n_interp=5):
     point_pairs = GetConsecutiveKeypointPairs(point_names, landmark_source, model3d, interpolate_set)
-    point_set_names_, point_names_, keypoints2d_ = \
+    point_set_names_, point_set_indices_, point_names_, keypoints2d_ = \
         GetInterpKeypointsSets(point_names=point_names,
                                keypoints2d=keypoints2d, point_pairs=point_pairs, n_interp=n_interp)
-    return point_set_names_, point_names_, keypoints2d_
+    return point_set_names_, point_set_indices_, point_names_, keypoints2d_
 
 
 def GetConsecutiveKeypointPairs(point_names, landmark_source, model3d, selected_bones):
@@ -211,13 +214,13 @@ def GetConsecutiveKeypointPairs(point_names, landmark_source, model3d, selected_
 
 
 def GetInterpKeypoints(point_names, keypoints2d, point_pairs=[], n_interp=5):
-    _, point_names_sets, keypoints2d_sets = \
+    _, _, point_names_sets, keypoints2d_sets = \
         GetInterpKeypointsSets(point_names, keypoints2d, point_pairs, n_interp)
 
-    point_names_ = [p for ps in point_names_sets for p in ps]
-    keypoints2d_ = mbv.Core.Vector2fStorage([p for ps in keypoints2d_sets for p in ps])
+    #point_names_ = [p for ps in point_names_sets for p in ps]
+    #keypoints2d_ = mbv.Core.Vector2fStorage([p for ps in keypoints2d_sets for p in ps])
     #keypoints3d_ = mbv.Core.Vector3fStorage([p for ps in keypoints3d_sets for p in ps])
-    return point_names_, keypoints2d_
+    return point_names_sets, keypoints2d_sets
 
 
 def GetInterpKeypointsSets(point_names, keypoints2d, point_pairs=[], n_interp=5):
@@ -231,35 +234,43 @@ def GetInterpKeypointsSets(point_names, keypoints2d, point_pairs=[], n_interp=5)
     default_set = [n for n in point_names if n not in interpolate_set]
 
     point_set_names_ =[]
+    point_set_indices_ = []
     point_names_ = []
-    keypoints2d_ = []
+    keypoints2d_ = mbv.Core.Vector2fStorage()
     #keypoints3d_ = []
 
-    for n in default_set:
+    for i,n in enumerate(default_set):
         point_set_names_.append(n)
-        point_names_.append([n])
-        k2d = mbv.Core.Vector2fStorage([kp2d_dict[n]])
-        keypoints2d_.append(k2d)
+        point_set_indices_.append((i,i+1))
+        point_names_.append(n)
+        #k2d = mbv.Core.Vector2fStorage([kp2d_dict[n]])
+        keypoints2d_.append(kp2d_dict[n])
         #k3d = DMU.UnprojectPoints(k2d, camera, depth)
         #keypoints3d_.append(k3d)
 
+    idx = len(default_set)
     for n0,n1 in point_pairs:
-        keypoints2d_cur = mbv.Core.Vector2fStorage()
+        #keypoints2d_cur = mbv.Core.Vector2fStorage()
         #keypoints3d_cur = mbv.Core.Vector3fStorage()
-        point_names_cur = []
+        #point_names_cur = []
         point_set_names_.append(n0)
-
+        idx0 = idx
         p0 = kp2d_dict[n0]
         p1 = kp2d_dict[n1]
         if (p0.x > 0) and (p0.y > 0) and (p1.x > 0) and (p1.y > 0):
             cur_p2d = p2d_interp(p0, p1, n_interp)
             for i, p in enumerate(cur_p2d):
                 lname = "{0}_{1:02d}".format(n0, i)
-                point_names_cur.append(lname)
-                keypoints2d_cur.append(p)
+                point_names_.append(lname)
+                keypoints2d_.append(p)
+                idx += 1
         else:
-            point_names_cur.append(n0)
-            keypoints2d_cur.append(p0)
+            point_names_.append(n0)
+            keypoints2d_.append(p0)
+            idx += 1
+        idx1 = idx
+        point_set_indices_.append( (idx0, idx1) )
+
 
 
         #keypoints3d_cur = DMU.UnprojectPoints(keypoints2d_cur,camera,depth)
@@ -268,9 +279,100 @@ def GetInterpKeypointsSets(point_names, keypoints2d, point_pairs=[], n_interp=5)
         #p1 = kp3d_dict[n1]
         #cur_p3d = p3d_interp(p0, p1, n_interp)
         #for p in cur_p3d: keypoints3d_cur.append(p)
-        keypoints2d_.append(keypoints2d_cur)
+        #keypoints2d_.append(keypoints2d_cur)
         #keypoints3d_.append(keypoints3d_cur)
-        point_names_.append(point_names_cur)
-    return point_set_names_, point_names_, keypoints2d_
+        #point_names_.append(point_names_cur)
+    return point_set_names_, point_set_indices_, point_names_, keypoints2d_
 
 
+
+def FilterKeypointsRandom(keypoints3d, keypoints2d, ratios=[0.1, 0.2]):
+    #print ratios
+    keypoints_out = mbv.Core.Vector3fStorage(keypoints3d)
+    n = len(keypoints3d)
+    ratio2d = min(ratios[0],ratios[1])
+    ratio3d = max(ratios[0], ratios[1])
+    xclude_indices_3d = np.unique(np.random.choice(n, int(ratio3d*n), replace=True))
+    if xclude_indices_3d.size == 0:
+        xclude_indices_2d = xclude_indices_3d
+    else:
+        xclude_indices_2d = np.unique(np.random.choice(xclude_indices_3d, int(ratio2d*n), replace=True))
+    for xind in xclude_indices_3d:
+        keypoints_out[xind].x = keypoints2d[xind].x
+        keypoints_out[xind].y = keypoints2d[xind].y
+        keypoints_out[xind].z = 0
+    for xind in xclude_indices_2d:
+        keypoints_out[xind].x = 0
+        keypoints_out[xind].y = 0
+        keypoints_out[xind].z = 0
+    # print 'Keypoints_out:\n', keypoints_out
+    return keypoints_out
+
+
+#
+def FilterKeypointsDepth(setindices, point_names, keypoints3d, keypoints2d, thres = 0.5):
+    point_names_out = []
+    keypoints3d_out = mbv.Core.Vector3fStorage()
+    keypoints2d_out = mbv.Core.Vector2fStorage()
+    acceptance_prob = []
+    accepted_mask = []
+    #for names, p3ds, p2ds in zip( point_names, keypoints3d, keypoints2d):
+    for idx0, idx1 in setindices:
+        N = idx1 - idx0
+
+        p3ds = keypoints3d[idx0:idx1]
+        names = point_names[idx0:idx1]
+        p2ds = keypoints2d[idx0:idx1]
+        print idx0, idx1, names
+        if N > 2:
+            line_dist = GU.NormalizedLineDist(p3ds[0], p3ds[-1], p3ds[2:-1], 50)
+        else:
+            line_dist = 0
+        cur_prob = exp(-(line_dist**2)/0.2)
+        acceptance_prob.append(cur_prob)
+        for n,p3d,p2d in zip(names, p3ds, p2ds):
+
+            if cur_prob > thres:
+                accepted_mask.append(True)
+                point_names_out.append(n)
+                keypoints3d_out.append(p3d)
+                keypoints2d_out.append(p2d)
+            else:
+                accepted_mask.append(True)
+                keypoints3d_out.append(mbv.Core.Vector3(p2d.x, p2d.y, 0))
+                keypoints2d_out.append(p2d)
+
+    return accepted_mask, point_names_out, keypoints3d_out, keypoints2d_out
+
+
+
+def GetInterpolatedModelObsLandmarks(depth, obs_source, obs_names, obs_points, obs_calib, model3d,
+                                     interpolated_bones, n_interp=5, depth_filt_thres = 0.0):
+    primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
+        obs_names, obs_source, model3d.model_name)
+    model_landmark_names_, model_landmarks_ = \
+        GetInterpModelLandmarks(model3d=model3d, default_bones=primitive_names,
+                                     interpolated_bones=interpolated_bones,
+                                     n_interp=n_interp)
+
+
+
+    # points3d_det_names, points3d_det, points2d_det = \
+    #     M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names,
+    #                                  points3d_det, points2d_det, interpolate_set, n_interp)
+    points3d_det_setnames_, points3d_det_setindices_, points3d_det_names_, points2d_det_ = \
+        GetInterpKeypointsModelSets(landmark_source=obs_source,
+                                         model3d=model3d,
+                                         point_names=obs_names,
+                                         keypoints2d=obs_points,
+                                         interpolate_set=interpolated_bones,
+                                         n_interp=n_interp)
+    points3d_det_ = DMU.UnprojectPoints(points2d_det_, obs_calib, depth)
+    accepted_det_mask, points3d_det_names, points3d_det, points2d_det = \
+        FilterKeypointsDepth(points3d_det_setindices_, points3d_det_names_,
+                                points3d_det_, points2d_det_, depth_filt_thres)
+    model_landmark_names = [m for m, a in zip(model_landmark_names_, accepted_det_mask) if a]
+    model_landmarks_ = [m for m, a in zip(model_landmarks_, accepted_det_mask) if a]
+    model_landmarks = mbv.PF.Landmark3dInfoVec(mbv.PF.Landmark3dInfoSkinnedVec())
+    for l in model_landmarks_: model_landmarks.append(l)
+    return model_landmark_names, model_landmarks, points3d_det_names, points3d_det, points2d_det

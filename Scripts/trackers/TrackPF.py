@@ -34,9 +34,9 @@ pf_params['pf']['smart_pf']['enable_blocks'] = False
 pf_params['pf']['smart_pf']['enable_bounds'] = True
 pf_params['pf']['smart_pf']['ceres_report'] = False
 pf_params['pf']['smart_pf']['max_iterations'] = 50
-pf_params['pf']['smart_pf']['depth_filt_thres'] = 0.2
+pf_params['pf']['smart_pf']['depth_filt_thres'] = 0.
 pf_params['pf']['smart_pf']['filter_random'] = False
-pf_params['pf']['smart_pf']['filter_history'] = True
+pf_params['pf']['smart_pf']['filter_history'] = False
 pf_params['pf']['smart_pf']['filter_history_thres'] = 100
 
 # Objectives
