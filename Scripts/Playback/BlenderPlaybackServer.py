@@ -5,10 +5,10 @@ import PythonModel3dTracker.Paths as Paths
 
 # Input
 wait_time = 1
-dataset = 'boxiw3_small'
-model_name = 'box'
-res = 'humaniw3_01'
-results_txt = os.path.join(Paths.datasets, "human_tracking/{}_tracked.json".format(res))
+dataset = ''
+model_name = ''
+res = 'mhad_s05_a04_mh_body_male_customquat_p1_lp1_ransac[0.0, 0.0]_foTrue_fhTrue'
+results_txt = os.path.join(Paths.results, "Human_tracking/Levmar/mhad_quats/{}.json".format(res))
 visualize = {'enable':True,
              'client': 'opencv',
              'labels':True, 'depth':True, 'rgb':True, 'wait_time':0}

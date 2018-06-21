@@ -5,7 +5,7 @@ import PythonModel3dTracker.Paths as Paths
 import PythonModel3dTracker.PythonModelTracker.TrackingResults.ResultMetricsCalculator as RMC
 
 
-input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/mhad_26dofs/more")
+input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/mhad_quats/")
 output_json = os.path.join(input_dir, 'results_metrics.json')
 
 if __name__ == "__main__":

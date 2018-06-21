@@ -14,6 +14,7 @@ def MeanLineDist(p1, p2, points):
 
 
 def NormalizedLineDist(p1,p2,points,max_dist=50):
+    #print 'p1p2points', p1, p2, points
     mean_dist = MeanLineDist(p1,p2,points)
     norm_dist = min(1, mean_dist/max_dist)
     return norm_dist

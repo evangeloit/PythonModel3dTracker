@@ -21,6 +21,7 @@ class SmartPF:
     default_smart_particles = 10
     default_filter_random_ratios = [0.1, 0.2]
     default_landmarks_history_size = 10
+    default_filter_history_thres = 100
 
     def __init__(self,rng,model3d,pf_params,decoder=None,landmarks=None):
         self.pf_params = pf_params
@@ -46,7 +47,7 @@ class SmartPF:
         self.filter_random = False
         self.filter_random_ratios = SmartPF.default_filter_random_ratios
         self.filter_history = False
-        self.filter_history_thres = 100
+        self.filter_history_thres = SmartPF.default_filter_history_thres
         self.landmarks_history = []
         self.landmarks_history_size = SmartPF.default_landmarks_history_size
         if 'smart_particles' in pf_params['smart_pf']:
@@ -57,8 +58,6 @@ class SmartPF:
         if 'filter_history' in pf_params['smart_pf']:
             self.filter_history = pf_params['smart_pf']['filter_history']
             self.filter_history_thres = pf_params['smart_pf']['filter_history_thres']
-
-
 
 
     def __del__(self):

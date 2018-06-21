@@ -10,7 +10,7 @@ import PyModel3dTracker as htpf
 import PythonModel3dTracker.PythonModelTracker.Grabbers.AutoGrabber as AutoGrabber
 import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as dsi
 import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as LG
-import PythonModel3dTracker.PythonModelTracker.Model3dUtils.Model3dUtils as M3DU
+import PythonModel3dTracker.PythonModelTracker.Landmarks.Model3dLandmarks as M3DL
 import PythonModel3dTracker.PythonModelTracker.ModelTrackingGui as mtg
 import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as mtr
 from PythonModel3dTracker.ObjectDetection.RigidObjectOptimizer import RigidObjectOptimizer
@@ -247,9 +247,10 @@ class PlaybackHelper:
                     lnames = []
                     if (self.model3d is not None) and (self.results is not None):
                         lnames, landmarks = self.results.get_model_landmarks(self.model3d.model_name)
+                        landmarks = landmarks[f]
                     if (len(lnames) > 0) and (len(points3d_det_names) > 0):
                         l_names_cor, l_cor, g_names_cor, g_cor = \
-                            M3DU.GetCorrespondingLandmarks(self.model3d.model_name, lnames, landmarks[f],
+                            M3DL.GetCorrespondingLandmarks(self.model3d.model_name, lnames, landmarks[f],
                                 self.params_ds.landmarks[self.sel_landmarks]['format'], points3d_det_names, points3d_det)
                         disp_landmark_sets = ['LandmarksModel', 'LandmmarksObs']
                         disp_landmark_names = [l_names_cor, g_names_cor]

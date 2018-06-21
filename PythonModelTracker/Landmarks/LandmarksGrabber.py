@@ -1,12 +1,12 @@
 import PythonModel3dTracker.PyMBVAll as mbv
-
+import math
 import PyModel3dTracker as mt
 import cv2
 import csv
 import numpy as np
 import os.path
 from PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksCorrespondences import primitives_dict, model_landmark_positions
-
+import json
 
 class LandmarksGrabber:
     """
@@ -17,9 +17,19 @@ class LandmarksGrabber:
         clb_filename
         clb        
     """
-    supported_formats = ['damien','bvh','roditak','csv']
+    supported_formats = ['damien','bvh','roditak','csv', 'json']
     
-    def __init__(self, source, landmarks_filename, clb_filename, model_name = None):
+    def __init__(self, source=None, landmarks_filename=None, clb_filename=None, model_name = None,
+                 params_ds=None, params_ds_label=None):
+
+        assert ((source is not None) and (landmarks_filename is not None) and (clb_filename is not None)) or \
+               ((params_ds is not None) and (params_ds_label is not None))
+
+        if params_ds is not None:
+            source = params_ds.landmarks[params_ds_label]['format']
+            landmarks_filename = params_ds.landmarks[params_ds_label]['filename'].format(params_ds.did)
+            clb_filename = params_ds.landmarks[params_ds_label]['calib_filename']
+
         assert source in LandmarksGrabber.supported_formats
         self.source = source
         self.landmarks_filename = landmarks_filename
@@ -41,6 +51,10 @@ class LandmarksGrabber:
         if self.source == 'csv':
             assert os.path.isfile(landmarks_filename)
             self.preloaded_point_names, self.preloaded_points = LandmarksGrabber.loadCsvLandmarks(str(landmarks_filename))
+        if self.source == 'json':
+            assert os.path.isfile(landmarks_filename)
+            self.preloaded_point_names, self.preloaded_points, self.json_source = LandmarksGrabber.loadJsonLandmarks(
+                str(landmarks_filename))
 
     @staticmethod
     def GetFilteredLandmarks(model_name, ldm_obs_source, ldm_obs_names, ldm_obs):
@@ -68,6 +82,11 @@ class LandmarksGrabber:
         self.f_count = f
 
     def acquire(self,images=None,calibs=None):
+        if calibs is not None and len(calibs) > 0:
+            self.clb = calibs[0]
+            self.t, extr_rot = self.clb.camera.OpenCV_getExtrinsics()
+            self.R, _ = cv2.Rodrigues(extr_rot)
+        source = self.source
         if self.source == 'damien':
             ldm_filename = self.landmarks_filename % self.f_count
             if os.path.isfile(ldm_filename):
@@ -88,22 +107,28 @@ class LandmarksGrabber:
         elif self.source == 'csv':
             self.point_names = self.preloaded_point_names
             points = self.preloaded_points[self.f_count]
+        elif self.source == 'json':
+            source = self.json_source
+            self.point_names = self.preloaded_point_names[self.f_count]
+            points = self.preloaded_points[self.f_count]
 
         points = np.dot(self.R,points) + self.t
 
         self.points_vec = LandmarksGrabber.np2pvec(points)
-
-
         self.f_count += 1
 
         if self.filter_landmarks:
             self.point_names, self.points_vec = \
-                LandmarksGrabber.GetFilteredLandmarks(self.model_name, self.source, self.point_names, self.points_vec)
+                LandmarksGrabber.GetFilteredLandmarks(self.model_name, source, self.point_names, self.points_vec)
 
 
-        self.points2d_vec = calibs[0].project(mbv.Core.Vector3fStorage(self.points_vec))
+        self.points2d_vec = self.clb.project(mbv.Core.Vector3fStorage(self.points_vec))
+        for p in self.points2d_vec:
+            if math.isnan(p.x) or math.isnan(p.y) or math.isnan(p.x) or math.isinf(p.y):
+                p.x = 0
+                p.y = 0
 
-        return self.point_names, [self.points_vec], [ self.points2d_vec ], self.clb, self.source
+        return self.point_names, [self.points_vec], [ self.points2d_vec ], self.clb, source
 
 
     @staticmethod
@@ -190,6 +215,21 @@ class LandmarksGrabber:
                     points_cur = points_cur.transpose()
                     points.append(points_cur)
         return point_names, points
+
+    @staticmethod
+    def loadJsonLandmarks(ldm_filename):
+        with open(ldm_filename, 'r') as fp:
+            ldm_info = json.load(fp)
+            json_source = ldm_info['source'][0]
+            preloaded_points = {}
+            preloaded_point_names = {}
+            for f,frame_points,frame_point_names in zip(ldm_info['frame_idx'], ldm_info['keypoints3d'], ldm_info['point_names']):
+                points_cur = np.empty((0, 3), float)
+                for points in frame_points[0]:
+                    points_cur = np.append(points_cur, np.array([points]), axis=0)
+                preloaded_points[f] = points_cur.transpose()
+                preloaded_point_names[f] = [str(n) for n in frame_point_names]
+        return preloaded_point_names, preloaded_points, json_source
 
     @staticmethod
     def loadCalibTxt(clb_filename):

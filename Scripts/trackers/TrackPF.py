@@ -12,11 +12,11 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'mhad_s03_a04'
+dataset = 'mhad_s12_a04'
 model_name = 'mh_body_male_customquat'
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
-landmarks_source = ['gt', 'detections', 'openpose'][2]
+landmarks_source = ['gt', 'detections', 'openpose', 'json_openpose'][3]
 
 
 res_filename = None #os.path.join(Paths.datasets,"human_tracking/{0}_tracked.json".format(dataset))
@@ -34,9 +34,15 @@ pf_params['pf']['smart_pf']['enable_blocks'] = False
 pf_params['pf']['smart_pf']['enable_bounds'] = True
 pf_params['pf']['smart_pf']['ceres_report'] = False
 pf_params['pf']['smart_pf']['max_iterations'] = 50
-pf_params['pf']['smart_pf']['depth_filt_thres'] = 0.
+pf_params['pf']['smart_pf']['interpolate_num'] = 3
+pf_params['pf']['smart_pf']['filter_occluded'] = True
+pf_params['pf']['smart_pf']['filter_occluded_params'] = {
+    'thres' : 0.2,
+    'cutoff': 50,
+    'sigma':0.2
+}
 pf_params['pf']['smart_pf']['filter_random'] = False
-pf_params['pf']['smart_pf']['filter_history'] = False
+pf_params['pf']['smart_pf']['filter_history'] = True
 pf_params['pf']['smart_pf']['filter_history_thres'] = 100
 
 # Objectives

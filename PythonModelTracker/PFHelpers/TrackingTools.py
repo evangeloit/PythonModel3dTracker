@@ -73,10 +73,8 @@ class DatasetTools:
             if params_ds.landmarks and (landmarks_source in params_ds.landmarks):
                 print('Landmarks filename: ', params_ds.landmarks[landmarks_source]['filename'])
                 print('Landmarks calib_filename: ', params_ds.landmarks[landmarks_source]['calib_filename'])
-                grabber_ldm = LG.LandmarksGrabber(params_ds.landmarks[landmarks_source]['format'],
-                                                   params_ds.landmarks[landmarks_source]['filename'],
-                                                   params_ds.landmarks[landmarks_source]['calib_filename'],
-                                                   model3d.model_name)
+                grabber_ldm = LG.LandmarksGrabber(params_ds=params_ds, params_ds_label=landmarks_source,
+                                                   model_name=model3d.model_name)
                 grabber_ldm.filter_landmarks = True
 
         return grabber_ldm
@@ -410,7 +408,7 @@ class TrackingLoopTools:
         if grabber_ldm is not None:
             grabber_ldm.seek(f)
             #points3d_det_names, points3d_det, ldm_calib \
-            landmark_observations = grabber_ldm.acquire(images, calibs)
+            landmark_observations = grabber_ldm.acquire(images)#, calibs)
 
         else:
             landmark_observations = None
@@ -471,51 +469,25 @@ class TrackingLoopTools:
         ldm_calib = landmark_observations[3]
         ldm_source = landmark_observations[4]
 
-        if smart_pf_params['enable_blocks']:
-            smart_pf.SetObservationBlocks(smart_pf.ba, smart_pf.model3d, ldm_source, points3d_det_names)
-
-
         if smart_pf_params['interpolate_bones'] and (smart_pf_params['interpolate_num'] > 1):
-            # primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
-            #     points3d_det_names, ldm_source, smart_pf.model3d.model_name)
-            # model_landmark_names_, model_landmarks_ = \
-            #     M3DU.GetInterpModelLandmarks(model3d=smart_pf.model3d, default_bones=primitive_names,
-            #                                  interpolated_bones=smart_pf_params['interpolate_bones'],
-            #                                  n_interp=smart_pf_params['interpolate_num'])
-            #
-            # smart_pf_model = smart_pf_params['model']
-            # interpolate_set = smart_pf_params['interpolate_bones']
-            # n_interp = smart_pf_params['interpolate_num']
-            # # points3d_det_names, points3d_det, points2d_det = \
-            # #     M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names,
-            # #                                  points3d_det, points2d_det, interpolate_set, n_interp)
-            # points3d_det_setnames_, points3d_det_setindices_, points3d_det_names_, points2d_det_ = \
-            #     M3DU.GetInterpKeypointsModelSets(landmark_source=ldm_source,
-            #                                      model3d=smart_pf.model3d,
-            #                                      point_names=points3d_det_names,
-            #                                      keypoints2d=points2d_det,
-            #                                      interpolate_set=interpolate_set,
-            #                                      n_interp=n_interp)
-            # points3d_det_ = DMU.UnprojectPoints(points2d_det_, ldm_calib, depth)
-            # accepted_det_mask, points3d_det_names, points3d_det,points2d_det = \
-            #     FU.FilterKeypointsDepth(points3d_det_setindices_, points3d_det_names_,
-            #                             points3d_det_, points2d_det_, smart_pf_params['depth_filt_thres'])
-            # model_landmark_names = [m for m,a in zip(model_landmark_names_, accepted_det_mask) if a]
-            # model_landmarks_ = [m for m, a in zip(model_landmarks_, accepted_det_mask) if a]
-            # model_landmarks = mbv.PF.Landmark3dInfoVec(mbv.PF.Landmark3dInfoSkinnedVec())
-            # for l in model_landmarks_: model_landmarks.append(l)
             model_landmark_names, model_landmarks, points3d_det_names, points3d_det, points2d_det = \
                 M3DU.GetInterpolatedModelObsLandmarks(depth, ldm_source, points3d_det_names, points2d_det, ldm_calib,
                                                       smart_pf.model3d,
                                                       smart_pf_params['interpolate_bones'],
                                                       smart_pf_params['interpolate_num'],
-                                                      smart_pf_params['depth_filt_thres'])
+                                                      smart_pf_params['filter_occluded'],
+                                                      smart_pf_params['filter_occluded_params'])
 
 
         else:
             model_landmark_names, model_landmarks = \
                 M3DU.GenerateModelLandmarksfromObservationLandmarks(smart_pf.model3d, ldm_source ,points3d_det_names)
-        print len(model_landmarks), len(points3d_det), len(points2d_det), len(model_landmark_names)
+
+        if smart_pf_params['enable_blocks']:
+            smart_pf.SetObservationBlocks(smart_pf.ba, smart_pf.model3d, ldm_source, points3d_det_names)
+
+        print 'Model/Model/Obs/Obs Landmarks num: 'len(model_landmark_names), len(model_landmarks), len(points3d_det), len(points2d_det)
+
         # for i,(no, nm, po, pm) in enumerate(zip(points3d_det_names, model_landmark_names, points3d_det, model_landmarks)):
         #     print i, nm, pm.pos, no, po
 
@@ -607,13 +579,11 @@ class TrackingLoopTools:
                     gui.send_frame(frame_data)
 
             if f > params_ds.limits[1]: continue_loop = False
-
             results.add(f, model3d.model_name, state)
 
-        #if res_filename is not None:
-        #    results.save(res_filename)
+        mbv.Core.CachedAllocatorStorage.clear()
         return results
-        #mbv.Core.CachedAllocatorStorage.clear()
+
 
     @staticmethod
     def PackLandmarks(state, decoder, landmarks, observations):

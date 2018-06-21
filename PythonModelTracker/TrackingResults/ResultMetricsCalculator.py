@@ -4,7 +4,7 @@ import os
 import PythonModel3dTracker.Paths as Paths
 from PythonModelTracker.TrackingResults.ModelTrackingResults import ModelTrackingResults
 import PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksGrabber as LG
-import PythonModel3dTracker.PythonModelTracker.Model3dUtils.Model3dUtils as M3DU
+import PythonModel3dTracker.PythonModelTracker.Landmarks.Model3dLandmarks as M3DL
 import PythonModel3dTracker.PythonModelTracker.Grabbers.DatasetInfo as DI
 
 
@@ -55,9 +55,15 @@ def CalculateMetricsJson(fname):
     joint_trans = []
     for frame in landmarks:
         lg.seek(frame)
-        gt_names, gt_landmarks, gt_clb = lg.acquire()
-        _, l_cor, _, g_cor =  M3DU.GetCorrespondingLandmarks(model_name, lnames, landmarks[frame],
-                                                     di.landmarks['gt']['format'], gt_names,gt_landmarks)
+        gt_names, gt_landmarks3d, gt_landmarks2d, gt_clb, gt_src = lg.acquire()
+
+
+        l_cor = landmarks[frame]
+        gt_names = [n for n in gt_names]
+        gt3d0 = gt_landmarks3d[0]
+        g_idx = []
+        for n in lnames: g_idx.append(gt_names.index(n))
+        g_cor = [[float(gt3d0[l].x), float(gt3d0[l].y), float(gt3d0[l].z)] for l in g_idx]
         lnp = np.array(l_cor)
         gnp = np.array(g_cor)
         dists = np.linalg.norm(lnp-gnp,axis=1)
@@ -72,9 +78,14 @@ def CalculateMetricsJson(fname):
     seq_dists = []
     for frame in landmarks:
         lg.seek(frame)
-        gt_names, gt_landmarks, gt_clb = lg.acquire()
-        _, l_cor, _, g_cor = M3DU.GetCorrespondingLandmarks(model_name, lnames, landmarks[frame],
-                                                          di.landmarks['gt']['format'], gt_names, gt_landmarks)
+        gt_names, gt_landmarks3d, gt_landmarks2d, gt_clb, gt_src = lg.acquire()
+        l_cor = landmarks[frame]
+        gt_names = [n for n in gt_names]
+        gt3d0 = gt_landmarks3d[0]
+        g_idx = []
+        for n in lnames: g_idx.append(gt_names.index(n))
+        g_cor = [[float(gt3d0[l].x), float(gt3d0[l].y), float(gt3d0[l].z)] for l in g_idx]
+
         lnp = np.array(l_cor)
         gnp = np.array(g_cor)
         dists = np.linalg.norm(lnp - gnp - seq_joint_trans, axis=1)

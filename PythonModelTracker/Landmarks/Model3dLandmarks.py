@@ -257,10 +257,10 @@ def GetInterpKeypointsSets(point_names, keypoints2d, point_pairs=[], n_interp=5)
         idx0 = idx
         p0 = kp2d_dict[n0]
         p1 = kp2d_dict[n1]
-        if (p0.x > 0) and (p0.y > 0) and (p1.x > 0) and (p1.y > 0):
+        if ((p0.x > 0) or (p0.y > 0)) and ((p1.x > 0) or (p1.y > 0)):
             cur_p2d = p2d_interp(p0, p1, n_interp)
             for i, p in enumerate(cur_p2d):
-                lname = "{0}_{1:02d}".format(n0, i)
+                lname = n0#"{0}_{1:02d}".format(n0, i)
                 point_names_.append(lname)
                 keypoints2d_.append(p)
                 idx += 1
@@ -268,6 +268,11 @@ def GetInterpKeypointsSets(point_names, keypoints2d, point_pairs=[], n_interp=5)
             point_names_.append(n0)
             keypoints2d_.append(p0)
             idx += 1
+            for i in range(n_interp-1):
+                point_names_.append(n0)
+                keypoints2d_.append(mbv.Core.Vector2(0,0))
+                idx += 1
+
         idx1 = idx
         point_set_indices_.append( (idx0, idx1) )
 
@@ -309,30 +314,28 @@ def FilterKeypointsRandom(keypoints3d, keypoints2d, ratios=[0.1, 0.2]):
     return keypoints_out
 
 
-#
-def FilterKeypointsDepth(setindices, point_names, keypoints3d, keypoints2d, thres = 0.5):
+# Uses point colinearity assumption for points of the same set to filter out possibly occluded keypoints.
+def FilterOccludedKeypoints(setindices, point_names, keypoints3d, keypoints2d, params):
     point_names_out = []
     keypoints3d_out = mbv.Core.Vector3fStorage()
     keypoints2d_out = mbv.Core.Vector2fStorage()
-    acceptance_prob = []
+    #acceptance_prob = []
     accepted_mask = []
     #for names, p3ds, p2ds in zip( point_names, keypoints3d, keypoints2d):
     for idx0, idx1 in setindices:
         N = idx1 - idx0
-
         p3ds = keypoints3d[idx0:idx1]
         names = point_names[idx0:idx1]
         p2ds = keypoints2d[idx0:idx1]
         print idx0, idx1, names
         if N > 2:
-            line_dist = GU.NormalizedLineDist(p3ds[0], p3ds[-1], p3ds[2:-1], 50)
+            line_dist = GU.NormalizedLineDist(p3ds[0], p3ds[-1], p3ds[1:-1], params['cutoff'])
         else:
             line_dist = 0
-        cur_prob = exp(-(line_dist**2)/0.2)
-        acceptance_prob.append(cur_prob)
+        cur_prob = exp(-(line_dist**2)/params['sigma'])
+        #print 'p3ds:',p3ds, 'Acceptance prob:', names, cur_prob, line_dist
         for n,p3d,p2d in zip(names, p3ds, p2ds):
-
-            if cur_prob > thres:
+            if cur_prob > params['thres']:
                 accepted_mask.append(True)
                 point_names_out.append(n)
                 keypoints3d_out.append(p3d)
@@ -347,10 +350,11 @@ def FilterKeypointsDepth(setindices, point_names, keypoints3d, keypoints2d, thre
 
 
 def GetInterpolatedModelObsLandmarks(depth, obs_source, obs_names, obs_points, obs_calib, model3d,
-                                     interpolated_bones, n_interp=5, depth_filt_thres = 0.0):
+                                     interpolated_bones, n_interp=5, filter_occluded = False,
+                                     params={'thres' : 0.9,'distcutoff': 50,'sigma':0.2}):
     primitive_names = LG.LandmarksGrabber.getPrimitiveNamesfromLandmarkNames(
         obs_names, obs_source, model3d.model_name)
-    model_landmark_names_, model_landmarks_ = \
+    model_landmark_names, model_landmarks = \
         GetInterpModelLandmarks(model3d=model3d, default_bones=primitive_names,
                                      interpolated_bones=interpolated_bones,
                                      n_interp=n_interp)
@@ -360,19 +364,21 @@ def GetInterpolatedModelObsLandmarks(depth, obs_source, obs_names, obs_points, o
     # points3d_det_names, points3d_det, points2d_det = \
     #     M3DU.GetInterpKeypointsModel(smart_pf_model, smart_pf.model3d, points3d_det_names,
     #                                  points3d_det, points2d_det, interpolate_set, n_interp)
-    points3d_det_setnames_, points3d_det_setindices_, points3d_det_names_, points2d_det_ = \
+    points3d_det_setnames, points3d_det_setindices, points3d_det_names, points2d_det = \
         GetInterpKeypointsModelSets(landmark_source=obs_source,
                                          model3d=model3d,
                                          point_names=obs_names,
                                          keypoints2d=obs_points,
                                          interpolate_set=interpolated_bones,
                                          n_interp=n_interp)
-    points3d_det_ = DMU.UnprojectPoints(points2d_det_, obs_calib, depth)
-    accepted_det_mask, points3d_det_names, points3d_det, points2d_det = \
-        FilterKeypointsDepth(points3d_det_setindices_, points3d_det_names_,
-                                points3d_det_, points2d_det_, depth_filt_thres)
-    model_landmark_names = [m for m, a in zip(model_landmark_names_, accepted_det_mask) if a]
-    model_landmarks_ = [m for m, a in zip(model_landmarks_, accepted_det_mask) if a]
-    model_landmarks = mbv.PF.Landmark3dInfoVec(mbv.PF.Landmark3dInfoSkinnedVec())
-    for l in model_landmarks_: model_landmarks.append(l)
+    points3d_det = DMU.UnprojectPoints(points2d_det, obs_calib, depth)
+
+    if filter_occluded:
+        accepted_det_mask, points3d_det_names, points3d_det, points2d_det = \
+            FilterOccludedKeypoints(points3d_det_setindices, points3d_det_names,
+                                    points3d_det, points2d_det, params)
+        model_landmark_names = [m for m, a in zip(model_landmark_names, accepted_det_mask) if a]
+        model_landmarks_ = [m for m, a in zip(model_landmarks, accepted_det_mask) if a]
+        model_landmarks = mbv.PF.Landmark3dInfoVec(mbv.PF.Landmark3dInfoSkinnedVec())
+        for l in model_landmarks_: model_landmarks.append(l)
     return model_landmark_names, model_landmarks, points3d_det_names, points3d_det, points2d_det
