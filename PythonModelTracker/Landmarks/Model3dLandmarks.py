@@ -327,7 +327,7 @@ def FilterOccludedKeypoints(setindices, point_names, keypoints3d, keypoints2d, p
         p3ds = keypoints3d[idx0:idx1]
         names = point_names[idx0:idx1]
         p2ds = keypoints2d[idx0:idx1]
-        print idx0, idx1, names
+        #print idx0, idx1, names
         if N > 2:
             line_dist = GU.NormalizedLineDist(p3ds[0], p3ds[-1], p3ds[1:-1], params['cutoff'])
         else:

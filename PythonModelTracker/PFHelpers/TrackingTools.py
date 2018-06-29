@@ -486,7 +486,7 @@ class TrackingLoopTools:
         if smart_pf_params['enable_blocks']:
             smart_pf.SetObservationBlocks(smart_pf.ba, smart_pf.model3d, ldm_source, points3d_det_names)
 
-        print 'Model/Model/Obs/Obs Landmarks num: 'len(model_landmark_names), len(model_landmarks), len(points3d_det), len(points2d_det)
+        #print 'Model/Model/Obs/Obs Landmarks num:',len(model_landmark_names), len(model_landmarks), len(points3d_det), len(points2d_det)
 
         # for i,(no, nm, po, pm) in enumerate(zip(points3d_det_names, model_landmark_names, points3d_det, model_landmarks)):
         #     print i, nm, pm.pos, no, po

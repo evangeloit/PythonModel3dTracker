@@ -3,7 +3,7 @@ import PythonModel3dTracker.PyMBVAll as mbv
 import PyCeresIK as IK
 from PythonModelTracker.Landmarks.OpenPoseGrabber import OpenPoseGrabber
 from PythonModelTracker.Landmarks.LandmarksCorrespondences import model_landmark_partitions
-import PythonModel3dTracker.PythonModelTracker.Features2DUtils as FU
+import PythonModel3dTracker.PythonModelTracker.Landmarks.Model3dLandmarks as M3DL
 import copy
 import time
 
@@ -110,7 +110,7 @@ class SmartPF:
                 p3d.x = p2d.x
                 p3d.y = p2d.y
                 p3d.z = 0
-        print "xclude_mask_3d:", xclude_mask_3d
+        #print "xclude_mask_3d:", xclude_mask_3d
         return keypoints_out
 
 
@@ -210,18 +210,18 @@ class SmartPF:
             if self.filter_history: self.filterKeypointsHistory()
             for i in range(self.smart_particles):
                 if self.filter_random:
-                    self.keypoints3d = FU.FilterKeypointsRandom(self.keypoints3d,
+                    self.keypoints3d = M3DL.FilterKeypointsRandom(self.keypoints3d,
                                                                 self.keypoints2d,
                                                                 self.filter_random_ratios)
 
-                print 'keypoints_cur:', self.keypoints3d
+                # print 'keypoints_cur:', self.keypoints3d
                 observations = OpenPoseGrabber.ConvertIK([self.keypoints3d], self.calib)
                 # do something with
                 cur_state = mbv.Core.DoubleVector(particles[:, i])
                 #print 'cur_state:', cur_state
                 t1 = time.time()
                 score, results = self.ba.solve(observations[0], cur_state)
-                print "Opt fps:", 1.0 / (time.time() - t1)
+                # print "Opt fps:", 1.0 / (time.time() - t1)
 
                 particles[:,i] = results
         #for f in range(n_particles):
