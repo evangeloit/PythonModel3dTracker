@@ -8,7 +8,7 @@ import PythonModel3dTracker.PythonModelTracker.PFHelpers.TrackingTools as tt
 import PythonModel3dTracker.PythonModelTracker.Landmarks.Model3dLandmarks as M3DL
 
 dry_run = False
-input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/mhad_quats/")
+input_dir = os.path.join(Paths.results, "Human_tracking/Levmar/mhad_quats/v6")
 
 
 for i,f in enumerate(os.listdir(input_dir)):

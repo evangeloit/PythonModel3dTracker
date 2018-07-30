@@ -12,7 +12,7 @@ def print_lanmark_info(l):
 
 
 
-model_xml = Paths.model3d_dict['mh_body_male_customquat']['path']
+model_xml = Paths.model3d_dict['mh_bream_glbscl']['path']
 model3d = mbv.PF.Model3dMeta.create(str(model_xml))
 model_parts = model3d.parts
 
@@ -45,7 +45,7 @@ landmark_names = mbv.Core.StringVector([b.key() for b in model3d.parts.bones_map
 landmarks = mbv.PF.Landmark3dInfoSkinned.create_multiple(landmark_names,
                                                          landmark_names,
                                                          mbv.PF.ReferenceFrame.RFGeomLocal,
-                                                         mbv.Core.Vector3fStorage([mbv.Core.Vector3(0, 100, 0)]),
+                                                         mbv.Core.Vector3fStorage([mbv.Core.Vector3(0, 0, 0)]),
                                                          model3d.parts.bones_map)
 
 transform_node = mbv.Dec.TransformNode()
@@ -56,16 +56,17 @@ landmarks_decoder.convertReferenceFrame(mbv.PF.ReferenceFrame.RFModel, transform
 init_pos = model3d.default_state
 value_range = model3d.high_bounds.data - model3d.low_bounds.data
 visualizer = Visualizer(model3d, mmanager, decoder, renderer)
-dims = [12,13,14]
+dims = []
 steps = 12
 for i in range(steps):
     # Setting param Vector
-    init_pos[2] = 2700#10 * f loat(i)
+    init_pos[2] = 1000#10 * f loat(i)
     rot_q = at.quaternion_from_euler(1.5,0+0.1*i,0)
     init_pos[3] = rot_q[1]
     init_pos[4] = rot_q[2]
     init_pos[5] = rot_q[3]
     init_pos[6] = rot_q[0]
+    init_pos[7] = 0.7
 
 
     for d in dims:

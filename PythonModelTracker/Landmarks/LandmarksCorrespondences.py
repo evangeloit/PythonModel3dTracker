@@ -81,6 +81,7 @@ primitives_dict[("damien", "human_ext_collisions")] = primitives_dict[("damien",
 primitives_dict[("damien", "mh_body_male_meta")] = primitives_dict[("damien", "mh_body_male")]
 primitives_dict[("damien", "mh_body_male_meta_grpscl")] = primitives_dict[("damien", "mh_body_male")]
 primitives_dict[("COCO", "mh_body_male_customquat")] = primitives_dict[("COCO", "mh_body_male_custom")]
+primitives_dict[("COCO", "mh_body_male_customquat_950")] = primitives_dict[("COCO", "mh_body_male_custom")]
 primitives_dict[("COCO", "mh_body_male_custom_vector")] = primitives_dict[("COCO", "mh_body_male_custom")]
 primitives_dict[("COCO", "mh_body_male_custom_meta")] = primitives_dict[("COCO", "mh_body_male_custom")]
 primitives_dict[("COCO", "mh_body_male_custom_0850")] = primitives_dict[("COCO", "mh_body_male_custom")]
@@ -98,6 +99,7 @@ primitives_dict[("bvh", "mh_body_male_custom_1050")] = primitives_dict[("bvh", "
 primitives_dict[("bvh", "mh_body_male_custom_1100")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_custom_1150")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_customquat")] = primitives_dict[("bvh", "mh_body_male_custom")]
+primitives_dict[("bvh", "mh_body_male_customquat_950")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("bvh", "mh_body_male_custom_vector")] = primitives_dict[("bvh", "mh_body_male_custom")]
 primitives_dict[("csv", "mh_body_male_custom_0950")] = primitives_dict[("csv", "mh_body_male_custom")]
 primitives_dict[("csv", "mh_body_male_customquat")] = primitives_dict[("csv", "mh_body_male_custom")]
@@ -137,6 +139,7 @@ model_landmark_positions = {
 }
 model_landmark_positions[("bvh", "mh_body_male_custom_vector")] = model_landmark_positions[("bvh", "mh_body_male_custom")]
 model_landmark_positions[("bvh", "mh_body_male_customquat")] = model_landmark_positions[("bvh", "mh_body_male_custom")]
+model_landmark_positions[("bvh", "mh_body_male_customquat_950")] = model_landmark_positions[("bvh", "mh_body_male_custom")]
 
 
 # Maps observation landmarks to model partitions
@@ -160,5 +163,7 @@ model_landmark_partitions = {
 }
 model_landmark_partitions[("bvh", "mh_body_male_custom_vector")] = model_landmark_partitions[("bvh", "mh_body_male_custom")]
 model_landmark_partitions[("bvh", "mh_body_male_customquat")] = model_landmark_partitions[("bvh", "mh_body_male_custom")]
+model_landmark_partitions[("bvh", "mh_body_male_customquat_950")] = model_landmark_partitions[("bvh", "mh_body_male_custom")]
 model_landmark_partitions[("COCO", "mh_body_male_custom_vector")] = model_landmark_partitions[("COCO", "mh_body_male_custom")]
 model_landmark_partitions[("COCO", "mh_body_male_customquat")] = model_landmark_partitions[("COCO", "mh_body_male_custom")]
+model_landmark_partitions[("COCO", "mh_body_male_customquat_950")] = model_landmark_partitions[("COCO", "mh_body_male_custom")]

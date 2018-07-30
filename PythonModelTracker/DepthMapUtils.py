@@ -19,8 +19,8 @@ def GetMedianDepths(points, depthmap, w=4):
     return depths
 
 def GetMedianDepth(p,depthmap,w=4):
-    x = p.x
-    y = p.y
+    x = int(p.x)
+    y = int(p.y)
     height = depthmap.shape[0]
     width = depthmap.shape[1]
     if (x > 0) and (y > 0) and (x < width) and (y < height):

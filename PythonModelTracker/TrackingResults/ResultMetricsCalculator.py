@@ -34,7 +34,7 @@ def CalculateMetricsDir(input_dir):
 
 
 
-def CalculateMetricsJson(fname, dist_cutoff=300):
+def CalculateMetricsJson(fname, dist_cutoffs=[75, 100, 150, 200, 250]):
 
     res = ModelTrackingResults()
     res.load(fname)
@@ -54,7 +54,7 @@ def CalculateMetricsJson(fname, dist_cutoff=300):
 
     ### Calculating the sequence average error in mm.
     seq_dists = []
-    seq_success_frames = 0
+    seq_success_frames = [0] * len(dist_cutoffs)
     joint_trans = []
     for frame in landmarks:
         lg.seek(frame)
@@ -70,13 +70,14 @@ def CalculateMetricsJson(fname, dist_cutoff=300):
         lnp = np.array(l_cor)
         gnp = np.array(g_cor)
         dists = np.linalg.norm(lnp-gnp,axis=1)
-        dists = np.clip(dists, 0, 500)
-        #print max(dists)
-        if np.max(dists) < dist_cutoff: seq_success_frames +=1
+        dists = np.clip(dists, 0, 2 * max(dist_cutoffs))
+        #print frame, 'dists:', np.average(dists)
+        for i, c in enumerate(dist_cutoffs):
+            if np.average(dists) < c: seq_success_frames[i] +=1
         joint_trans.append(lnp-gnp)
         avg_dist = np.average(dists)
         seq_dists.append(avg_dist)
-    seq_success_ratio = float(seq_success_frames)/float(len(landmarks))
+    seq_success_ratio = [(dc, float(sf)/float(len(landmarks))) for dc, sf in zip(dist_cutoffs, seq_success_frames)]
     seq_dist = np.average(np.array(seq_dists))
     seq_joint_trans = np.average(np.array(joint_trans), axis=0)
     print fname, "dist:", seq_dist, "C:", seq_success_ratio

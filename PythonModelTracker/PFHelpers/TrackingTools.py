@@ -45,8 +45,8 @@ class DatasetTools:
             init_state = mbv.Core.DoubleVector(ds_init_state)
         else:
             init_state = model3d.default_state
-            print('Invalid dataset init state: ', ds_init_state)
-            print('Setting init state from model default: ', model3d.default_state)
+            #print('Invalid dataset init state: ', ds_init_state)
+            #print('Setting init state from model default: ', model3d.default_state)
         return init_state
 
     @staticmethod
@@ -87,7 +87,7 @@ class DatasetTools:
 
     @staticmethod
     def GenGrabber(params_ds):
-        print('Opening dataset:', params_ds.stream_filename)
+        print 'Opening dataset:', params_ds.stream_filename
         grabber = AutoGrabber.create(str(params_ds.format),
                                      mbv.Core.StringVector([str(s) for s in params_ds.stream_filename]),
                                      str(params_ds.calib_filename))

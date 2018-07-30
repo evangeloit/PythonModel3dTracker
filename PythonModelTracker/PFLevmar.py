@@ -1,8 +1,8 @@
 import numpy as np
 import PythonModel3dTracker.PyMBVAll as mbv
 import PyCeresIK as IK
-from PythonModelTracker.Landmarks.OpenPoseGrabber import OpenPoseGrabber
-from PythonModelTracker.Landmarks.LandmarksCorrespondences import model_landmark_partitions
+from PythonModel3dTracker.PythonModelTracker.Landmarks.OpenPoseGrabber import OpenPoseGrabber
+from PythonModel3dTracker.PythonModelTracker.Landmarks.LandmarksCorrespondences import model_landmark_partitions
 import PythonModel3dTracker.PythonModelTracker.Landmarks.Model3dLandmarks as M3DL
 import copy
 import time
@@ -15,6 +15,7 @@ class SmartPF:
     model_partitions = {
         "mh_body_male_custom": ["global_pos", "r_arm", "l_arm", "r_leg", "l_leg", "head"],
         "mh_body_male_customquat": ["global_pos", "r_arm", "l_arm", "r_leg", "l_leg", "head"],
+        "mh_body_male_customquat_950": ["global_pos", "r_arm", "l_arm", "r_leg", "l_leg", "head"],
         "mh_body_male_custom_vector": ["global_pos", "r_arm", "l_arm", "r_leg", "l_leg", "head"]
     }
 
@@ -181,7 +182,7 @@ class SmartPF:
     def CreatePF(rng,model3d,pf_params):
         pfs = mbv.PF.ParticleFilterStandard()
         pfs.rng = rng
-        pfs.resampling_flag = True
+        pfs.resampling_flag = False
         pfs.like_variance = pf_params['like_variance']
         pfs.n_particles = pf_params['n_particles']
         pfs.state_est_method = mbv.PF.PFEstMethod.pf_est_max
