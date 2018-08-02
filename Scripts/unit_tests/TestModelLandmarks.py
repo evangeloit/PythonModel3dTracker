@@ -6,8 +6,8 @@ import cv2
 
 
 def print_lanmark_info(l):
-    print 'Landmark Name:',l.name, ', linked geom:', l.linked_geometry
-    print 'init pos:', l.pos.data[0],l.pos.data[1],l.pos.data[2]
+    print 'Landmark Name:',l.name, ', linked geom:', l.linked_geometry,
+    print 'init pos:', l.pos,
            #', issue inst id:', l.primitiveid_pair.iss, ' / ',l.primitiveid_pair.ins
 
 
@@ -60,14 +60,13 @@ dims = []
 steps = 12
 for i in range(steps):
     # Setting param Vector
-    init_pos[2] = 1000#10 * f loat(i)
+    init_pos[2] = 600#10 * f loat(i)
     rot_q = at.quaternion_from_euler(1.5,0+0.1*i,0)
     init_pos[3] = rot_q[1]
     init_pos[4] = rot_q[2]
     init_pos[5] = rot_q[3]
     init_pos[6] = rot_q[0]
-    init_pos[7] = 0.7
-
+    init_pos[7] = 0.036
 
     for d in dims:
          init_pos[d] = model3d.low_bounds[d] + i * value_range[d][0] / float(steps)

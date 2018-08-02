@@ -43,21 +43,16 @@ results_path = "Human_tracking/Levmar/mhad_quats/v6"
 #             'mhad_s11_a04', 'mhad_s12_a04'
 # ]
 
-model_names = ["mh_body_male_customquat_950",
-               "mh_body_male_customquat_950",
-               "mh_body_male_customquat_950", "mh_body_male_customquat_950", "mh_body_male_customquat_950",
-               "mh_body_male_customquat_950", "mh_body_male_customquat_950", "mh_body_male_customquat_950",
-               "mh_body_male_customquat_950", "mh_body_male_customquat_950", "mh_body_male_customquat_950",
-               "mh_body_male_customquat_950", "mh_body_male_customquat_950", "mh_body_male_customquat_950",
-               "mh_body_male_customquat_950"
+model_names = ["mh_body_male_customquat", "mh_body_male_customquat",
+               "mh_body_male_customquat", "mh_body_male_customquat",
+               "mh_body_male_customquat", "mh_body_male_customquat",
+               "mh_body_male_customquat"
                ]
-datasets = ['mhad_s01_a04',
-            'mhad_s04_a04',
-            'mhad_s07_a04', 'mhad_s08_a04', 'mhad_s09_a01',
-            'mhad_s09_a02', 'mhad_s09_a03', 'mhad_s09_a04',
-            'mhad_s09_a05', 'mhad_s09_a06', 'mhad_s09_a07',
-            'mhad_s09_a08', 'mhad_s09_a09', 'mhad_s09_a10',
-            'mhad_s09_a11'
+datasets = [
+    'mhad_s03_a04','mhad_s06_a04',
+    'mhad_s12_a04','mhad_s11_a04',
+    'mhad_s05_a04','mhad_s02_a04',
+    'mhad_s10_a04'
 ]
 
 #model_names = ["mh_body_male_customquat"] * len(datasets)

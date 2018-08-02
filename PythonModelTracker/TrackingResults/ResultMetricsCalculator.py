@@ -17,24 +17,33 @@ def IsResultsFile(filename):
     return valid_file
 
 
-def CalculateMetricsDir(input_dir):
+def CalculateMetricsDir(input_dir,saved_metrics=None):
     results_metrics = {}
     results_counter = 0
     for i,f in enumerate(sorted(os.listdir(input_dir))):
         results_in = os.path.join(input_dir, f)
         res = ModelTrackingResults()
-        if res.check_file(results_in, ModelTrackingResults.all_required_fields + ["parameters"]):
-            print results_counter,
+        if (saved_metrics is not None) and (f in saved_metrics):
+            results_metrics[f] = saved_metrics[f]
+        elif res.check_file(results_in, ModelTrackingResults.all_required_fields + ["parameters"]):
+            print results_counter, results_in,
             results_counter += 1
-            did, model_name, parameters, seq_dist, seq_dist_corr, seq_success_ratio = CalculateMetricsJson(fname=results_in)
+            did, model_name, parameters, dist_cutoffs, seq_dist, seq_dist_corr, \
+            seq_success_ratio_f, seq_success_ratio_j,seq_success_ratio_f_corr,seq_success_ratio_j_corr = \
+                CalculateMetricsJson(fname=results_in)
             results_metrics[f] = {"did":did, "model_name":model_name, "parameters":parameters,
+                                  "dist_cutoofs": dist_cutoffs,
                                   "seq_dist":seq_dist, "seq_dist_corr":seq_dist_corr,
-                                  "seq_success_ratio":seq_success_ratio}
+                                  "seq_success_ratio_f":seq_success_ratio_f,
+                                  "seq_success_ratio_j": seq_success_ratio_j,
+                                  "seq_success_ratio_f_corr": seq_success_ratio_f_corr,
+                                  "seq_success_ratio_j_corr": seq_success_ratio_j_corr
+                                  }
     return results_metrics
 
 
 
-def CalculateMetricsJson(fname, dist_cutoffs=[75, 100, 150, 200, 250]):
+def CalculateMetricsJson(fname, dist_cutoffs=[20,40,60,80,100,120,140,160,180,200]):
 
     res = ModelTrackingResults()
     res.load(fname)
@@ -55,7 +64,9 @@ def CalculateMetricsJson(fname, dist_cutoffs=[75, 100, 150, 200, 250]):
     ### Calculating the sequence average error in mm.
     seq_dists = []
     seq_success_frames = [0] * len(dist_cutoffs)
+    seq_success_joints = [0] * len(dist_cutoffs)
     joint_trans = []
+    n_frames = float(len(landmarks))
     for frame in landmarks:
         lg.seek(frame)
         gt_names, gt_landmarks3d, gt_landmarks2d, gt_clb, gt_src = lg.acquire()
@@ -63,6 +74,7 @@ def CalculateMetricsJson(fname, dist_cutoffs=[75, 100, 150, 200, 250]):
 
         l_cor = landmarks[frame]
         gt_names = [n for n in gt_names]
+        n_joints = float(len(lnames))
         gt3d0 = gt_landmarks3d[0]
         g_idx = []
         for n in lnames: g_idx.append(gt_names.index(n))
@@ -71,19 +83,22 @@ def CalculateMetricsJson(fname, dist_cutoffs=[75, 100, 150, 200, 250]):
         gnp = np.array(g_cor)
         dists = np.linalg.norm(lnp-gnp,axis=1)
         dists = np.clip(dists, 0, 2 * max(dist_cutoffs))
-        #print frame, 'dists:', np.average(dists)
         for i, c in enumerate(dist_cutoffs):
-            if np.average(dists) < c: seq_success_frames[i] +=1
+            if np.max(dists) < c: seq_success_frames[i] +=1
+            seq_success_joints[i] += np.count_nonzero(dists < c)
         joint_trans.append(lnp-gnp)
         avg_dist = np.average(dists)
         seq_dists.append(avg_dist)
-    seq_success_ratio = [(dc, float(sf)/float(len(landmarks))) for dc, sf in zip(dist_cutoffs, seq_success_frames)]
+    seq_success_ratio_f = [float(sf)/n_frames for sf in seq_success_frames]
+    seq_success_ratio_j = [float(sf)/(n_joints*n_frames) for sf in seq_success_joints]
     seq_dist = np.average(np.array(seq_dists))
     seq_joint_trans = np.average(np.array(joint_trans), axis=0)
-    print fname, "dist:", seq_dist, "C:", seq_success_ratio
+    print "dist:", seq_dist, "Cframes:", seq_success_ratio_f, "Cjoints", seq_success_ratio_j,
 
     ### Calculating the sequence average error after removing the mean offset per joint over the sequence.
     seq_dists = []
+    seq_success_frames = [0] * len(dist_cutoffs)
+    seq_success_joints = [0] * len(dist_cutoffs)
     for frame in landmarks:
         lg.seek(frame)
         gt_names, gt_landmarks3d, gt_landmarks2d, gt_clb, gt_src = lg.acquire()
@@ -97,11 +112,17 @@ def CalculateMetricsJson(fname, dist_cutoffs=[75, 100, 150, 200, 250]):
         lnp = np.array(l_cor)
         gnp = np.array(g_cor)
         dists = np.linalg.norm(lnp - gnp - seq_joint_trans, axis=1)
-
+        dists = np.clip(dists, 0, 2 * max(dist_cutoffs))
+        for i, c in enumerate(dist_cutoffs):
+            if np.max(dists) < c: seq_success_frames[i] +=1
+            seq_success_joints[i] += np.count_nonzero(dists < c)
         avg_dist = np.average(dists)
         seq_dists.append(avg_dist)
+    seq_success_ratio_f_corr = [float(sf) / n_frames for sf in seq_success_frames]
+    seq_success_ratio_j_corr = [float(sf) / (n_joints * n_frames) for sf in seq_success_joints]
     seq_dist_corr = np.average(np.array(seq_dists))
-    #print 'corrected dist:', seq_dist_corr
-    return did, model_name, parameters, seq_dist, seq_dist_corr, seq_success_ratio
+    print 'dist_corr:', seq_dist_corr,"Cframes_corr:", seq_success_ratio_f_corr, "Cjoints_corr", seq_success_ratio_j_corr
+    return did, model_name, parameters, dist_cutoffs, seq_dist, seq_dist_corr, \
+           seq_success_ratio_f, seq_success_ratio_j, seq_success_ratio_f_corr, seq_success_ratio_j_corr
 
 
