@@ -29,7 +29,7 @@ for i,f in enumerate(os.listdir(input_dir)):
             results_ldm = GenerateLandmarks(results,landmark_names_mbv, landmarks)
             results_ldm.save(results_out)
     else:
-        print 'Skipping ', f_base
+        print i, '--- skipping ---', f_base
 
 
 

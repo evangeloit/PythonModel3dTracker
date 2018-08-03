@@ -44,7 +44,7 @@ def CalculateMetricsDir(input_dir,saved_metrics=None):
 
 
 def CalculateMetricsJson(fname, dist_cutoffs=[20,40,60,80,100,120,140,160,180,200]):
-
+    clip_dist = 1.5 * max(dist_cutoffs)
     res = ModelTrackingResults()
     res.load(fname)
 
@@ -82,9 +82,9 @@ def CalculateMetricsJson(fname, dist_cutoffs=[20,40,60,80,100,120,140,160,180,20
         lnp = np.array(l_cor)
         gnp = np.array(g_cor)
         dists = np.linalg.norm(lnp-gnp,axis=1)
-        dists = np.clip(dists, 0, 2 * max(dist_cutoffs))
+        dists = np.clip(dists, 0, clip_dist)
         for i, c in enumerate(dist_cutoffs):
-            if np.max(dists) < c: seq_success_frames[i] +=1
+            if np.average(dists) < c: seq_success_frames[i] +=1
             seq_success_joints[i] += np.count_nonzero(dists < c)
         joint_trans.append(lnp-gnp)
         avg_dist = np.average(dists)
@@ -112,9 +112,9 @@ def CalculateMetricsJson(fname, dist_cutoffs=[20,40,60,80,100,120,140,160,180,20
         lnp = np.array(l_cor)
         gnp = np.array(g_cor)
         dists = np.linalg.norm(lnp - gnp - seq_joint_trans, axis=1)
-        dists = np.clip(dists, 0, 2 * max(dist_cutoffs))
+        dists = np.clip(dists, 0, clip_dist)
         for i, c in enumerate(dist_cutoffs):
-            if np.max(dists) < c: seq_success_frames[i] +=1
+            if np.average(dists) < c: seq_success_frames[i] +=1
             seq_success_joints[i] += np.count_nonzero(dists < c)
         avg_dist = np.average(dists)
         seq_dists.append(avg_dist)
