@@ -12,14 +12,19 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-dataset = 'mhad_s09_a03'
-model_name = 'mh_body_male_customquat_950'
+# dataset = 'mhad_s09_a03'
+dataset = '/home/evangeloit/Desktop/alex_far_01.oni'
+# model_name = 'mh_body_male_customquat_950'
+model_name = 'mh_body_male_custom_vector'
+
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
-landmarks_source = ['gt', 'detections', 'openpose', 'json_openpose'][3]
+landmarks_source = ['gt', 'detections', 'openpose', 'openpose'][2]
 
 
-res_filename = None #os.path.join(Paths.datasets,"human_tracking/{0}_tracked.json".format(dataset))
+# res_filename = None #os.path.join(Paths.datasets,"human_tracking/{0}_tracked.json".format(dataset))
+
+res_filename = "/home/evangeloit/Desktop/Gest2/LocalTests/results/human_tracking/gt1.json"
 
 # PF Initialization
 hmf_arch_type = "2levels"
@@ -31,10 +36,10 @@ pf_params['pf_listener_flag'] = False
 pf_params['pf']['enable_smart'] = True
 pf_params['pf']['smart_pf']['smart_particles'] = 1
 pf_params['pf']['smart_pf']['enable_blocks'] = False
-pf_params['pf']['smart_pf']['enable_bounds'] = True
+pf_params['pf']['smart_pf']['enable_bounds'] = False
 pf_params['pf']['smart_pf']['ceres_report'] = False
 pf_params['pf']['smart_pf']['max_iterations'] = 50
-pf_params['pf']['smart_pf']['interpolate_num'] = 3
+# pf_params['pf']['smart_pf']['interpolate_num'] = 3
 pf_params['pf']['smart_pf']['filter_occluded'] = True
 pf_params['pf']['smart_pf']['filter_occluded_params'] = {
     'thres' : 0.2,

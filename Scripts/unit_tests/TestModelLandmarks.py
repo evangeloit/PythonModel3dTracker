@@ -12,7 +12,9 @@ def print_lanmark_info(l):
 
 
 
-model_xml = Paths.model3d_dict['mh_bream_glbscl']['path']
+model_xml = Paths.model3d_dict['mh_body_male_custom']['path']
+
+# model_xml = "mh_body_male_custom"
 model3d = mbv.PF.Model3dMeta.create(str(model_xml))
 model_parts = model3d.parts
 

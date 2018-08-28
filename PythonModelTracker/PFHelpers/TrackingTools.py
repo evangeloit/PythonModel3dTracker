@@ -408,7 +408,7 @@ class TrackingLoopTools:
         if grabber_ldm is not None:
             grabber_ldm.seek(f)
             #points3d_det_names, points3d_det, ldm_calib \
-            landmark_observations = grabber_ldm.acquire(images)#, calibs)
+            landmark_observations = grabber_ldm.acquire(images,calibs)#, calibs)
 
         else:
             landmark_observations = None
