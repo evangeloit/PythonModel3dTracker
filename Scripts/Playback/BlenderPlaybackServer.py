@@ -5,8 +5,8 @@ import PythonModel3dTracker.Paths as Paths
 
 # Input
 wait_time = 1
-dataset = 'alex_far_01'
-model_name = 'mh_body_male_custom'
+dataset = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/mhad_s12_a04.json'
+model_name = 'mh_body_male_customquat'
 res = ''
 results_txt = None #os.path.join(Paths.results, "Human_tracking/Levmar/mhad_quats/{}.json".format(res))
 visualize = {'enable':True,

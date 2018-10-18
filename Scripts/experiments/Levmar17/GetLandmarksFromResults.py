@@ -23,7 +23,8 @@ for i,f in enumerate(os.listdir(input_dir)):
             # results.load(results_in)
             results.landmark_names = {}
             results.landmarks = {}
-            model_name = results.models[0]
+            # model_name = results.models[0]
+            model_name = "mh_body_male_customquat_950"
             model3d, _ = tt.ModelTools.GenModel(model_name)
             landmark_names_mbv, landmarks = \
                 M3DL.GenerateModelLandmarksfromObservationLandmarks(model3d,'bvh', ldm_obs_names=None)

@@ -1,8 +1,10 @@
 import os
-
+import json
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.PFSettings as pfs
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.TrackingTools as tt
 import PythonModel3dTracker.PythonModelTracker.PFHelpers.VisualizationTools as vt
+import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResults as Mtr
+import numpy as np
 import PythonModel3dTracker.Paths as Paths
 
 #Viz Parameters
@@ -12,18 +14,20 @@ visualize_params = {'enable':True,
 assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
-# dataset = 'mhad_s09_a03'
-dataset = '/home/evangeloit/Desktop/alex_far_01.oni'
-# model_name = 'mh_body_male_customquat_950'
-model_name = 'mh_body_male_custom'
 
+# name = ['mhad_s01_a04', 'mhad_s02_a04', 'mhad_s03_a04', 'mhad_s09_a01', 'mhad_s11_a04']
+dataset = 'mhad_s12_a04'
+model_name = 'mh_body_male_customquat'
+
+# for dataset in name:
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
 landmarks_source = ['gt', 'detections', 'openpose'][2]
 
 
 # res_filename = None #os.path.join(Paths.datasets,"human_tracking/{0}_tracked.json".format(dataset))
-res_filename = "/home/evangeloit/Desktop/Gest2/LocalTests/results/human_tracking/gt1.json"
+res_filename = "/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/" + dataset\
+               + "_results.json"
 # res_filename = os.path.join(Paths.datasets,"{0}_tracked.json".format(dataset))
 
 
@@ -73,4 +77,21 @@ results = tt.TrackingLoopTools.loop(params_ds,model3d, grabbers, pf,
                           pf_params['pf'],model3dobj,objective_params,
                           visualizer, visualize_params)
 
-if res_filename is not None: results.save(res_filename)
+if res_filename is not None:
+    results.save(res_filename)
+
+# Camera Invariant
+
+res = Mtr.ModelTrackingResults()
+res.load(res_filename)
+states = res.get_model_states(model_name)
+
+for fr in states:
+    for index in range(0, 7):
+        states[fr][index] = 0
+        if index == 6:
+            states[fr][index] = 1
+
+    res.add(fr, model_name, states[fr])
+
+res.save(res_filename)
