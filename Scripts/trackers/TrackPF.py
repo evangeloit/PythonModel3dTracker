@@ -16,7 +16,7 @@ assert visualize_params['client'] in ['opencv','blender']
 # Model & Datasets
 
 # name = ['mhad_s01_a04', 'mhad_s02_a04', 'mhad_s03_a04', 'mhad_s09_a01', 'mhad_s11_a04']
-dataset = 'mhad_s06_a11'
+dataset = 'mhad_s12_a03'
 model_name = 'mh_body_male_customquat'
 
 # for dataset in name:

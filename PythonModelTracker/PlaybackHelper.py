@@ -136,7 +136,7 @@ class PlaybackHelper:
             state = self.model3d.default_state
         return state
 
-    def playback_loop(self,visualize):
+    def playback_loop(self,visualize, command=None):
         #assert self.model3d is not None
         assert self.params_ds is not None
         self.init_grabber()
@@ -147,13 +147,15 @@ class PlaybackHelper:
         else:
             gui = mtg.ModelTrackingGuiZeromq()
 
-
+        # gui_command = gui.recv_command()
+        # gui_command.name = command  # New entry
         f = self.params_ds.limits[0]
         state = self.get_init_state(f)
         self.grabber.seek(f)
         continue_loop = True
         while continue_loop:
             gui_command = gui.recv_command()
+            gui_command.name = command  # New entry
             if gui_command.name == "quit":
                 continue_loop = False
 
