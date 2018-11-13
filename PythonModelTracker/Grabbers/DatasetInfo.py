@@ -92,7 +92,7 @@ class DatasetInfo:
             did = dataset
             self.load(os.path.join(Paths.datasets, Paths.datasets_dict[did]))  # ds.getDatasetInfo(did)
 
-    def extract_stream_filename(self, path):
+    def extract_stream_filename(self, path, dstype='mhad'):
 
         rgb_names = ['color', 'rgb', 'images']
         depth_names = ['depth', 'dpt']
@@ -109,39 +109,80 @@ class DatasetInfo:
                     if n in f: dir_names[0] = f_full
                 for n in rgb_names:
                     if n in f: dir_names[1] = f_full
-
-
-        if None in dir_names:
-            for f in filelist:
-                fname, fext = os.path.splitext(f)
-                number_str = re.sub(r'(\D)+', '', fname)
-                string_str = re.sub(r'(\d)+', '', fname)
-                if number_str:
-                    if string_str not in fname_templates:
-                        fname_templates.append(string_str)
-                        fname_extensions.append(fext)
-                    frame_num = int(number_str)
-                    digits_number = len(number_str)
-                    print(frame_num)
-                    if (frame_num > self.limits[1]): self.limits[1] = frame_num
-            assert len(fname_templates) == 2
-            depth_found = 0
-            rgb_found = 0
-            for i, f in enumerate(fname_templates):
-                for n in depth_names:
-                    if n in f:
-                        d_idx = i
-                        depth_found += 1
-                        break
-                for n in rgb_names:
-                    if n in f:
-                        rgb_found += 1
-                        break
-            assert (depth_found == 1) and (rgb_found == 1)
-            stream_filename = [
-                os.path.join(path, fname_templates[d_idx] + '%0{0}d'.format(digits_number) + fname_extensions[d_idx]),
-                os.path.join(path, fname_templates[1 - d_idx] + '%0{0}d'.format(digits_number) + fname_extensions[1 - d_idx])]
+        if dstype == 'mhad':
+            # pass
+            if None in dir_names:
+                for f in filelist:
+                    fname, fext = os.path.splitext(f)
+                    # print(fname)
+                    # print(fext)
+                    number_str = re.sub(r'(\D)+', '', fname)
+                    # print(number_str)
+                    # string_str = re.sub(r'(\d)+', '', fname)
+                    string_str = fname[:-5]
+                    # print(string_str)
+                    if number_str:
+                        if string_str not in fname_templates:
+                            fname_templates.append(string_str)
+                            # print(fname_templates)
+                            fname_extensions.append(fext)
+                        frame_num = int(number_str[8:13])
+                        digits_number = len(number_str[8:13])
+                        # print(digits_number)
+                        # print(frame_num)
+                        if (frame_num > self.limits[1]): self.limits[1] = frame_num
+                assert len(fname_templates) == 2
+                depth_found = 0
+                rgb_found = 0
+                for i, f in enumerate(fname_templates):
+                    for n in depth_names:
+                        if n in f:
+                            d_idx = i
+                            depth_found += 1
+                            break
+                    for n in rgb_names:
+                        if n in f:
+                            rgb_found += 1
+                            break
+                assert (depth_found == 1) and (rgb_found == 1)
+                stream_filename = [
+                    os.path.join(path, fname_templates[d_idx] + '%0{0}d'.format(digits_number) + fname_extensions[d_idx]),
+                    os.path.join(path,
+                                 fname_templates[1 - d_idx] + '%0{0}d'.format(digits_number) + fname_extensions[1 - d_idx])]
+        elif dstype == 'normal':
+            # pass
+            if None in dir_names:
+                for f in filelist:
+                    fname, fext = os.path.splitext(f)
+                    number_str = re.sub(r'(\D)+', '', fname)
+                    string_str = re.sub(r'(\d)+', '', fname)
+                    if number_str:
+                        if string_str not in fname_templates:
+                            fname_templates.append(string_str)
+                            fname_extensions.append(fext)
+                        frame_num = int(number_str)
+                        digits_number = len(number_str)
+                        print(frame_num)
+                        if (frame_num > self.limits[1]): self.limits[1] = frame_num
+                assert len(fname_templates) == 2
+                depth_found = 0
+                rgb_found = 0
+                for i, f in enumerate(fname_templates):
+                    for n in depth_names:
+                        if n in f:
+                            d_idx = i
+                            depth_found += 1
+                            break
+                    for n in rgb_names:
+                        if n in f:
+                            rgb_found += 1
+                            break
+                assert (depth_found == 1) and (rgb_found == 1)
+                stream_filename = [
+                    os.path.join(path, fname_templates[d_idx] + '%0{0}d'.format(digits_number) + fname_extensions[d_idx]),
+                    os.path.join(path, fname_templates[1 - d_idx] + '%0{0}d'.format(digits_number) + fname_extensions[1 - d_idx])]
         else:
+
             stream_filename = []
             for d in dir_names:
                 filelist = os.listdir(d)

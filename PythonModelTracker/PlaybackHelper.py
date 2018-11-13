@@ -65,7 +65,7 @@ class PlaybackHelper:
 
 
 
-    def set_dataset(self,dataset,sel_landmarks=None):
+    def set_dataset(self,dataset,sel_landmarks=None, calib_filename=None):
         #assert self.model3d is not None
 
         self.params_ds = dsi.DatasetInfo()
@@ -76,6 +76,8 @@ class PlaybackHelper:
         #     paths.datasets_dict[self.params_ds.did] = self.params_ds.json_filename
         #     paths.save_datasets_dict(paths.datasets_dict)
         self.sel_landmarks = sel_landmarks
+        self.params_ds.calib_filename = calib_filename
+
 
 
     def init_grabber(self):
