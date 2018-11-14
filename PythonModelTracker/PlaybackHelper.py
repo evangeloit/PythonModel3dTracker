@@ -155,7 +155,7 @@ class PlaybackHelper:
         continue_loop = True
         while continue_loop:
             gui_command = gui.recv_command()
-            gui_command.name = command  # New entry
+            # gui_command.name = command  # New entry
             if gui_command.name == "quit":
                 continue_loop = False
 

@@ -7,6 +7,9 @@ import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResu
 import numpy as np
 import PythonModel3dTracker.Paths as Paths
 
+# dtpath = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/data/'
+# os.chdir(dtpath) # Mhad Dataset directory
+
 #Viz Parameters
 visualize_params = {'enable':True,
              'client': 'opencv','labels':True, 'depth':True, 'rgb':True,
@@ -26,7 +29,7 @@ landmarks_source = ['gt', 'detections', 'openpose'][2]
 
 
 # res_filename = None #os.path.join(Paths.datasets,"human_tracking/{0}_tracked.json".format(dataset))
-res_filename = "/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/" + dataset\
+res_filename = "/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/results_normal/" + dataset\
                + "_results.json"
 # res_filename = os.path.join(Paths.datasets,"{0}_tracked.json".format(dataset))
 
@@ -94,4 +97,6 @@ for fr in states:
 
     res.add(fr, model_name, states[fr])
 
-res.save(res_filename)
+new_res = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/results_camera invariant/'+ dataset\
+               + "_results.json"
+res.save(new_res)

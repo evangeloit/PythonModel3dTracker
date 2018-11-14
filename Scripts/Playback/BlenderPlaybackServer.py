@@ -31,7 +31,6 @@ for subj in range(0,len(subj_name)):#for every subject
                          'labels':True, 'depth':True, 'rgb':True, 'wait_time':1}
         assert visualize['client'] in ['opencv','blender']
         sel_landmarks = None # "gt" #"gt"   #see dataset json for available landmarks.
-
          # Output options
         results_txt_out =None #os.path.join(Paths.datasets, "object_tracking/{}_blender.json".format(res))
         output_video = None #os.path.join(Paths.datasets,"human_tracking/{}.avi".format(res))
@@ -43,7 +42,7 @@ for subj in range(0,len(subj_name)):#for every subject
         else:
             if model_name is not None: ph.set_model(model_name)
             ph.set_dataset(dataset,sel_landmarks,calib_filename=calib_file)
-        ph.playback_loop(visualize,command="quit")
+        ph.playback_loop(visualize,command=None)
 
         if results_txt_out is not None:
             ph.results.save(results_txt_out)
