@@ -1,6 +1,7 @@
 import cv2
 import os
-
+from copy import deepcopy
+import copy
 import PythonModel3dTracker.PyMBVAll as mbv
 import PyModel3dTracker as m3dt
 
@@ -457,14 +458,23 @@ class TrackingLoopTools:
         return model3dobj.getPFObjective()
 
 
+
+
     @staticmethod
     def SetupSmartPFObjective(observations, smart_pf, smart_pf_params):
+
+
         depth = observations['images'][0]
         # calibs = observations['calibs']
         landmark_observations = observations['landmarks']
         points3d_det_names = landmark_observations[0]
 
+        if not landmark_observations[1]:
+            print("EMPTY LIST")
+
         points3d_det = landmark_observations[1][0]
+        # print(points3d_det)
+
         points2d_det = landmark_observations[2][0]
         ldm_calib = landmark_observations[3]
         ldm_source = landmark_observations[4]
@@ -495,7 +505,7 @@ class TrackingLoopTools:
 
         observations['landmarks'] = (points3d_det_names, [points3d_det], [points2d_det])
 
-        return mbv.Opt.ParallelObjective(smart_pf.Objective)
+        return mbv.Opt.ParallelObjective(smart_pf.Objective), landmark_observations
 
     @staticmethod
     def loop(params_ds,model3d,grabbers,pf,pf_params,model3dobj,objective_params,
@@ -542,14 +552,32 @@ class TrackingLoopTools:
                     f = f_gui
                     if (f > params_ds.limits[1]) or (f < 0): break
                     observations = TrackingLoopTools.Grab(f, params_ds, grabbers)
+                    landmarks_observations = observations['landmarks']
 
                     if pf_params['enable_smart']:
-                        objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf, pf_params['smart_pf'])
-                        landmarks = pf.landmarks
+
+
+                        if not landmarks_observations[0] or not landmarks_observations[1] or not landmarks_observations[2]:
+                            #case tracking is lost and you get empty lists
+
+                            observations = {'images': observations_past0, 'calibs': observations_past1,'landmarks': observations_past2}
+
+                            print "Lost Track -", "frame: ", f, " Keeping last working observation: ", observations['landmarks']
+                            objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf, pf_params['smart_pf'])
+                            landmarks = pf.landmarks
+
+                        else:
+
+                            objective = TrackingLoopTools.SetupSmartPFObjective(observations, pf, pf_params['smart_pf'])
+                            landmarks = pf.landmarks
+
                     else: landmarks = []
+
+
                     if objective_params['enable']:
                         objective = TrackingLoopTools.SetupObjetive(state,observations,model3d,
                                                                     model3dobj,objective_params)
+
                     pf.track(state, objective)
 
                     # Evaluating part objective
@@ -576,6 +604,15 @@ class TrackingLoopTools:
                             frame_data = mtg.FrameDataOpencv(rgb=viz, n_frame=f)
                     else:
                         frame_data = 'None'
+
+                    #Keeps the past observations / (t-1)frame observation
+                    if f > 1:
+                        observations_past0 = observations['images']
+                        observations_past1 = observations['calibs']
+                        if landmarks_observations[0] or landmarks_observations[1] or landmarks_observations[
+                            2]:
+                            observations_past2 = tuple(landmarks_observations)
+
                     gui.send_frame(frame_data)
 
             if f > params_ds.limits[1]: continue_loop = False
@@ -638,3 +675,13 @@ def get_model(model_name):
 
 
 
+
+def PastObservations(observations):
+
+    list_obs = list(observations)
+
+    list_obs.extend(list_obs)
+
+    # print(list_obs)
+    # print(type(list_obs))
+    return list_obs

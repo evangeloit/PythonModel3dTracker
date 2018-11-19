@@ -7,8 +7,6 @@ import PythonModel3dTracker.PythonModelTracker.TrackingResults.ModelTrackingResu
 import numpy as np
 import PythonModel3dTracker.Paths as Paths
 
-# dtpath = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/data/'
-# os.chdir(dtpath) # Mhad Dataset directory
 
 #Viz Parameters
 visualize_params = {'enable':True,
@@ -19,7 +17,7 @@ assert visualize_params['client'] in ['opencv','blender']
 # Model & Datasets
 
 # name = ['mhad_s01_a04', 'mhad_s02_a04', 'mhad_s03_a04', 'mhad_s09_a01', 'mhad_s11_a04']
-dataset = 'mhad_s12_a03'
+dataset = 'mhad_s03_a03'
 model_name = 'mh_body_male_customquat'
 
 # for dataset in name:
@@ -54,7 +52,7 @@ pf_params['pf']['smart_pf']['filter_occluded_params'] = {
     'cutoff': 100,
     'sigma':0.2
 }
-pf_params['pf']['smart_pf']['filter_random'] = False
+pf_params['pf']['smart_pf']['filter_random'] = True # False
 pf_params['pf']['smart_pf']['filter_random_ratios']  = [0.1, 0.3]
 pf_params['pf']['smart_pf']['filter_history'] = False
 pf_params['pf']['smart_pf']['filter_history_thres'] = 100
@@ -69,12 +67,15 @@ objective_params = {
     'depth_cutoff': 500,
     'bgfg_type': 'depth'
 }
+
+# list = tt.PastObservations()
 mesh_manager = tt.ObjectiveTools.GenMeshManager(model3d)
 model3dobj, decoder, renderer = tt.ObjectiveTools.GenObjective(mesh_manager, model3d, objective_params)
 visualizer = vt.Visualizer(model3d, mesh_manager, decoder, renderer)
 decoder = visualizer.decoder
 grabbers = tt.DatasetTools.GenGrabbers(params_ds, model3d, landmarks_source)
 pf, rng = tt.ParticleFilterTools.GenPF(pf_params, model3d, decoder)
+
 
 results = tt.TrackingLoopTools.loop(params_ds,model3d, grabbers, pf,
                           pf_params['pf'],model3dobj,objective_params,
@@ -97,6 +98,6 @@ for fr in states:
 
     res.add(fr, model_name, states[fr])
 
-new_res = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/results_camera invariant/'+ dataset\
+new_res = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/results_camera_invariant/'+ dataset\
                + "_results.json"
 res.save(new_res)
