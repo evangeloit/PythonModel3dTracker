@@ -16,21 +16,19 @@ assert visualize_params['client'] in ['opencv','blender']
 
 # Model & Datasets
 
-# name = ['mhad_s01_a04', 'mhad_s02_a04', 'mhad_s03_a04', 'mhad_s09_a01', 'mhad_s11_a04']
-dataset = 'mhad_s03_a03'
+dataset = 'mydata_s01_a01'
 model_name = 'mh_body_male_customquat'
 
-# for dataset in name:
 model3d, model_class = tt.ModelTools.GenModel(model_name)
 params_ds = tt.DatasetTools.Load(dataset)
 landmarks_source = ['gt', 'detections', 'openpose'][2]
 
 
-# res_filename = None #os.path.join(Paths.datasets,"human_tracking/{0}_tracked.json".format(dataset))
-res_filename = "/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/results_normal/" + dataset\
-               + "_results.json"
-# res_filename = os.path.join(Paths.datasets,"{0}_tracked.json".format(dataset))
+# res_filename = "/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/results_normal/" + dataset\
+#                + "_results.json"
 
+res_filename = "/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/res/results_normal/" + dataset\
+                + "_results.json"
 
 # PF Initialization
 hmf_arch_type = "2levels"
@@ -98,6 +96,6 @@ for fr in states:
 
     res.add(fr, model_name, states[fr])
 
-new_res = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/results_camera_invariant/'+ dataset\
+new_res = '/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/res/results_camera_invariant/' + dataset\
                + "_results.json"
 res.save(new_res)

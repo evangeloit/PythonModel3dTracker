@@ -92,7 +92,7 @@ class DatasetInfo:
             did = dataset
             self.load(os.path.join(Paths.datasets, Paths.datasets_dict[did]))  # ds.getDatasetInfo(did)
 
-    def extract_stream_filename(self, path, dstype='mhad'):
+    def extract_stream_filename(self, path, dstype='normal'):
 
         rgb_names = ['color', 'rgb', 'images']
         depth_names = ['depth', 'dpt']

@@ -8,7 +8,8 @@ import PythonModel3dTracker.Paths as Paths
 dirname = os.path.dirname
 params_ds=dsi.DatasetInfo()
 calib_file = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/ds/calib.txt'
-dtpath = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/data/'
+# dtpath = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/data/'
+dtpath = '/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/images/'
 os.chdir(dtpath) # Mhad Dataset directory
 subj_name = os.listdir(os.getcwd()) # List of Subjects in the directory
 
@@ -18,7 +19,7 @@ for subj in range(0,len(subj_name)):#for every subject
     acts = os.listdir(os.path.join(os.getcwd(), subj_name[subj]))
     for act in range(0,len(acts)):#for every action of a subject
         wait_time = 1
-        dataset =os.path.join(os.getcwd(),subj_name[subj],acts[act])#+dtname[0]+'.json'
+        dataset =os.path.join(os.getcwd(), subj_name[subj], acts[act])#+dtname[0]+'.json'
         model_name = 'mh_body_male_customquat'
         res = ''
         results_txt =None #os.path.join(Paths.results, "Human_tracking/{}.json".format(res))
