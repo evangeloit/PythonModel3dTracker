@@ -27,7 +27,7 @@ landmarks_source = ['gt', 'detections', 'openpose'][2]
 # res_filename = "/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/rs/Human_tracking/results_normal/" + dataset\
 #                + "_results.json"
 
-res_filename = "/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/res/results_normal/" + dataset\
+res_filename = "/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/Mydataset/res/results_normal/" + dataset\
                 + "_results.json"
 
 # PF Initialization
@@ -96,6 +96,6 @@ for fr in states:
 
     res.add(fr, model_name, states[fr])
 
-new_res = '/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/res/results_camera_invariant/' + dataset\
+new_res = '/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/Mydataset/res/results_camera_invariant/' + dataset\
                + "_results.json"
 res.save(new_res)

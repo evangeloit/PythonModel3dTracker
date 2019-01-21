@@ -23,5 +23,5 @@ if __name__ == '__main__':
     viz = images[1]
     viz = ru.disp_points(keypoints2d[0], viz)
 
-    cv2.imshow("viz",viz)
+    cv2.imshow("viz", viz)
     cv2.waitKey(0)

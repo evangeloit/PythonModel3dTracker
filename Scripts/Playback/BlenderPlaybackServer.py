@@ -9,7 +9,7 @@ dirname = os.path.dirname
 params_ds=dsi.DatasetInfo()
 calib_file = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/ds/calib.txt'
 # dtpath = '/home/evangeloit/Desktop/GitBlit_Master/PythonModel3dTracker/Data/data/'
-dtpath = '/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/images/'
+dtpath = '/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/Mydataset/data/'
 os.chdir(dtpath) # Mhad Dataset directory
 subj_name = os.listdir(os.getcwd()) # List of Subjects in the directory
 

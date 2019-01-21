@@ -8,8 +8,8 @@ import PythonModel3dTracker.PythonModelTracker.PFHelpers.TrackingTools as tt
 import PythonModel3dTracker.PythonModelTracker.Landmarks.Model3dLandmarks as M3DL
 
 dry_run = False
-input_dir = os.path.join(Paths.results, "Human_tracking/results_camera_invariant")
-# input_dir = "/home/evangeloit/Desktop/Gest2/LocalTests/results/human_tracking"
+# input_dir = os.path.join(Paths.results, "Human_tracking/results_camera_invariant")
+input_dir = "/home/evangeloit/Desktop/GitBlit_Master/Moving_Pose_Descriptor/Mydataset/res/results_camera_invariant"
 
 
 for i,f in enumerate(os.listdir(input_dir)):
